@@ -49,6 +49,32 @@ class DesignSeeder extends Seeder
                 'page_name'   => 'home',
                 'description' => 'بانر قسم المنتجات الجديدة في الصفحة الرئيسية',
             ],
+            // Home page — Top offers section banners
+            [
+                'title'       => 'top_offer_1',
+                'page_name'   => 'home',
+                'description' => 'عرض أول - قسم العروض في الصفحة الرئيسية',
+            ],
+            [
+                'title'       => 'top_offer_2',
+                'page_name'   => 'home',
+                'description' => 'عرض ثاني - قسم العروض في الصفحة الرئيسية',
+            ],
+            [
+                'title'       => 'top_offer_3',
+                'page_name'   => 'home',
+                'description' => 'عرض ثالث - قسم العروض في الصفحة الرئيسية',
+            ],
+            [
+                'title'       => 'top_offer_4',
+                'page_name'   => 'home',
+                'description' => 'عرض رابع - قسم العروض في الصفحة الرئيسية',
+            ],
+            [
+                'title'       => 'top_offer_5',
+                'page_name'   => 'home',
+                'description' => 'عرض خامس - قسم العروض في الصفحة الرئيسية',
+            ],
             // Offers page banners
             [
                 'title'       => 'بانر صفحة العروض',
