@@ -164,7 +164,11 @@ function removeFilter(key) {
 
 function goto(val) {
     router.get('/products', {
-        ...props.filters,
+        search:    props.filters?.q || undefined,
+        sort:      props.filters?.sort && props.filters.sort !== 'latest' ? props.filters.sort : undefined,
+        min_price: props.filters?.min || undefined,
+        max_price: props.filters?.max || undefined,
+        category:  props.filters?.cat || undefined,
         page: val,
     }, { preserveState: true, preserveScroll: true });
 }
