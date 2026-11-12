@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CountryCitySeeder::class);
         $this->call(StoreFeaturesSeeder::class);
         $this->call(ProductSeeder::class);
+        $this->call(ShippingTypesAndPriceSeeder::class);
         $this->call(DesignSeeder::class);
         $this->call(StaticPagesSeeder::class);
         // \App\Models\User::factory(10)->create();
