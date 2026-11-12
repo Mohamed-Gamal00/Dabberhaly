@@ -1,0 +1,103 @@
+<template>
+    <div class="features-bar">
+        <v-container>
+            <v-row>
+                <v-col
+                    v-for="(f, i) in features"
+                    :key="i"
+                    cols="6"
+                    sm="6"
+                    md="3"
+                    class="d-flex justify-center"
+                >
+                    <div class="feature-item" :class="{ 'feature-item--bordered': i > 0 }">
+                        <div class="feature-icon">
+                            <v-icon :color="f.color" size="26">{{ f.icon }}</v-icon>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">{{ f.title }}</div>
+                            <div class="feature-sub">{{ f.sub }}</div>
+                        </div>
+                    </div>
+                </v-col>
+            </v-row>
+        </v-container>
+    </div>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+import { useLocale } from '../../composables/useLocale';
+const { t } = useLocale();
+const features = computed(() => [
+    { icon: 'mdi-truck-fast-outline',   color: '#76543D', title: t('features_free_shipping'),    sub: t('features_free_shipping_sub') },
+    { icon: 'mdi-shield-check-outline', color: '#76543D', title: t('features_secure_payment'),   sub: t('features_secure_payment_sub') },
+    { icon: 'mdi-refresh',              color: '#76543D', title: t('features_free_returns'),     sub: t('features_free_returns_sub') },
+    { icon: 'mdi-headset',              color: '#76543D', title: t('features_support'),          sub: t('features_support_sub') },
+]);
+</script>
+
+<style scoped>
+.features-bar {
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 20px 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    width: 100%;
+}
+
+.feature-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(118, 84, 61, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.feature-text { display: flex; flex-direction: column; }
+
+.feature-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.3;
+}
+
+.feature-sub {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 2px;
+}
+
+/* Vertical divider on md+ */
+@media (min-width: 960px) {
+    .feature-item--bordered {
+        border-right: 1px solid #e5e7eb;
+    }
+}
+
+/* Mobile: 2 columns, no border */
+@media (max-width: 599px) {
+    .feature-item {
+        padding: 8px;
+        gap: 8px;
+    }
+    .feature-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+    }
+    .feature-title { font-size: 12px; }
+    .feature-sub { font-size: 10px; }
+}
+</style>

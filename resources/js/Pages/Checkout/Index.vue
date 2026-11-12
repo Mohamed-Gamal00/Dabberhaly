@@ -1,0 +1,629 @@
+<template>
+    <div class="co-page" dir="rtl">
+        <v-container class="py-8">
+            <v-row>
+
+                <!-- ===== LEFT col (8): Shipping + Payment + Cart + Confirm ===== -->
+                <v-col cols="12" md="8">
+
+                    <!-- Row 1: Shipping + Payment (side by side) -->
+                    <v-row class="mb-4">
+
+                        <!-- Shipping method -->
+                        <v-col cols="12" sm="6">
+                            <div class="co-card h-100">
+                                <div class="co-card-title">{{ t('shipping_method') }}</div>
+                                <v-divider class="mb-3" />
+
+                                <div class="co-radio-group">
+                                    <label v-if="shipping?.add_pickup_from_store" class="co-radio-item" :class="{ active: shippingOption === 'noShipping' }">
+                                        <input type="radio" v-model="shippingOption" value="noShipping" />
+                                        <span>{{ t('pickup_from_store') }}</span>
+                                    </label>
+                                    <label v-if="shipping?.add_normal_price" class="co-radio-item" :class="{ active: shippingOption === 'fixed_shipping' }">
+                                        <input type="radio" v-model="shippingOption" value="fixed_shipping" />
+                                        <span>{{ t('fixed_shipping') }} - {{ shipping.normal_shipping_price }} ر.س</span>
+                                    </label>
+                                    <label v-if="shipping?.add_wight_price" class="co-radio-item" :class="{ active: shippingOption === 'shipping_based_on_weight' }">
+                                        <input type="radio" v-model="shippingOption" value="shipping_based_on_weight" />
+                                        <span>{{ t('weight_shipping') }}</span>
+                                    </label>
+                                    <label v-if="shipping?.add_price_based_on_city" class="co-radio-item" :class="{ active: shippingOption === 'shipping_based_on_city' }">
+                                        <input type="radio" v-model="shippingOption" value="shipping_based_on_city" />
+                                        <span>{{ t('city_shipping') }} - {{ cityShippingPrice }} ر.س</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </v-col>
+
+                        <!-- Payment method -->
+                        <v-col cols="12" sm="6">
+                            <div class="co-card h-100">
+                                <div class="co-card-title">{{ t('payment_method') }}</div>
+                                <v-divider class="mb-3" />
+
+                                <div class="co-radio-group">
+                                    <label class="co-radio-item" :class="{ active: form.payment_method === 'cash_on_delivery' }">
+                                        <input type="radio" v-model="form.payment_method" value="cash_on_delivery" />
+                                        <span>{{ t('cash_on_delivery') }}</span>
+                                    </label>
+                                    <label class="co-radio-item" :class="{ active: form.payment_method === 'card_payment' }">
+                                        <input type="radio" v-model="form.payment_method" value="card_payment" />
+                                        <span>{{ t('card_payment') }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </v-col>
+                    </v-row>
+
+                    <!-- Discount code -->
+                    <div class="co-card mb-4">
+                        <div class="co-card-title">{{ t('discount_code') }}</div>
+                        <v-divider class="mb-3" />
+
+                        <!-- Applied badge -->
+                        <div v-if="appliedDiscount" class="co-discount-applied mb-3">
+                            <v-icon size="18" color="success" class="me-1">mdi-check-circle</v-icon>
+                            <span>{{ t('discount_applied') }} <strong>{{ appliedDiscount.code }}</strong> — {{ t('discount_value') }} {{ appliedDiscount.type === 'percentage' ? appliedDiscount.value + '%' : appliedDiscount.value + ' ر.س' }}</span>
+                            <button class="co-discount-remove" @click="removeDiscount">
+                                <v-icon size="14">mdi-close</v-icon>
+                            </button>
+                        </div>
+
+                        <div v-else class="co-discount-input-row">
+                            <v-text-field v-model="discountInput" :placeholder="t('discount_placeholder')" variant="outlined" density="compact" hide-details rounded="lg" bg-color="grey-lighten-5" style="flex:1" dir="ltr" :error="!!discountError" @keyup.enter="applyDiscount" />
+                            <v-btn color="primary" rounded="lg" height="40" style="text-transform:none; min-width:90px" :loading="discountLoading" @click="applyDiscount">{{ t('discount_apply') }}</v-btn>
+                        </div>
+                        <div v-if="discountError" class="mt-2">
+                            <div v-if="discountError === '__login__'" class="co-discount-login-msg">
+                                <v-icon size="16" color="warning" class="me-1">mdi-account-lock-outline</v-icon>
+                                {{ t('discount_login_required') }}
+                                <a href="/login" class="text-primary fw-bold mx-1">{{ t('discount_login_link') }}</a>
+                                {{ t('discount_or') }}
+                                <a href="/register" class="text-primary fw-bold mx-1">{{ t('discount_register_link') }}</a>
+                                {{ t('discount_login_msg') }}
+                            </div>
+                            <div v-else class="text-red text-caption">{{ discountError }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Cart items -->
+                    <div class="co-card mb-4">
+                        <a href="/products" class="text-decoration-none">
+                            <div class="co-card-title text-primary" style="cursor:pointer">{{ t('cart_title') }}</div>
+                        </a>
+                        <v-divider class="mb-3" />
+
+                        <div v-for="item in cartItems" :key="item.id" class="co-item">
+                            <img :src="item.image" class="co-item-img" alt="product" />
+                            <div class="co-item-info">
+                                <div class="co-item-name">{{ item.name }}</div>
+                            </div>
+                            <div class="co-item-qty">
+                                <span>{{ item.quantity }}</span>
+                            </div>
+                            <div class="co-item-total">
+                                {{ Math.ceil((Number(item.discount_price) || Number(item.price)) * Number(item.quantity)) }} ر.س
+                            </div>
+                        </div>
+
+                        <v-divider class="my-3" />
+
+                        <div class="co-sum-row"><span>{{ t('cart_items_count') }}</span><span>{{ totalItemsCount }} {{ t('pieces') }}</span></div>
+                        <div v-if="appliedDiscount" class="co-sum-row" style="color:#16a34a">
+                            <span>
+                                <v-icon size="14" color="success" class="me-1">mdi-tag-outline</v-icon>
+                                {{ t('discount_applied') }} ({{ appliedDiscount.code }})
+                            </span>
+                            <span>- {{ discountSaving }} ر.س</span>
+                        </div>
+                        <div class="co-sum-row co-sum-total"><span>{{ t('total') }}</span><span>{{ grandTotal }} ر.س</span></div>
+                    </div>
+
+                    <!-- Confirm + Note -->
+                    <div class="co-card">
+                        <div class="co-card-title">{{ t('confirm_order') }}</div>
+                        <v-divider class="mb-3" />
+                        <div class="co-card-title mt-2" style="font-weight:500; color:#77736B; font-size:13px">{{ t('note') }}</div>
+                        <v-textarea v-model="form.note" variant="outlined" density="compact" hide-details rows="3" rounded="lg" bg-color="grey-lighten-5" class="mt-1 mb-4" />
+
+                        <div class="d-flex flex-column mb-4" style="gap:10px">
+                            <label class="co-check"><input type="checkbox" v-model="joinNews" /><span>{{ t('join_newsletter') }}</span></label>
+                            <label class="co-check"><input type="checkbox" v-model="form.terms" /><span>{{ t('agree_terms') }} <a href="#" class="text-primary">{{ t('privacy_policy_link') }}</a></span></label>
+                        </div>
+
+                        <div v-if="errors.terms" class="text-red text-caption mb-2">{{ errors.terms }}</div>
+                        <div v-if="errors.general" class="text-red text-caption mb-2">{{ errors.general }}</div>
+
+                        <v-btn block color="primary" height="48" rounded="lg" style="text-transform:none; font-size:15px; font-weight:600" :loading="submitting" @click="submit">{{ t('place_order') }}</v-btn>
+                    </div>
+
+                </v-col>
+
+                <!-- ===== RIGHT col (4): Address / Contact ===== -->
+                <v-col cols="12" md="4">
+                    <div class="co-card">
+
+                        <!-- Validation summary from backend -->
+                        <v-alert
+                            v-if="Object.keys(errors).length && !errors.terms"
+                            type="error"
+                            variant="tonal"
+                            rounded="lg"
+                            density="compact"
+                            class="mb-4"
+                        >
+                            <div class="font-weight-bold mb-1">{{ t('fix_errors') }}</div>
+                            <ul class="mb-0 ps-3" style="font-size:13px">
+                                <li v-for="(msgs, field) in errors" :key="field">
+                                    {{ Array.isArray(msgs) ? msgs[0] : msgs }}
+                                </li>
+                            </ul>
+                        </v-alert>
+
+                        <!-- Guest: login or guest toggle -->
+                        <template v-if="!user">
+                            <div class="co-card-title">{{ t('login_or_guest') }}</div>
+                            <v-divider class="mb-3" />
+                            <div class="co-radio-group mb-4">
+                                <label class="co-radio-item" :class="{ active: guestMode === 'login' }" @click="goToLogin">
+                                    <input type="radio" v-model="guestMode" value="login" />
+                                    <v-icon size="16" class="me-2">mdi-account-circle-outline</v-icon>
+                                    <span>{{ t('login') }}</span>
+                                    <v-icon size="14" class="ms-auto">mdi-chevron-left</v-icon>
+                                </label>
+                                <label class="co-radio-item" :class="{ active: guestMode === 'guest' }">
+                                    <input type="radio" v-model="guestMode" value="guest" />
+                                    <v-icon size="16" class="me-2">mdi-account-outline</v-icon>
+                                    <span>{{ t('continue_as_guest') }}</span>
+                                </label>
+                            </div>
+                        </template>
+
+                        <!-- Logged in: saved addresses -->
+                        <template v-if="user && userAddresses.length">
+                            <div class="co-card-title">{{ t('choose_shipping_address') }}</div>
+                            <v-divider class="mb-3" />
+                            <div class="mb-3">
+                                <label
+                                    v-for="addr in userAddresses"
+                                    :key="addr.id"
+                                    class="co-addr-opt"
+                                    :class="{ active: form.user_address === String(addr.id) }"
+                                    @click="form.user_address = String(addr.id)"
+                                >
+                                    <v-icon size="15" :color="form.user_address === String(addr.id) ? 'primary' : 'grey'">mdi-map-marker-outline</v-icon>
+                                    <div style="flex:1">
+                                        <div style="font-size:13px; font-weight:600">{{ addr.address_title || t('address_title') }}</div>
+                                        <div style="font-size:12px; color:#77736B">{{ addr.address }}</div>
+                                    </div>
+                                    <v-chip v-if="addr.main_address" size="x-small" color="primary" variant="flat">{{ t('main_address') }}</v-chip>
+                                </label>
+                            </div>
+                        </template>
+
+                        <!-- Add new address toggle -->
+                        <template v-if="user">
+                            <label
+                                class="co-addr-opt mb-4"
+                                :class="{ active: form.user_address === 'add_address' }"
+                                @click="form.user_address = 'add_address'"
+                            >
+                                <v-icon size="15" color="grey">mdi-plus-circle-outline</v-icon>
+                                <span style="font-size:13px">{{ t('add_new_address') }}</span>
+                            </label>
+                        </template>
+
+                        <!-- Address form: shown for guests in guest mode, or users adding new address -->
+                        <template v-if="(!user && guestMode === 'guest') || (user && form.user_address === 'add_address')">
+                            <div class="co-card-title">{{ t('address_details') }}</div>
+                            <v-divider class="mb-3" />
+                            <div class="co-field-group">
+                                <div class="co-field">
+                                    <label class="co-label">{{ t('first_name') }}</label>
+                                    <v-text-field v-model="addrForm.first_name" :placeholder="t('first_name')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="grey-lighten-5" class="mt-1" :error-messages="errors['addr.shipping.first_name'] || errors['addr.billing.first_name']" />
+                                </div>
+                                <div class="co-field">
+                                    <label class="co-label">{{ t('last_name') }}</label>
+                                    <v-text-field v-model="addrForm.last_name" :placeholder="t('last_name')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="grey-lighten-5" class="mt-1" :error-messages="errors['addr.shipping.last_name'] || errors['addr.billing.last_name']" />
+                                </div>
+                                <div v-if="!user" class="co-field co-field--full">
+                                    <label class="co-label">{{ t('email') }}</label>
+                                    <v-text-field v-model="addrForm.email" :placeholder="t('email')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="grey-lighten-5" class="mt-1" dir="ltr" :error-messages="errors['guest_email']" />
+                                </div>
+                                <div class="co-field co-field--full">
+                                    <label class="co-label">{{ t('phone') }}</label>
+                                    <v-text-field v-model="addrForm.phone_number" :placeholder="t('phone')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="grey-lighten-5" class="mt-1" dir="ltr" :error-messages="errors['addr.shipping.phone_number'] || errors['addr.billing.phone_number']" />
+                                </div>
+                                <div class="co-field co-field--full">
+                                    <label class="co-label">{{ t('country') }}</label>
+                                    <v-select v-model="addrForm.country_id" :items="countries" item-title="name_ar" item-value="id" :placeholder="t('select_country')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="grey-lighten-5" class="mt-1" :error-messages="errors['addr.shipping.country_id'] || errors['addr.billing.country_id']" @update:model-value="addrForm.city_id = null" />
+                                </div>
+                                <div class="co-field co-field--full">
+                                    <label class="co-label">{{ t('city') }}</label>
+                                    <v-select v-model="addrForm.city_id" :items="filteredCities" item-title="name_ar" item-value="id" :placeholder="t('select_city')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="grey-lighten-5" class="mt-1" :error-messages="errors['addr.shipping.city_id'] || errors['addr.billing.city_id']" />
+                                </div>
+                                <div class="co-field co-field--full">
+                                    <label class="co-label">{{ t('address') }}</label>
+                                    <v-text-field v-model="addrForm.address" :placeholder="t('enter_address')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="grey-lighten-5" class="mt-1" :error-messages="errors['addr.shipping.address'] || errors['addr.billing.address']" />
+                                </div>
+                            </div>
+                        </template>
+
+                    </div>
+                </v-col>
+
+            </v-row>
+        </v-container>
+    </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue';
+import { usePage, router } from '@inertiajs/vue3';
+import axios from 'axios';
+import { useLocale } from '../../composables/useLocale';
+const { t } = useLocale();
+
+const { props } = usePage();
+const user          = computed(() => props.auth?.user);
+const cartItems     = ref(props.cartItems || []);
+const totalBefore   = computed(() =>
+    cartItems.value.reduce((sum, item) => {
+        return sum + Number(item.price) * item.quantity;
+    }, 0)
+);
+
+const totalItemsCount = computed(() => cartItems.value.length);
+
+const cartTotal = computed(() =>
+    cartItems.value.reduce((sum, item) => {
+        const price = item.discount_price && Number(item.discount_price) < Number(item.price)
+            ? Number(item.discount_price)
+            : Number(item.price);
+        const qty = Number(item.quantity);
+        return sum + price * qty;
+    }, 0)
+);
+const countries     = ref(props.countries || []);
+const cities        = ref(props.cities || []);
+const shipping      = ref(props.shipping);
+const discountPrice = ref(props.discountPrice || 0);
+const userAddresses = ref(props.userAddresses || []);
+
+const submitting     = ref(false);
+const errors         = ref({});
+const discountInput  = ref('');
+const discountError  = ref('');
+const discountLoading = ref(false);
+const appliedDiscount = ref(null); // { code, value, type }
+const joinNews       = ref(false);
+const guestMode      = ref('guest');
+
+function goToLogin() {
+    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+}
+const shippingOption = ref(
+    props.shipping?.add_pickup_from_store ? 'noShipping' :
+    props.shipping?.add_normal_price      ? 'fixed_shipping' :
+    props.shipping?.add_wight_price       ? 'shipping_based_on_weight' :
+    props.shipping?.add_price_based_on_city ? 'shipping_based_on_city' : 'fixed_shipping'
+);
+
+const form = ref({
+    payment_method: 'cash_on_delivery',
+    user_address: userAddresses.value.find(a => a.main_address)
+        ? String(userAddresses.value.find(a => a.main_address).id)
+        : (userAddresses.value.length ? String(userAddresses.value[0].id) : 'add_address'),
+    note: '',
+    terms: false,
+});
+
+const addrForm = ref({
+    first_name:   user.value?.first_name || '',
+    last_name:    '',
+    email:        user.value?.email || '',
+    phone_number: '',
+    country_id:   null,
+    city_id:      null,
+    address:      '',
+});
+
+const filteredCities = computed(() =>
+    addrForm.value.country_id
+        // eslint-disable-next-line eqeqeq
+        ? cities.value.filter(c => c.country_id == addrForm.value.country_id)
+        : cities.value
+);
+
+const cityShippingPrice = computed(() => {
+    // For saved address: look up city_id from the selected user address
+    let cityId = addrForm.value.city_id;
+
+    if (user.value && form.value.user_address && form.value.user_address !== 'add_address') {
+        const savedAddr = userAddresses.value.find(a => String(a.id) === String(form.value.user_address));
+        if (savedAddr?.city_id) cityId = savedAddr.city_id;
+    }
+
+    if (!cityId) return 0;
+    // eslint-disable-next-line eqeqeq
+    const city = cities.value.find(c => c.id == cityId);
+    return city?.shipping_price || 0;
+});
+
+const shippingCost = computed(() => {
+    if (shippingOption.value === 'noShipping') return 0;
+    if (shippingOption.value === 'fixed_shipping') return Number(shipping.value?.normal_shipping_price) || 0;
+    if (shippingOption.value === 'shipping_based_on_city') return Number(cityShippingPrice.value) || 0;
+    if (shippingOption.value === 'shipping_based_on_weight') return Number(shipping.value?.weight_price) || 0;
+    return 0;
+});
+
+const grandTotal = computed(() =>
+    Math.ceil(Number(cartTotal.value) + Number(shippingCost.value) - Number(discountSaving.value))
+);
+
+async function applyDiscount() {
+    if (!discountInput.value.trim()) return;
+    discountError.value   = '';
+    discountLoading.value = true;
+    try {
+        const { data } = await axios.post('/checkout/apply-discount', {
+            discount_code: discountInput.value.trim(),
+        });
+        appliedDiscount.value = {
+            code:  data.discount_code,
+            value: data.discount_value,
+            type:  data.discount_type,
+        };
+        discountPrice.value = data.discount_type === 'percentage'
+            ? Math.ceil(cartTotal.value * data.discount_value / 100)
+            : data.discount_value;
+        discountInput.value = '';
+    } catch (e) {
+        const res = e.response?.data;
+        if (res?.requires_login) {
+            discountError.value = '__login__';
+        } else {
+            discountError.value = res?.message || t('error_occurred');
+        }
+    } finally {
+        discountLoading.value = false;
+    }
+}
+
+function removeDiscount() {
+    appliedDiscount.value = null;
+    discountPrice.value   = 0;
+    discountInput.value   = '';
+    discountError.value   = '';
+}
+
+const discountSaving = computed(() => {
+    if (!appliedDiscount.value) return 0;
+    if (appliedDiscount.value.type === 'percentage') {
+        return Math.ceil(cartTotal.value * appliedDiscount.value.value / 100);
+    }
+    return appliedDiscount.value.value;
+});
+
+async function submit() {
+    // Validate guest / new address fields
+    const isGuest = !user.value;
+    const needsAddressForm = isGuest ? guestMode.value === 'guest' : form.value.user_address === 'add_address';
+
+    if (needsAddressForm) {
+        const fieldErrors = {};
+        if (!addrForm.value.first_name?.trim())   fieldErrors['addr.billing.first_name']   = [t('first_name_required')];
+        if (!addrForm.value.last_name?.trim())    fieldErrors['addr.billing.last_name']    = [t('last_name_required')];
+        if (!addrForm.value.phone_number?.trim()) fieldErrors['addr.billing.phone_number'] = [t('phone_required')];
+        if (!addrForm.value.address?.trim())      fieldErrors['addr.billing.address']      = [t('address_required')];
+        if (!addrForm.value.country_id)           fieldErrors['addr.billing.country_id']   = [t('country_required')];
+        if (!addrForm.value.city_id)              fieldErrors['addr.billing.city_id']      = [t('city_required')];
+        if (isGuest && !addrForm.value.email?.trim()) fieldErrors['guest_email'] = [t('email_required')];
+
+        if (Object.keys(fieldErrors).length) {
+            errors.value = fieldErrors;
+            // Scroll to the form
+            document.querySelector('.co-field-group')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+    }
+
+    submitting.value = true;
+    errors.value = {};
+
+    const addrType = isGuest ? 'billing' : 'shipping';
+
+    const payload = {
+        payment_method:  form.value.payment_method,
+        note:            form.value.note,
+        terms:           form.value.terms ? 1 : 0,
+        shipping_price:  shippingCost.value,
+        join_news:       joinNews.value ? 1 : 0,
+    };
+
+    if (shippingOption.value === 'noShipping') {
+        payload.pickup_from_store = true;
+    } else if (shippingOption.value === 'fixed_shipping') {
+        payload.fixed_shipping = true;
+    } else if (shippingOption.value === 'shipping_based_on_weight') {
+        payload.shipping_based_on_weight = true;
+    } else if (shippingOption.value === 'shipping_based_on_city') {
+        payload.shipping_based_on_city = true;
+    }
+
+    if (user.value && form.value.user_address !== 'add_address') {
+        payload.user_address = form.value.user_address;
+    } else {
+        payload.addr = {
+            [addrType]: {
+                first_name:   addrForm.value.first_name,
+                last_name:    addrForm.value.last_name,
+                phone_number: addrForm.value.phone_number,
+                country_id:   addrForm.value.country_id,
+                city_id:      addrForm.value.city_id,
+                address:      addrForm.value.address,
+            }
+        };
+        if (isGuest) payload.guest_email = addrForm.value.email;
+    }
+
+    try {
+        const { data } = await axios.post('/checkout', payload);
+        if (data.redirect) window.location.href = data.redirect;
+        else router.visit('/');
+    } catch (e) {
+        if (e.response?.status === 422) {
+            errors.value = e.response.data.errors || {};
+        } else {
+            errors.value = { general: e.response?.data?.message || e.message || t('error_occurred') };
+            console.error('Checkout error:', e.response?.data);
+        }
+    } finally {
+        submitting.value = false;
+    }
+}
+</script>
+
+<style scoped>
+.co-page { background: #F7F0E5; min-height: 100vh; }
+
+.co-card {
+    background: white;
+    border: 1px solid #D7CDBD;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.co-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #302F2B;
+    margin-bottom: 8px;
+}
+
+/* Radio */
+.co-radio-group { display: flex; flex-direction: column; gap: 8px; }
+
+.co-radio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #302F2B;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #D7CDBD;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.co-radio-item.active { border-color: #76543D; background: rgba(118, 84, 61, 0.08); }
+.co-radio-item input { accent-color: #76543D; }
+
+/* Discount */
+.co-discount-login-msg {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    background: #FFF9ED;
+    border: 1px solid #E6D3BB;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #76543D;
+}
+
+.co-discount-input-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.co-discount-applied {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #EFF8F3;
+    border: 1px solid #C6E7D5;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #16a34a;
+}
+
+.co-discount-remove {
+    margin-right: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #77736B;
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+.co-discount-remove:hover { color: #ef4444; }
+
+/* Cart item */
+.co-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #E6D3BB;
+}
+
+.co-item-img {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #D7CDBD;
+    flex-shrink: 0;
+}
+
+.co-item-info { flex: 1; }
+.co-item-name { font-size: 13px; font-weight: 600; color: #302F2B; }
+
+.co-item-qty {
+    border: 1px solid #D7CDBD;
+    border-radius: 8px;
+    padding: 4px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #76543D;
+}
+
+.co-item-total { font-size: 13px; font-weight: 700; color: #76543D; min-width: 70px; text-align: left; }
+
+.co-sum-row { display: flex; justify-content: space-between; font-size: 13px; color: #77736B; padding: 4px 0; }
+.co-sum-total { font-size: 15px; font-weight: 700; color: #302F2B; padding-top: 8px; border-top: 1px solid #D7CDBD; margin-top: 4px; }
+
+/* Address option */
+.co-addr-opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #D7CDBD;
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 13px;
+}
+
+.co-addr-opt.active { border-color: #76543D; background: rgba(118, 84, 61, 0.08); }
+
+/* Contact form grid */
+.co-field-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.co-field { display: flex; flex-direction: column; }
+.co-field--full { grid-column: 1 / -1; }
+.co-label { font-size: 12px; font-weight: 600; color: #302F2B; }
+
+/* Checkbox */
+.co-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #302F2B; cursor: pointer; }
+.co-check input { accent-color: #76543D; width: 15px; height: 15px; }
+</style>

@@ -1,0 +1,199 @@
+<?php
+
+namespace App\Http\Controllers\Inertia;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest ;
+use App\Models\City;
+use App\Models\Country;
+use App\Models\User;
+use App\Models\User_verfication;
+use App\Models\UserAddress;
+use App\Services\CheckOut\CheckoutServices;
+use App\Services\SMSGateways\moraSms;
+use App\Services\VerificationServices;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
+
+class UserAuthController extends Controller
+{
+    public $sms_service;
+    public $moraSms;
+    protected CheckoutServices $checkoutServices;
+
+    public function __construct(VerificationServices $services, moraSms $moraSmsGateway, CheckoutServices $checkoutServices)
+    {
+        $this->sms_service      = $services;
+        $this->moraSms          = $moraSmsGateway;
+        $this->checkoutServices = $checkoutServices;
+    }
+
+    /* ================== AUTH VIEWS ================== */
+
+    public function loginView()
+    {
+        return Inertia::render('Auth/Login');
+    }
+
+    public function registerView()
+    {
+        $countries = Country::where('status', 'used')->get();
+        $countriesId =  Country::where('status', 'used')->pluck('id')->toArray();
+        $cities = City::whereIn('country_id', $countriesId)->where('status', 'used')->get();
+
+        // dd($cities);
+
+        return Inertia::render('Auth/Register', [
+            'countries' => $countries,
+            'cities' => $cities,
+        ]);
+    }
+
+    public function forgotPasswordView()
+    {
+        return Inertia::render('Auth/ForgotPassword');
+    }
+
+    public function resetPasswordView()
+    {
+        return Inertia::render('Auth/ResetPassword');
+    }
+
+    /* ================== AUTH ACTIONS ================== */
+
+    // ✅ Handle Register
+    public function register(RegisterRequest $request)
+    {
+        $data = $request->validated();
+
+        DB::transaction(function () use ($data) {
+            $user = User::create([
+                'first_name' => $data['first_name'],
+                'family_name' => $data['family_name'],
+                'phone_number' => $data['phone_number'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'address' => $data['address'],
+            ]);
+
+            UserAddress::create([
+                'address_title' => __('flash.main_address_label'),
+                'first_name'    => $user->first_name,
+                'family_name'   => $user->family_name,
+                'phone_number'  => $user->phone_number,
+                'user_id'       => $user->id,
+                'address'       => $data['address'],
+                'country_id'    => $data['country_id'] ?? Country::first()?->id,
+                'city_id'       => $data['city_id'] ?? null,
+                'main_address'  => true,
+            ]);
+
+            Auth::guard('web')->login($user);
+        });
+
+        // Merge any guest cart items into the newly registered user's cart
+        try {
+            $this->checkoutServices->mergeGuestCart(Auth::guard('web')->id());
+        } catch (\Throwable $e) {
+            logger()->error('Cart merge failed on register: ' . $e->getMessage());
+        }
+
+        return redirect()->route('home');
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::guard('web')->attempt($credentials)) {
+            $request->session()->regenerate();
+
+            // Merge any guest cart items into the now-authenticated user's cart
+            try {
+                $this->checkoutServices->mergeGuestCart(Auth::guard('web')->id());
+            } catch (\Throwable $e) {
+                logger()->error('Cart merge failed on login: ' . $e->getMessage());
+            }
+
+            return redirect()->route('home');
+        }
+
+        return back()->withErrors(['email' => trans('auth.failed')]);
+    }
+
+    public function logout(Request $request)
+    {
+        $userId = Auth::guard('web')->id();
+
+        // Transfer the user's cart to a new guest identity before logging out.
+        // This preserves the cart items but makes them inaccessible to the
+        // authenticated user and the old guest identity.
+        if ($userId) {
+            $this->checkoutServices->transferCartToGuest($userId);
+        }
+
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
+    public function verifyCode(Request $request)
+    {
+        $request->validate(['code' => 'required']);
+        $user_id = session('user_id');
+        if (!$user_id) {
+            return back()->with('error', __('flash.session_expired'));
+        }
+
+        $user = User::find($user_id);
+        $isValidCode = $this->sms_service->checkOTPCodePassword($user->id, $request->code);
+
+        if ($isValidCode) {
+            $user->verificationCode()->update(['is_verified' => 1]);
+            Auth::login($user);
+            session()->forget(['user_id', 'verification_code']);
+
+            return redirect()->route('home')->with('success', __('flash.account_activated'));
+        }
+
+        return back()->with('error', __('flash.invalid_code'));
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['phone_number' => 'required|exists:users,phone_number']);
+        $user = User::where('phone_number', $request->phone_number)->first();
+
+        $verificationData = $this->sms_service->setVerificationCode($user->id);
+        $message = $this->sms_service->getSMSVerifyMessageByAppName($verificationData->code);
+        $this->moraSms->send_sms($user->phone_number, $message);
+
+        session(['user_id' => $user->id, 'verification_code' => $verificationData->code]);
+
+        return back()->with('success', __('flash.otp_sent'));
+    }
+
+    public function passwordUpdate(Request $request)
+    {
+        $request->validate(['password' => 'required|confirmed|min:8']);
+        $user = User::find(session('user_id'));
+
+        if (!$user) {
+            return redirect()->route('user.forgotPasswordView')->with('error', __('flash.session_expired'));
+        }
+
+        $user->update(['password' => Hash::make($request->password)]);
+        session()->forget(['user_id', 'verification_code']);
+
+        return redirect()->route('login')->with('success', __('flash.password_updated'));
+    }
+}
