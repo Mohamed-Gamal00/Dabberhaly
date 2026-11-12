@@ -43,6 +43,12 @@ class DesignSeeder extends Seeder
                 'page_name'   => 'home',
                 'description' => 'بانر التلفزيون في الصفحة الرئيسية',
             ],
+            // Home page — New products section banner
+            [
+                'title'       => 'new_products_banner',
+                'page_name'   => 'home',
+                'description' => 'بانر قسم المنتجات الجديدة في الصفحة الرئيسية',
+            ],
             // Offers page banners
             [
                 'title'       => 'بانر صفحة العروض',
