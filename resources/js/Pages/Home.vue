@@ -43,7 +43,7 @@ const sectionColors = {
         <SeoHead />
         <UpperPanner :banners="banners" />
         <TheFeatures :bgColor="sectionColors.white" />
-        <TopCategories :bgColor="sectionColors.vanilla" />
+        <!-- <TopCategories :bgColor="sectionColors.vanilla" /> -->
         <TopOffers :bgColor="sectionColors.latte" />
         <ProductsComponents
             :products="products"
