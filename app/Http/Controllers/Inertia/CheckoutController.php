@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Inertia;
 
+use App\Events\UserOrder;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\DiscountCode;
@@ -175,19 +176,21 @@ class CheckoutController extends Controller
 
             $this->checkoutService->updateProductStatue($user);
 
-            $this->checkoutService->sendNotificationToAdmin($order);
-
             // Clear applied discount from session
             session()->forget('applied_discount_code_id');
 
             DB::commit();
-
-            return $this->checkoutService->checkPaymentMethod($request, $order);
-
         } catch (Throwable $e) {
             DB::rollBack();
             return response()->json(['message' => __('flash.order_creation_failed'), 'error' => $e->getMessage()], 500);
         }
+
+        // Notify admins asynchronously through the UserOrder event.
+        // Dispatched AFTER commit so the queued listener only runs for an
+        // order that actually exists — never for a rolled-back one.
+        event(new UserOrder($order));
+
+        return $this->checkoutService->checkPaymentMethod($request, $order);
     }
 
     /**

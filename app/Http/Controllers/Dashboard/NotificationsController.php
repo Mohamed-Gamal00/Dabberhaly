@@ -38,6 +38,20 @@ class NotificationsController extends Controller
             }
         }
 
-        return redirect()->to($request->url);
+        $url = $request->input('url');
+
+        if ($url) {
+            // Extract path and query so redirect always stays on the current domain and port,
+            // even if the stored notification URL was absolute (e.g. generated in CLI with http://localhost).
+            $parsed = parse_url($url);
+            if (!empty($parsed['path'])) {
+                $target = $parsed['path'] . (!empty($parsed['query']) ? '?' . $parsed['query'] : '');
+                return redirect()->to($target);
+            }
+
+            return redirect()->to($url);
+        }
+
+        return redirect()->back();
     }
 }

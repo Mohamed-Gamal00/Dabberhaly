@@ -48,7 +48,7 @@ class ContactFormSubmitted extends Notification
         return [
             'title' => 'يوجد رسالة جديده',
             'body' => "تمت اضافة الرساله لقائمة الرسائل",
-            'url' => route('contact_us.watch', $this->form->id),
+            'url' => route('contact_us.watch', $this->form->id, false),
             'message_id' => $this->form->id
         ];
     }

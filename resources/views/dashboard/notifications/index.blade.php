@@ -16,14 +16,14 @@
 					<div>
 						<h5 class="font-size-16 mb-4">الاشعارات</h5>
 						@forelse($notifications as $notification)
-							<a href="{{$notification->data['url']}}?notification_id={{$notification->id}}">
+							<a href="{{ route('notifications.read', ['notification_id' => $notification->id, 'url' => $notification->data['url'] ?? '#']) }}">
 								<div class="table-responsive">
 									<table class="table table-nowrap table-hover mb-0">
 										<tbody>
 										<tr>
 											<th scope="row">{{++$counter}}</th>
 											<td>
-												<a href="{{$notification->data['url']}}?notification_id={{$notification->id}}"
+												<a href="{{ route('notifications.read', ['notification_id' => $notification->id, 'url' => $notification->data['url'] ?? '#']) }}"
 												   class="text-reset @if($notification->unread()) fw-bold @endif">{{$notification->data['title']}}</a>
 											</td>
 											<td class="@if($notification->unread()) fw-bold @endif">

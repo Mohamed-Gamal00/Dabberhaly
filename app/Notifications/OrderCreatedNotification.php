@@ -48,7 +48,7 @@ class OrderCreatedNotification extends Notification
         return [
             'title' => 'يوجد طلب جديد',
             'body' => "تمت اضافة الطلب لقائمة الطلبات",
-            'url' => route('orders.show', $this->order->id),
+            'url' => route('orders.show', $this->order->id, false),
             'order_id' => $this->order->id
         ];
     }
