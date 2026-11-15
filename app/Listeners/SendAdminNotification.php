@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
 /**
- * Sends the order-created notifications to admins. 
+ * Sends the order-created notifications to admins.
  *
  * Implements ShouldQueue so it runs on the queue worker instead of
  * blocking the HTTP request that created the order.
@@ -23,7 +23,7 @@ class SendAdminNotification implements ShouldQueueAfterCommit
     use InteractsWithQueue;
 
     /**
-     * Handle the event.
+     * Handle the event. 
      */
     public function handle(UserOrder $event): void
     {
