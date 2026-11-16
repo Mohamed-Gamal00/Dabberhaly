@@ -6,6 +6,7 @@ use App\Events\UserOrder;
 use App\Models\Admin;
 use App\Models\Order;
 use App\Notifications\OrderCreatedAdminNotification;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Queue\InteractsWithQueue;
@@ -22,9 +23,9 @@ class SendAdminNotification implements ShouldQueueAfterCommit
 {
     use InteractsWithQueue, Queueable;
 
-    public int $tries = 2;
+    public int $tries = 5;
 
-    public array $backoff = [30, 60];
+    public array $backoff = [10, 15,20,25,30];
 
     public function handle(UserOrder $event): void
     {
@@ -32,6 +33,7 @@ class SendAdminNotification implements ShouldQueueAfterCommit
         if ($admins->isEmpty()) {
             $admins = Admin::all();
         }
+        // throw new Exception ('zeeeeeeeeeeeeeeeeeeeeeew');
 
         try {
             foreach ($admins as $admin) {
