@@ -20,7 +20,7 @@ class OrderCreatedEmailAdmin extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -30,8 +30,18 @@ class OrderCreatedEmailAdmin extends Notification
             ->view('emails.order_created_admin', ['order' => $this->order]);
     }
 
+    public function toDatabase(object $notifiable): array
+    {
+        return [
+            'title' => 'يوجد طلب جديد',
+            'body'  => "تمت اضافة الطلب #{$this->order->number} لقائمة الطلبات",
+            'url'   => route('orders.show', $this->order->id, false),
+            'order_id' => $this->order->id,
+        ];
+    }
+
     public function toArray(object $notifiable): array
     {
-        return [];
+        return $this->toDatabase($notifiable);
     }
 }

@@ -17,7 +17,7 @@ class SendUserNotification implements ShouldQueueAfterCommit
 
     public int $tries = 3;
 
-    public array $backoff = [10, 20];
+    public array $backoff = [10, 30];
 
     public function handle(UserOrder $event): void
     {
@@ -37,7 +37,7 @@ class SendUserNotification implements ShouldQueueAfterCommit
         }
 
         try {
-            throw new \RuntimeException('Testing Laravel Queue Retry');
+            // throw new \RuntimeException('Testing Laravel Queue Retry');
             $notification = new SendOrderCreatedToUser($order);
 
             if ($order->user) {

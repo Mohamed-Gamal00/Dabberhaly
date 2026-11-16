@@ -31,11 +31,12 @@ class SendAdminNotification implements ShouldQueueAfterCommit
 
     public function handle(UserOrder $event): void
     {
-        $admin = Admin::where('super_admin', 1)->get();
+        $admins = Admin::where('super_admin', 1)->get();
 
         try {
-            Notification::route('mail', $admin->email)
-                ->notify(new OrderCreatedEmailAdmin($event->order));
+            foreach ($admins as $admin) {
+                $admin->notify(new OrderCreatedEmailAdmin($event->order));
+            }
         } catch (Throwable $e) {
             Log::warning($e->getMessage());
 
