@@ -21,13 +21,13 @@ class ContactUsController extends Controller
   {
     $messages = $this->contactRepository->getAll();
     $user = Auth::guard('admin')->user();
-    $notifications = $user->notifications()->where('type', "App\Notifications\ContactFormSubmitted")->get();
+    $notifications = $user->notifications()->where('type', "App\Notifications\ContactMessageAdminNotification")->get();
     return view('dashboard.contact_us.index', compact('messages', 'notifications'));
   }
 
   public function show($id)
   {
-    
+
     $message = $this->contactRepository->show($id);
     return view('dashboard.contact_us.show', compact('message'));
   }

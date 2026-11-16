@@ -24,7 +24,7 @@ class OrderController extends Controller
         $orders = $this->orderRepository->getAll();
         $user   = Auth::guard('admin')->user();
         $notifications = $user->notifications()
-            ->where('type', "App\Notifications\OrderCreatedNotification")
+            ->where('type', "App\Notifications\OrderCreatedAdminNotification")
             ->get();
 
         return view('dashboard.orders.index', compact('orders', 'notifications'));

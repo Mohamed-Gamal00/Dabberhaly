@@ -20,10 +20,10 @@ class SideBar extends Component
     {
         $user = Auth::guard('admin')->user();
         $this->unreadMessageCount = $user->unReadNotifications()
-            ->where('type', 'App\Notifications\ContactFormSubmitted')
+            ->where('type', 'App\Notifications\ContactMessageAdminNotification')
             ->count();
         $this->unreadOrderCreatedCount = $user->unReadNotifications()
-            ->where('type', 'App\Notifications\OrderCreatedNotification')
+            ->where('type', 'App\Notifications\OrderCreatedAdminNotification')
             ->count();
     }
 

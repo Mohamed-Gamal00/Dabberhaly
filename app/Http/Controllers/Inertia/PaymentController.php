@@ -3,14 +3,11 @@
 namespace App\Http\Controllers\Inertia;
 
 use App\Http\Controllers\Controller;
-use App\Models\Admin;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Setting;
-use App\Notifications\OrderPaidAdminNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
@@ -102,14 +99,6 @@ class PaymentController extends Controller
         ]);
 
         if ($status === 'paid') {
-            // Send payment confirmation notification to all admins
-            $admins = Admin::all();
-            foreach ($admins as $admin) {
-                try {
-                    $admin->notify(new OrderPaidAdminNotification($order, $transaction));
-                } catch (\Exception $e) {}
-            }
-
             return Inertia::render('Payment/Success', [
                 'order' => $this->orderData($order),
             ]);

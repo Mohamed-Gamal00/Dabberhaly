@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\Notifications\SendNewsToUserRequest;
-use App\Notifications\NewsNotification;
+use App\Notifications\NewsletterNotification;
 
 use App\Models\SendNewsToUser;
 use App\Models\User;
@@ -36,7 +36,7 @@ class SendNewsToUsersController extends Controller
 
     foreach ($users as $user) {
       try {
-        $user->notify(new NewsNotification(
+        $user->notify(new NewsletterNotification(
           $request->input('title'),
           $request->input('body'),
           $user
