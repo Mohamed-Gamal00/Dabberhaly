@@ -11,23 +11,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Throwable;
 
-/**
- * Sends order confirmation email to the customer (registered user or guest).
- *
- * Implements ShouldQueueAfterCommit so it runs on the queue worker only after
- * the order transaction has been safely committed to the database.
- */
 class SendUserNotification implements ShouldQueueAfterCommit
 {
     use InteractsWithQueue, Queueable;
 
-    public int $tries = 2;
+    public int $tries = 3;
 
-    public array|int $backoff = [100, 200];
+    public array $backoff = [10, 20];
 
-    /**
-     * Handle the event.
-     */
     public function handle(UserOrder $event): void
     {
         $order = $event->order;
@@ -37,25 +28,44 @@ class SendUserNotification implements ShouldQueueAfterCommit
             ?? $order->addresses()->first()?->email;
 
         if (! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            Log::info("Order #{$order->number}: No valid customer email found to send confirmation.", [
-                'order_id' => $order->id,
-            ]);
+            Log::info(
+                "Order #{$order->number}: No valid customer email found.",
+                ['order_id' => $order->id]
+            );
 
             return;
         }
 
-        $order->user
-            ? $order->user->notify(new SendOrderCreatedToUser($order))
-            : Notification::route('mail', $email)->notify(new SendOrderCreatedToUser($order));
+        try {
+            throw new \RuntimeException('Testing Laravel Queue Retry');
+            $notification = new SendOrderCreatedToUser($order);
+
+            if ($order->user) {
+                $order->user->notify($notification);
+            } else {
+                Notification::route('mail', $email)
+                    ->notify($notification);
+            }
+        } catch (Throwable $e) {
+            Log::warning('Failed to send order confirmation email.', [
+                'order_id' => $order->id,
+                'order_number' => $order->number,
+                'email' => $email,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
     }
 
-    /**
-     * Handle a job failure.
-     */
-    public function fail(?Throwable $exception = null): void
-    {
-        Log::warning('Failed to send order confirmation email to customer.', [
-            'exception' => $exception?->getMessage(),
+    public function failed(
+        UserOrder $event,
+        Throwable $exception
+    ): void {
+        Log::error('Order confirmation email permanently failed.', [
+            'order_id' => $event->order->id,
+            'order_number' => $event->order->number,
+            'error' => $exception->getMessage(),
         ]);
     }
 }
