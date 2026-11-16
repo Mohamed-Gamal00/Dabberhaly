@@ -13,7 +13,7 @@ use Inertia\Inertia;
 class PaymentController extends Controller
 {
     /**
-     * Show the Moyasar payment form for a given order number.
+     * Show the Moyasar payment form for a given order number ..
      */
     public function show($order_number)
     {
