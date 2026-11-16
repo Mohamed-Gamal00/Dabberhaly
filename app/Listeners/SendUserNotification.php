@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\UserOrder;
 use App\Notifications\OrderCreatedCustomerNotification;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Queue\InteractsWithQueue;
@@ -17,7 +18,7 @@ class SendUserNotification implements ShouldQueueAfterCommit
 
     public int $tries = 5;
 
-    public array $backoff = [10,20,40,30,60];
+    public array $backoff = [10, 20, 40, 30, 60];
 
     public function handle(UserOrder $event): void
     {
@@ -26,6 +27,8 @@ class SendUserNotification implements ShouldQueueAfterCommit
         $email = $order->user?->email
             ?? $order->guest?->email
             ?? $order->addresses()->first()?->email;
+
+        throw new Exception('zeeeeeeeeeeeeeeeeeeeeeew');
 
         if (! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             Log::info(
