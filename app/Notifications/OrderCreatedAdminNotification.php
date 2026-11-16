@@ -31,19 +31,8 @@ class OrderCreatedAdminNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        if ($notifiable instanceof AnonymousNotifiable) {
-            return ['mail'];
-        }
-
-        $channels = ['database'];
-
-        if (!empty($notifiable->email) && filter_var($notifiable->email, FILTER_VALIDATE_EMAIL)) {
-            $channels[] = 'mail';
-        }
-
-        return $channels;
+        return ['database'];
     }
-
     /**
      * Mail representation for admin email alerts.
      */

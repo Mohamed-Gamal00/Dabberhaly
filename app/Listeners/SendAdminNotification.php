@@ -24,7 +24,7 @@ class SendAdminNotification implements ShouldQueueAfterCommit
 
     public int $tries = 2;
 
-    public array $backoff = [10, 20];
+    public array $backoff = [30, 60];
 
     public function handle(UserOrder $event): void
     {

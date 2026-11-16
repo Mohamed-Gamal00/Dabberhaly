@@ -17,7 +17,7 @@ class SendUserNotification implements ShouldQueueAfterCommit
 
     public int $tries = 3;
 
-    public array $backoff = [10, 30];
+    public array $backoff = [30, 60];
 
     public function handle(UserOrder $event): void
     {
