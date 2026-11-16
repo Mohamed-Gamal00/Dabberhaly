@@ -185,8 +185,8 @@ class CheckoutController extends Controller
             return response()->json(['message' => __('flash.order_creation_failed'), 'error' => $e->getMessage()], 500);
         }
 
-        // Notify admins asynchronously through the UserOrder event.
-        // Dispatched AFTER commit so the queued listener only runs for an
+        // Notify admins and customer asynchronously through the UserOrder event.
+        // Dispatched AFTER commit so queued listeners only run for an
         // order that actually exists — never for a rolled-back one.
         event(new UserOrder($order));
 

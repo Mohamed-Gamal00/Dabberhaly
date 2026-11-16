@@ -4,23 +4,23 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Validator;
 
 class SendOrderCreatedToUser extends Notification
 {
     use Queueable;
 
-    protected $order;
+    public Order $order;
 
     /**
      * Create a new notification instance.
      */
     public function __construct(Order $order)
     {
-        $this->order = $order;
+        $this->order = $order->relationLoaded('orderItems')
+            ? $order
+            : $order->load(['orderItems', 'addresses.city', 'addresses.country', 'user', 'guest']);
     }
 
     /**
@@ -38,18 +38,14 @@ class SendOrderCreatedToUser extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $validator = Validator::make(['email' => $this->order->addresses()->first()->email], ['email' => 'email']);
-
-        if ($validator->fails()) {
-            return new MailMessage();
-        }
+        $customerName = $this->order->customer_name;
 
         return (new MailMessage)
-            ->subject('طلب جديد')
-            ->greeting("أهلا {$this->order->addresses()->first()->first_name}")
-            ->line("تم انشاء طلب جديد برقم (#{$this->order->number}) ")
-            ->action('مشاهدة أفضل العروض والخصومات', url('/'))
-            ->line('نحن سعداء لاستخدامك متجرنا الالكتروني .');
+            ->subject("🛍️ تأكيد استلام طلبك #{$this->order->number} — " . config('app.name'))
+            ->view('emails.order_created_user', [
+                'order'        => $this->order,
+                'customerName' => $customerName,
+            ]);
     }
 
     /**
@@ -59,8 +55,6 @@ class SendOrderCreatedToUser extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 }

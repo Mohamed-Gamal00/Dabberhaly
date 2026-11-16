@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\UserOrder;
 use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\UserCheckoutRequest;
@@ -65,9 +66,10 @@ class CheckoutController extends Controller
 
             $this->checkOutservice->updateProductStatue($user);
 
-            $this->checkOutservice->sendNotificationToAdmin($order);
-
             DB::commit();
+
+            // Notify admins and customer asynchronously through the UserOrder event.
+            event(new UserOrder($order));
 
             return $this->checkOutservice->checkPaymentMethod($request, $order);
         } catch (Throwable $e) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\guest;
 
 use App\Enums\OrderStatus;
+use App\Events\UserOrder;
 use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
@@ -195,27 +196,14 @@ class CheckoutController extends Controller
             }
 
 
-            $admins = Admin::all();
-            Notification::send($admins, new OrderCreatedNotification($order));
-
-            $validAdmins = $admins->filter(function ($admin) {
-                return filter_var($admin->email, FILTER_VALIDATE_EMAIL);
-            });
-
-            foreach ($validAdmins as $admin) {
-                try {
-                    Notification::route('mail', $admin->email)
-                        ->notify(new OrderCreatedEmailAdmin($order));
-                } catch (\Exception $e) {
-                }
-            }
-
-
             Cart::withoutGlobalScope('cookie_id')->where('guest_id', $guestId)
                 ->where('status', 0)
                 ->update(['status' => 1]);
 
             DB::commit();
+
+            // Notify admins and customer asynchronously through the UserOrder event.
+            event(new UserOrder($order));
             if ($request->payment_method == 'card_payment') {
 
                 $paymentLink = route('user.payment', ['order_number' => $order->number]);
