@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\UserOrder;
-use App\Notifications\SendOrderCreatedToUser;
+use App\Notifications\OrderCreatedCustomerNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Queue\InteractsWithQueue;
@@ -37,8 +37,7 @@ class SendUserNotification implements ShouldQueueAfterCommit
         }
 
         try {
-            // throw new \RuntimeException('Testing Laravel Queue Retry');
-            $notification = new SendOrderCreatedToUser($order);
+            $notification = new OrderCreatedCustomerNotification($order);
 
             if ($order->user) {
                 $order->user->notify($notification);

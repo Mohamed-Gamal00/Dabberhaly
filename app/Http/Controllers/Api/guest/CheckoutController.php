@@ -16,8 +16,6 @@ use App\Models\SendNewsToUser;
 use App\Models\Setting;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\UserAddress;
-use App\Notifications\OrderCreatedEmailAdmin;
-use App\Notifications\OrderCreatedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;

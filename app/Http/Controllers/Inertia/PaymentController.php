@@ -7,7 +7,7 @@ use App\Models\Admin;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Setting;
-use App\Notifications\OrderPaidEmailAdmin;
+use App\Notifications\OrderPaidAdminNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
@@ -102,13 +102,11 @@ class PaymentController extends Controller
         ]);
 
         if ($status === 'paid') {
-            // Send payment confirmation email to all admins
+            // Send payment confirmation notification to all admins
             $admins = Admin::all();
-            $validAdmins = $admins->filter(fn($a) => filter_var($a->email, FILTER_VALIDATE_EMAIL));
-            foreach ($validAdmins as $admin) {
+            foreach ($admins as $admin) {
                 try {
-                    Notification::route('mail', $admin->email)
-                        ->notify(new OrderPaidEmailAdmin($order, $transaction));
+                    $admin->notify(new OrderPaidAdminNotification($order, $transaction));
                 } catch (\Exception $e) {}
             }
 

@@ -3,16 +3,13 @@
 namespace App\Listeners;
 
 use App\Events\UserOrder;
-use App\Listeners\Concerns\RetriesRateLimitedMail;
 use App\Models\Admin;
 use App\Models\Order;
-use App\Notifications\OrderCreatedEmailAdmin;
-use App\Notifications\OrderCreatedNotification;
+use App\Notifications\OrderCreatedAdminNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 use Throwable;
 
 /**
@@ -32,10 +29,13 @@ class SendAdminNotification implements ShouldQueueAfterCommit
     public function handle(UserOrder $event): void
     {
         $admins = Admin::where('super_admin', 1)->get();
+        if ($admins->isEmpty()) {
+            $admins = Admin::all();
+        }
 
         try {
             foreach ($admins as $admin) {
-                $admin->notify(new OrderCreatedEmailAdmin($event->order));
+                $admin->notify(new OrderCreatedAdminNotification($event->order));
             }
         } catch (Throwable $e) {
             Log::warning($e->getMessage());

@@ -13,8 +13,7 @@ use App\Models\Product;
 use App\Models\SendNewsToUser;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\UserAddress;
-use App\Notifications\OrderCreatedEmailAdmin;
-use App\Notifications\OrderCreatedNotification;
+use App\Notifications\OrderCreatedAdminNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
@@ -283,17 +282,7 @@ class CheckoutServices
     public function sendNotificationToAdmin($order)
     {
         $admins = Admin::all();
-        Notification::send($admins, new OrderCreatedNotification($order));
-
-        // إرسال إيميل للأدمنز اللي عندهم إيميل صحيح
-        $validAdmins = $admins->filter(fn($admin) => filter_var($admin->email, FILTER_VALIDATE_EMAIL));
-        foreach ($validAdmins as $admin) {
-            try {
-                Notification::route('mail', $admin->email)
-                    ->notify(new OrderCreatedEmailAdmin($order));
-            } catch (\Exception $e) {
-            }
-        }
+        Notification::send($admins, new OrderCreatedAdminNotification($order));
     }
 
     public function checkPaymentMethod($request, $order)

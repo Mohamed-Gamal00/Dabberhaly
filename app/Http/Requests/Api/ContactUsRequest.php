@@ -4,8 +4,6 @@ namespace App\Http\Requests\Api;
 
 use App\Helper\ApiResponse;
 use App\Models\Admin;
-use App\Notifications\ContactFormSubmitted;
-use App\Notifications\NewMessageEmail;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Notification;

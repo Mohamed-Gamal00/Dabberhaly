@@ -5,8 +5,7 @@ namespace App\Http\Controllers\Inertia;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\ContactUs;
-use App\Notifications\ContactFormSubmitted;
-use App\Notifications\NewMessageEmail;
+use App\Notifications\ContactMessageAdminNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
@@ -35,13 +34,9 @@ class ContactUsController extends Controller
         ]);
 
         $admins = Admin::all();
-        Notification::send($admins, new ContactFormSubmitted($form));
-
         foreach ($admins as $admin) {
             try {
-                if (filter_var($admin->email, FILTER_VALIDATE_EMAIL)) {
-                    Notification::send($admin, new NewMessageEmail($form));
-                }
+                $admin->notify(new ContactMessageAdminNotification($form));
             } catch (\Exception $e) {}
         }
 
