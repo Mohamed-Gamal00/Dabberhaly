@@ -25,7 +25,7 @@ class Cart extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'cookie_id', 'status', 'color_id', 'product_id', 'user_id', 'guest_id', 'quantity', 'weight', 'discounted_price'
+        'cookie_id', 'status', 'product_id', 'user_id', 'quantity', 'weight', 'discounted_price'
     ];
 
     /** @var string|null Cached cookie id for the current request. */
@@ -149,18 +149,21 @@ class Cart extends Model
         static::$cachedCookieId = null;
     }
 
-    public static function getCookieIdApi()
+    public static function getCookieIdApi(): string
     {
         $request = request();
-        if (request()->user()) {
-            $cookie_id = Cart::where('status', 0)->where('user_id', $request->user()->id)->withoutGlobalScope('cookie_id')->value('cookie_id');
+
+        if ($request->user()) {
+            $cookie_id = Cart::where('status', 0)
+                ->where('user_id', $request->user()->id)
+                ->withoutGlobalScope('cookie_id')
+                ->value('cookie_id');
         } else {
-            $cookie_id = Cart::where('status', 0)->where('guest_id', $request->guest_id)->withoutGlobalScope('cookie_id')->value('cookie_id');
+            // Guest carts are keyed by the cookie_id sent in the guest-id header.
+            $cookie_id = $request->header('guest-id');
         }
-        if (!$cookie_id) {
-            $cookie_id = Str::uuid()->toString();
-        }
-        return $cookie_id;
+
+        return $cookie_id ?: Str::uuid()->toString();
     }
 
     public function user()
@@ -177,6 +180,6 @@ class Cart extends Model
 
     public function guest()
     {
-        return $this->belongsTo(GuestModel::class, 'guest_id', 'id');
+        return $this->belongsTo(GuestModel::class, 'cookie_id', 'cookie_id');
     }
 }

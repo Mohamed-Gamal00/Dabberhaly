@@ -63,7 +63,7 @@ class GuestCheckDiscountController extends Controller
         $guestId = $request->header('guest-id');
 //        return $guestId;
         $cartItems = Cart::with('product')->withoutGlobalScope('cookie_id')
-            ->where('guest_id', $guestId)
+            ->where('cookie_id', $guestId)
             ->where('status', 0)->get();
 
         if ($cartItems->isEmpty()) {

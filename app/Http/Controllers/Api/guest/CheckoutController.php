@@ -126,7 +126,7 @@ class CheckoutController extends Controller
 
 //        return $request->all();
         $items = Cart::withoutGlobalScope('cookie_id')
-            ->where('guest_id', $guestId)
+            ->where('cookie_id', $guestId)
             ->where('status', 0)->get();
 
         if ($items->isEmpty()) {
@@ -160,7 +160,6 @@ class CheckoutController extends Controller
                     'product_name' => $cart_items->product->name, // product is the relation
                     'price' => $cart_items->product->price * $cart_items->quantity, // product is the relation
                     'quantity' => $cart_items->quantity,
-                    'color' => $cart_items->color_id ?? null,
                 ]);
 
                 # NOTE:: Ensure that the user cannot add more items to the cart than the available quantity of the product.
@@ -194,7 +193,7 @@ class CheckoutController extends Controller
             }
 
 
-            Cart::withoutGlobalScope('cookie_id')->where('guest_id', $guestId)
+            Cart::withoutGlobalScope('cookie_id')->where('cookie_id', $guestId)
                 ->where('status', 0)
                 ->update(['status' => 1]);
 
@@ -229,7 +228,7 @@ class CheckoutController extends Controller
     public function totalBeforeDiscount($guestId): float
     {
         return Cart::with('product')->withoutGlobalScope('cookie_id')
-            ->where('guest_id', $guestId)->where('status', 0)->get()->sum(function ($item) {
+            ->where('cookie_id', $guestId)->where('status', 0)->get()->sum(function ($item) {
                 return $item->quantity * $item->product->price;
             });
     }
@@ -238,7 +237,7 @@ class CheckoutController extends Controller
     public function total($guestId): float
     {
         return Cart::with('product')->withoutGlobalScope('cookie_id')
-            ->where('guest_id', $guestId)->where('status', 0)->get()->sum(function ($item) {
+            ->where('cookie_id', $guestId)->where('status', 0)->get()->sum(function ($item) {
                 return $item->quantity * ($item->discounted_price ?? $item->product->price);
             });
     }

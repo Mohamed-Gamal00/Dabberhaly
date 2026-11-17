@@ -29,7 +29,6 @@ class CartRequest extends FormRequest
             // 'user_id' => 'nullable|exists:users,id',
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
-            'color_id' => 'nullable|exists:colors,id', // Assuming you have a colors table
         ];
     }
 

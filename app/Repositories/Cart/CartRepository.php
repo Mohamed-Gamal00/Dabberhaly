@@ -11,7 +11,7 @@ interface CartRepository
   public function get(): Collection; // this means must return collection
 
   // add item to cart and its quantity...default = 1
-  public function add(Product $product, $quantity = 1, $color_id = null);
+  public function add(Product $product, $quantity = 1);
 
   // update quantity for item
   public function update($id, $quantity);
@@ -24,7 +24,7 @@ interface CartRepository
 
   // count all items in cart and return float
   public function totalBeforeDiscount(): float;
-  
+
   // count all items in cart and return float
   public function total(): float;
 }

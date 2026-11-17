@@ -66,7 +66,6 @@ class CartController extends Controller
         $request->validate([
             'product_id' => 'required|integer|exists:products,id',
             'quantity'   => 'nullable|integer|min:1',
-            'color_id'   => 'nullable|exists:colors,id',
         ]);
 
         $product = Product::findOrFail($request->product_id);
@@ -79,7 +78,7 @@ class CartController extends Controller
         }
 
         try {
-            $this->cart->add($product, $quantity, $request->color_id);
+            $this->cart->add($product, $quantity);
         } catch (InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }

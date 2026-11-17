@@ -17,7 +17,7 @@ class CartModelRepository implements CartRepository
      *
      * @throws \InvalidArgumentException When the resulting quantity would exceed stock.
      */
-    public function add(Product $product, $quantity = 1, $color_id = null)
+    public function add(Product $product, $quantity = 1)
     {
         $quantity = max(1, (int) $quantity);
 
@@ -39,7 +39,6 @@ class CartModelRepository implements CartRepository
                 'product_id' => $product->id,
                 'status'     => 0,
                 'quantity'   => $quantity,
-                'color_id'   => $color_id,
             ]);
         } else {
             // Incrementing an existing line — respect stock.
