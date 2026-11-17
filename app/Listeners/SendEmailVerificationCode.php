@@ -34,7 +34,7 @@ class SendEmailVerificationCode implements ShouldQueue
             ]
         );
 
-        $user->notify(new EmailVerificationCodeNotification($code));
+        $user->notify(new EmailVerificationCodeNotification($code, $user->first_name ?? ''));
     }
 
     public function failed(UserRegistered $event, Throwable $exception): void

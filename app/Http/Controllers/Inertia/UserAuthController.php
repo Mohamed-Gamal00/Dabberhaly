@@ -12,11 +12,13 @@ use App\Models\Country;
 use App\Models\User;
 use App\Models\User_verfication;
 use App\Models\UserAddress;
+use App\Notifications\EmailVerificationCodeNotification;
 use App\Services\CheckOut\CheckoutServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Inertia;
 
@@ -50,7 +52,7 @@ class UserAuthController extends Controller
 
     public function verifyView()
     {
-        if (! session('user_id')) {
+        if (! session('pending_registration')) {
             return redirect()->route('login');
         }
 
@@ -77,35 +79,21 @@ class UserAuthController extends Controller
     {
         $data = $request->validated();
 
-        $user = DB::transaction(function () use ($data) {
-            $user = User::create([
+        // Store registration data in session — no DB write until email is verified
+        session([
+            'pending_registration' => [
                 'first_name'   => $data['first_name'],
                 'family_name'  => $data['family_name'],
                 'phone_number' => $data['phone_number'],
                 'email'        => $data['email'],
                 'password'     => Hash::make($data['password']),
                 'address'      => $data['address'],
-            ]);
+                'country_id'   => $data['country_id'] ?? null,
+                'city_id'      => $data['city_id'] ?? null,
+            ],
+        ]);
 
-            UserAddress::create([
-                'address_title' => __('flash.main_address_label'),
-                'first_name'    => $user->first_name,
-                'family_name'   => $user->family_name,
-                'phone_number'  => $user->phone_number,
-                'user_id'       => $user->id,
-                'address'       => $data['address'],
-                'country_id'    => $data['country_id'] ?? Country::first()?->id,
-                'city_id'       => $data['city_id'] ?? null,
-                'main_address'  => true,
-            ]);
-
-            return $user;
-        });
-
-        // Fire event — queued listener will generate OTP and email it
-        event(new UserRegistered($user));
-
-        session(['user_id' => $user->id]);
+        $this->sendRegistrationOtp($data['email'], $data['first_name']);
 
         return redirect()->route('auth.verify.view');
     }
@@ -151,34 +139,50 @@ class UserAuthController extends Controller
     {
         $request->validate(['code' => 'required|digits:4']);
 
-        $userId = session('user_id');
+        $pending = session('pending_registration');
 
-        if (! $userId) {
+        if (! $pending) {
             return back()->with('error', __('flash.session_expired'));
         }
 
-        $user = User::find($userId);
+        $otpData = session('pending_otp');
 
-        if (! $user) {
-            return back()->with('error', __('flash.session_expired'));
-        }
-
-        $record = User_verfication::where('user_id', $userId)
-            ->where('is_reset_password', false)
-            ->first();
-
-        if (! $record || $record->code !== $request->code) {
+        if (! $otpData || $otpData['code'] !== $request->code) {
             return back()->with('error', __('flash.invalid_code'));
         }
 
-        if ($record->verification_code_expires_at && now()->isAfter($record->verification_code_expires_at)) {
+        if (now()->isAfter($otpData['expires_at'])) {
             return back()->with('error', __('flash.code_expired'));
         }
 
-        $record->update(['is_verified' => true]);
-        $user->update(['email_verified_at' => now()]);
+        // OTP valid — now create the user and address
+        $user = DB::transaction(function () use ($pending) {
+            $user = User::create([
+                'first_name'        => $pending['first_name'],
+                'family_name'       => $pending['family_name'],
+                'phone_number'      => $pending['phone_number'],
+                'email'             => $pending['email'],
+                'password'          => $pending['password'],
+                'address'           => $pending['address'],
+                'email_verified_at' => now(),
+            ]);
 
-        session()->forget('user_id');
+            UserAddress::create([
+                'address_title' => __('flash.main_address_label'),
+                'first_name'    => $user->first_name,
+                'family_name'   => $user->family_name,
+                'phone_number'  => $user->phone_number,
+                'user_id'       => $user->id,
+                'address'       => $pending['address'],
+                'country_id'    => $pending['country_id'] ?? Country::first()?->id,
+                'city_id'       => $pending['city_id'] ?? null,
+                'main_address'  => true,
+            ]);
+
+            return $user;
+        });
+
+        session()->forget(['pending_registration', 'pending_otp']);
 
         Auth::guard('web')->login($user);
 
@@ -193,19 +197,13 @@ class UserAuthController extends Controller
 
     public function resendVerificationCode(Request $request)
     {
-        $userId = session('user_id');
+        $pending = session('pending_registration');
 
-        if (! $userId) {
+        if (! $pending) {
             return back()->with('error', __('flash.session_expired'));
         }
 
-        $user = User::find($userId);
-
-        if (! $user) {
-            return back()->with('error', __('flash.session_expired'));
-        }
-
-        event(new UserRegistered($user));
+        $this->sendRegistrationOtp($pending['email'], $pending['first_name']);
 
         return back()->with('success', __('flash.otp_sent'));
     }
@@ -268,6 +266,21 @@ class UserAuthController extends Controller
         session()->forget('user_id');
 
         return redirect()->route('login')->with('success', __('flash.password_updated'));
+    }
+
+    private function sendRegistrationOtp(string $email, string $name): void
+    {
+        $code = str_pad((string) mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+
+        session([
+            'pending_otp' => [
+                'code'       => $code,
+                'expires_at' => now()->addMinutes(10),
+            ],
+        ]);
+
+        Notification::route('mail', $email)
+            ->notify(new EmailVerificationCodeNotification($code, $name));
     }
 }
 

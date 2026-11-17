@@ -10,7 +10,7 @@ class EmailVerificationCodeNotification extends Notification
 {
     use Queueable;
 
-    public function __construct(public string $code)
+    public function __construct(public string $code, public string $name = '')
     {
     }
 
@@ -25,7 +25,7 @@ class EmailVerificationCodeNotification extends Notification
             ->subject('🔐 رمز التحقق — ' . config('app.name'))
             ->view('emails.email_verification_code', [
                 'code' => $this->code,
-                'name' => $notifiable->first_name ?? '',
+                'name' => $this->name ?: ($notifiable->first_name ?? ''),
             ]);
     }
 
