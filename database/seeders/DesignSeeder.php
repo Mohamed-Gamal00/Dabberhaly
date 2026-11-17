@@ -69,6 +69,12 @@ class DesignSeeder extends Seeder
                 'page_name'   => 'home',
                 'description' => 'العرض المميز الخامس في الصفحة الرئيسية',
             ],
+            // Home page — new products banner
+            [
+                'title'       => 'new_products_banner',
+                'page_name'   => 'home',
+                'description' => 'بانر المنتجات الجديدة في الصفحة الرئيسية',
+            ],
             // Offers page banners
             [
                 'title'       => 'بانر صفحة العروض',
