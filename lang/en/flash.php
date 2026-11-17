@@ -5,6 +5,9 @@ return [
     'session_expired'      => 'Session expired, please try again.',
     'account_activated'    => 'Your account has been activated successfully.',
     'invalid_code'         => 'Invalid verification code.',
+    'code_expired'         => 'The code has expired, please request a new one.',
+    'email_not_found'      => 'No account found with that email address.',
+    'too_many_attempts'    => 'Too many attempts. Please wait :minutes minute(s) before trying again.',
     'otp_sent'             => 'Verification code sent to reset your password.',
     'password_updated'     => 'Password updated successfully.',
     'password_changed'     => 'Password changed successfully.',
@@ -13,7 +16,7 @@ return [
     'address_updated'      => 'Address updated successfully.',
     'address_deleted'      => 'Address deleted.',
     'main_address_updated' => 'Main address updated successfully.',
-    
+
     // API Response Messages
     'discount_already_used' => 'You have already used this discount code.',
     'discount_cart_empty' => 'Cannot use discount code with empty cart.',

@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Inertia;
 
 class UserAuthController extends Controller
@@ -216,9 +217,18 @@ class UserAuthController extends Controller
             ['email.exists' => __('flash.email_not_found')]
         );
 
+        $key = 'forgot-password:' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($key, 3)) {
+            $seconds = RateLimiter::availableIn($key);
+            $minutes = ceil($seconds / 60);
+            return back()->with('error', __('flash.too_many_attempts', ['minutes' => $minutes]));
+        }
+
+        RateLimiter::hit($key, 600); // 10-minute decay window
+
         $user = User::where('email', $request->email)->first();
 
-        // Fire event — queued listener will generate OTP and email it
         event(new UserForgotPassword($user));
 
         session(['user_id' => $user->id]);

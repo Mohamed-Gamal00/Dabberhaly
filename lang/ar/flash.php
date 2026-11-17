@@ -5,6 +5,9 @@ return [
     'session_expired'      => 'انتهت الجلسة، حاول مرة أخرى.',
     'account_activated'    => 'تم تفعيل حسابك بنجاح.',
     'invalid_code'         => 'الرمز غير صالح.',
+    'code_expired'         => 'انتهت صلاحية الرمز، اطلب رمزاً جديداً.',
+    'email_not_found'      => 'البريد الإلكتروني غير مسجل.',
+    'too_many_attempts'    => 'لقد تجاوزت الحد المسموح به. يرجى الانتظار :minutes دقيقة قبل المحاولة مجدداً.',
     'otp_sent'             => 'تم إرسال كود التحقق لإعادة تعيين كلمة المرور.',
     'password_updated'     => 'تم تحديث كلمة المرور بنجاح.',
     'password_changed'     => 'تم تغيير كلمة المرور بنجاح.',
@@ -13,7 +16,7 @@ return [
     'address_updated'      => 'تم تحديث العنوان بنجاح.',
     'address_deleted'      => 'تم حذف العنوان.',
     'main_address_updated' => 'تم تحديث العنوان الرئيسي بنجاح.',
-    
+
     // API Response Messages
     'discount_already_used' => 'لقد استخدمت هذا الكود بالفعل.',
     'discount_cart_empty' => 'لا يمكن استخدام كود الخصم والسلة فارغة.',

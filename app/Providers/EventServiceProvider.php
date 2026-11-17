@@ -2,12 +2,7 @@
 
 namespace App\Providers;
 
-use App\Events\UserForgotPassword;
-use App\Events\UserRegistered;
-use App\Listeners\SendEmailVerificationCode;
-use App\Listeners\SendPasswordResetCode;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -17,12 +12,6 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
-        UserRegistered::class => [
-            SendEmailVerificationCode::class,
-        ],
-        UserForgotPassword::class => [
-            SendPasswordResetCode::class,
-        ],
     ];
 
     /**
