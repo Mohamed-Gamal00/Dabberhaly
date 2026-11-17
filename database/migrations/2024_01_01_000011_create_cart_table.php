@@ -9,8 +9,8 @@ return new class extends Migration {
     {
         if (!Schema::hasTable('carts')) {
             Schema::create('carts', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('cookie_id');
+                $table->ulid('id')->primary();
+                $table->uuid('cookie_id')->index();
                 $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
                 $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
                 $table->foreignId('guest_id')->nullable()->constrained('guests')->nullOnDelete();

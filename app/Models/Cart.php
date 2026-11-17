@@ -11,11 +11,11 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\Guest as GuestModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 
 class Cart extends Model
 {
-    use HasFactory;
-
+    use HasFactory , HasUlids;
     /** Cookie name used to identify guest carts. */
     public const COOKIE_NAME = 'cart_id';
 
@@ -58,7 +58,7 @@ class Cart extends Model
         });
 
         static::creating(function (Cart $cart) {
-            $cart->id = Str::uuid()->toString();
+            // $cart->id = Str::uuid()->toString();
 
             // Assign user_id automatically for authenticated web users
             if (!$cart->user_id && Auth::guard('web')->check()) {
