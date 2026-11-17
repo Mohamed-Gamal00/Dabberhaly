@@ -99,11 +99,12 @@ class CheckoutServices
     {
         $totalPrice          = $this->calculateTotal($user);
         $totalBeforeDiscount = $this->calculateTotalBeforeDiscount($user);
+        $cookieId = Cart::getCookieId();
 
         // For guest checkout: create or update a Guest record
         $guestId = null;
+
         if (!$user) {
-            $cookieId = Cart::getCookieId();
             $addr     = $request->addr['billing'] ?? [];
             $guest    = Guest::updateOrCreate(
                 ['cookie_id' => $cookieId],
@@ -128,7 +129,7 @@ class CheckoutServices
             'shipping_price'      => $shippingPrice,
             'totalBeforeDiscount' => $totalBeforeDiscount,
             'total_price'         => $totalPrice + $shippingPrice,
-            'cookie_id'           => $user ? null : Cart::getCookieId(),
+            'cookie_id'           => $user ? null : $cookieId,
         ]);
     }
 
