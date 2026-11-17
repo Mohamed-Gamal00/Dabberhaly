@@ -15,7 +15,7 @@ class Design extends Model
     public function getImageUrlAttribute()
     {
         if (!$this->image) {
-            return asset('assets/images/category.jpg');
+            return asset('assets/images/category.png');
         }
         return asset('storage/' . $this->image);
     }
