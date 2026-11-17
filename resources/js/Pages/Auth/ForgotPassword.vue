@@ -28,19 +28,20 @@
                 </v-alert>
 
                 <v-form @submit.prevent="submit">
-                    <label class="field-label">{{ t('forgot_phone') }}</label>
+                    <label class="field-label">{{ t('forgot_email') }}</label>
                     <v-text-field
-                        v-model="form.phone_number"
-                        placeholder="05xxxxxxxx"
+                        v-model="form.email"
+                        placeholder="example@email.com"
+                        type="email"
                         variant="outlined"
                         density="comfortable"
                         hide-details="auto"
                         class="mb-5 mt-1"
-                        prepend-inner-icon="mdi-phone-outline"
+                        prepend-inner-icon="mdi-email-outline"
                         dir="ltr"
                         rounded="lg"
                         bg-color="grey-lighten-5"
-                        :error-messages="form.errors.phone_number"
+                        :error-messages="form.errors.email"
                     />
 
                     <v-btn
@@ -70,18 +71,25 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { computed, watch } from 'vue';
+import { useForm, usePage, router } from '@inertiajs/vue3';
 import { useLocale } from '../../composables/useLocale';
 
 defineOptions({ layout: null });
 
 const siteName = computed(() => usePage().props.seo?.site_name || 'متجري');
 const { t } = useLocale();
-const form = useForm({ phone_number: '' });
+const form = useForm({ email: '' });
 const page = usePage();
 const success = computed(() => page.props.flash?.success);
 const error   = computed(() => page.props.flash?.error);
+
+// Redirect to reset-password page once OTP is sent successfully
+watch(success, (val) => {
+    if (val) {
+        setTimeout(() => router.visit('/reset-password'), 1500);
+    }
+});
 
 const submit = () => form.post('/forgot-password');
 </script>

@@ -20,12 +20,14 @@ use Inertia\Inertia;
 
     Route::get('/login', [UserAuthController::class, 'loginView'])->name('login');
     Route::get('/register', [UserAuthController::class, 'registerView'])->name('register');
+    Route::get('/verify-email', [UserAuthController::class, 'verifyView'])->name('auth.verify.view');
     Route::get('/forgot-password', [UserAuthController::class, 'forgotPasswordView'])->name('forgot');
     Route::get('/reset-password', [UserAuthController::class, 'resetPasswordView'])->name('reset');
 
     Route::post('/login', [UserAuthController::class, 'login'])->name('auth.login');
     Route::post('/register', [UserAuthController::class, 'register'])->name('auth.register');
     Route::post('/verify', [UserAuthController::class, 'verifyCode'])->name('auth.verify');
+    Route::post('/verify-resend', [UserAuthController::class, 'resendVerificationCode'])->name('auth.verify.resend');
     Route::post('/forgot-password', [UserAuthController::class, 'forgotPassword'])->name('auth.forgot');
     Route::post('/update-password', [UserAuthController::class, 'passwordUpdate'])->name('auth.update');
     Route::post('/logout', [UserAuthController::class, 'logout'])->name('auth.logout');

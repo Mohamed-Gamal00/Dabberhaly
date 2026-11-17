@@ -28,6 +28,22 @@
                 </v-alert>
 
                 <v-form @submit.prevent="submit">
+                    <label class="field-label">{{ t('reset_code') }}</label>
+                    <v-text-field
+                        v-model="form.code"
+                        :placeholder="t('reset_code_placeholder')"
+                        variant="outlined"
+                        density="comfortable"
+                        hide-details="auto"
+                        class="mb-4 mt-1"
+                        prepend-inner-icon="mdi-shield-key-outline"
+                        dir="ltr"
+                        rounded="lg"
+                        bg-color="grey-lighten-5"
+                        :error-messages="form.errors.code"
+                        maxlength="4"
+                    />
+
                     <label class="field-label">{{ t('reset_new_password') }}</label>
                     <v-text-field
                         v-model="form.password"
@@ -91,7 +107,7 @@ defineOptions({ layout: null });
 
 const { t } = useLocale();
 const siteName = computed(() => usePage().props.seo?.site_name || 'متجري');
-const form  = useForm({ password: '', password_confirmation: '' });
+const form  = useForm({ code: '', password: '', password_confirmation: '' });
 const showPass  = ref(false);
 const showPass2 = ref(false);
 const page = usePage();
