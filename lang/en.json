@@ -231,6 +231,15 @@
   "register_step3": "Receive your order safely",
   "register_tagline": "Join thousands of customers and enjoy a shopping experience like no other.",
 
+  "verify_title": "Verify Your Email",
+  "verify_subtitle": "Enter the 4-digit code we sent to your email address",
+  "verify_tagline": "Verify your identity to activate your account and start shopping.",
+  "verify_code_label": "Verification Code",
+  "verify_code_placeholder": "Enter the 4-digit code",
+  "verify_btn": "Activate Account",
+  "verify_resend": "Didn't receive the code?",
+  "verify_resend_btn": "Resend",
+
   "forgot_title": "Forgot Password?",
   "forgot_subtitle": "Enter your email address to recover your account",
   "forgot_tagline": "Enter your email and we'll send you a verification code to reset your password.",

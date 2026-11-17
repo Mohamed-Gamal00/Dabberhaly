@@ -115,7 +115,7 @@ const filteredCities = computed(() =>
 
 const submit = () => {
     loading.value = true;
-    form.post('/register', { preserveState: true, onFinish: () => (loading.value = false) });
+    form.post('/register', { onFinish: () => (loading.value = false) });
 };
 </script>
 
