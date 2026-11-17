@@ -43,6 +43,32 @@ class DesignSeeder extends Seeder
                 'page_name'   => 'home',
                 'description' => 'بانر التلفزيون في الصفحة الرئيسية',
             ],
+            // Home page — top offers
+            [
+                'title'       => 'top_offer_1',
+                'page_name'   => 'home',
+                'description' => 'العرض المميز الأول في الصفحة الرئيسية',
+            ],
+            [
+                'title'       => 'top_offer_2',
+                'page_name'   => 'home',
+                'description' => 'العرض المميز الثاني في الصفحة الرئيسية',
+            ],
+            [
+                'title'       => 'top_offer_3',
+                'page_name'   => 'home',
+                'description' => 'العرض المميز الثالث في الصفحة الرئيسية',
+            ],
+            [
+                'title'       => 'top_offer_4',
+                'page_name'   => 'home',
+                'description' => 'العرض المميز الرابع في الصفحة الرئيسية',
+            ],
+            [
+                'title'       => 'top_offer_5',
+                'page_name'   => 'home',
+                'description' => 'العرض المميز الخامس في الصفحة الرئيسية',
+            ],
             // Offers page banners
             [
                 'title'       => 'بانر صفحة العروض',
