@@ -8,6 +8,7 @@ use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\Cart;
+use App\Models\Guest;
 use App\Models\City;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -137,8 +138,10 @@ class CheckoutController extends Controller
         DB::beginTransaction();
         try {
 
+            $guest = Guest::where('cookie_id', $guestId)->first();
+
             $order = Order::create([
-                'guest_id' => $guestId,
+                'guest_id' => $guest?->id,
                 'payment_method' => $request->payment_method, // cash on deleviry
                 'status' => OrderStatus::Pending,
                 'note' => $request->note,

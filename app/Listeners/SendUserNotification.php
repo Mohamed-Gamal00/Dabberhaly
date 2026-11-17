@@ -24,11 +24,11 @@ class SendUserNotification implements ShouldQueueAfterCommit
     {
         $order = $event->order;
 
-        $email = $order->user?->email
-            ?? $order->guest?->email
-            ?? $order->addresses()->first()?->email;
+        $email = $order->user_id
+            ? ($order->user->email ?? null)
+            : ($order->guest?->email ?? $order->addresses()->first()?->email);
 
-        throw new Exception('zeeeeeeeeeeeeeeeeeeeeeew');
+        // throw new Exception('zeeeeeeeeeeeeeeeeeeeeeew');
 
         if (! $email || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             Log::info(
@@ -42,7 +42,7 @@ class SendUserNotification implements ShouldQueueAfterCommit
         try {
             $notification = new OrderCreatedCustomerNotification($order);
 
-            if ($order->user) {
+            if ($order->user_id) {
                 $order->user->notify($notification);
             } else {
                 Notification::route('mail', $email)
