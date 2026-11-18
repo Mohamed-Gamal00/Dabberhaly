@@ -225,13 +225,18 @@ class CheckoutServices
         if ($request->has('user_address') && $request->user_address !== 'add_address') {
             $UserAddress = $user ? $user->addresses()->find($request->user_address) : null;
             if ($UserAddress) {
+                // العنوان المحفوظ نفسه ممكن تكون مدينته/دولته null (مثلاً
+                // عنوان اتسجل من الموبايل قبل ما يتظبط اشتقاق الدولة من
+                // المدينة) — وقتها نكمّل الناقص من العنوان الرئيسي للعميل،
+                // لأنه مصدر بيانات المدينة/الدولة بتاعة العميل.
+                $fallback = $this->mainAddressLocation($user);
                 $order->addresses()->create([
                     'type'         => 'shipping',
                     'first_name'   => $UserAddress->first_name,
                     'last_name'    => $UserAddress->family_name,
                     'phone_number' => $UserAddress->phone_number,
-                    'country_id'   => $UserAddress->country_id,
-                    'city_id'      => $UserAddress->city_id,
+                    'country_id'   => $UserAddress->country_id ?? $fallback['country_id'] ?? null,
+                    'city_id'      => $UserAddress->city_id ?? $fallback['city_id'] ?? null,
                     'address'      => $UserAddress->address,
                     'email'        => $user?->email,
                 ]);
@@ -283,7 +288,57 @@ class CheckoutServices
                 'address'      => $addr['address'] ?? null,
                 'email'        => $request->guest_email,
             ]);
+            return;
         }
+
+        // الحالة الرابعة: يوزر مسجل من الموبايل بيضيف عنوان جديد بحقول
+        // مسطّحة (first_name/country_id/city_id/address) مش جوّه addr.shipping
+        // زي الويب — من غيرها الطلب كان بيتعمل من غير أي صف في
+        // order_addresses أصلاً.
+        if ($user && $request->filled('first_name') && $request->has('country_id')) {
+            $fallback = $this->mainAddressLocation($user);
+            $order->addresses()->create([
+                'type'         => 'shipping',
+                'first_name'   => $request->first_name,
+                'last_name'    => $request->last_name,
+                'phone_number' => $request->phone_number,
+                'country_id'   => $request->country_id ?? $fallback['country_id'] ?? null,
+                'city_id'      => $request->city_id ?? $fallback['city_id'] ?? null,
+                'address'      => $request->address,
+                'email'        => $user->email,
+            ]);
+
+            // حفظ العنوان في قائمة عناوين اليوزر للاستخدام مستقبلاً
+            UserAddress::create([
+                'user_id'       => $user->id,
+                'address_title' => 'عنوان جديد',
+                'first_name'    => $request->first_name,
+                'family_name'   => $request->last_name,
+                'phone_number'  => $request->phone_number,
+                'country_id'    => $request->country_id ?? $fallback['country_id'] ?? null,
+                'city_id'       => $request->city_id ?? $fallback['city_id'] ?? null,
+                'address'       => $request->address,
+                'main_address'  => false,
+            ]);
+        }
+    }
+
+    /**
+     * مدينة/دولة العنوان الرئيسي للعميل — مصدر بيانات موقعه لما يكون
+     * العنوان المستخدم في الطلب ناقصهم.
+     */
+    protected function mainAddressLocation($user): array
+    {
+        if (! $user) {
+            return [];
+        }
+
+        $main = $user->addresses()->where('main_address', true)->first();
+
+        return [
+            'country_id' => $main?->country_id,
+            'city_id' => $main?->city_id,
+        ];
     }
 
     public function getCartItems($user)
