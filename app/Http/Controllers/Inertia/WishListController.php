@@ -5,20 +5,9 @@ namespace App\Http\Controllers\Inertia;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 
 class WishListController extends Controller
 {
-    public function index()
-    {
-        $user = Auth::user();
-        $wishlistProducts = $user->wishlistProducts()->get();
-
-        return Inertia::render('Wishlist/Index', [
-            'wishlistProducts' => $wishlistProducts,
-        ]);
-    }
-
     public function add(Product $product)
     {
         $user = Auth::user();

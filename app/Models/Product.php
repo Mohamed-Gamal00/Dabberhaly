@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helper\SlugHelper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,8 +38,10 @@ class Product extends Model
     protected static function booted()
     {
         static::creating(function ($product) {
-            $slug = str_replace(' ', '-', $product->name);
-            $product->slug = $slug;
+            $product->slug = SlugHelper::unique(
+                'products',
+                str_replace(' ', '-', $product->name)
+            );
         });
     }
 

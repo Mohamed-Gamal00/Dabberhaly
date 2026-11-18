@@ -19,11 +19,14 @@
     </coverage>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:mR0dHx9f7394riv6Dh8J99kUkw1W4YydpYLGOJ2HeFc="/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
+        <env name="DB_CONNECTION" value="mysql"/>
         <env name="DB_DATABASE" value="ecommerce_testing"/>
-        <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
-        <!-- <env name="DB_DATABASE" value=":memory:"/> -->
+        <!-- DB_USERNAME / DB_PASSWORD are intentionally NOT set here:
+             they come from .env so the local database password is never
+             committed to the repository. -->
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

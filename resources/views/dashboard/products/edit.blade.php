@@ -9,6 +9,7 @@
 @endsection
 
 @section('section')
+    @include('dashboard.partials.category-options')
 
 @if ($errors->any())
 <div class="alert alert-danger alert-dismissible fade show mb-4">
@@ -271,22 +272,9 @@
             <div class="card-body d-flex flex-column gap-3">
                 <div>
                     <label class="form-label fw-semibold">القسم <span class="text-danger">*</span></label>
-                    @php
-                        function getSubCategoriesEdit($subCategories, $prefix = '', $selectedId = null) {
-                            $html = '';
-                            foreach ($subCategories as $category) {
-                                $sel = $selectedId == $category->id ? 'selected' : '';
-                                $html .= '<option value="' . $category->id . '" ' . $sel . '>' . e($prefix . $category->name) . '</option>';
-                                if ($category->children->isNotEmpty()) {
-                                    $html .= getSubCategoriesEdit($category->children, $prefix . $category->name . ' / ', $selectedId);
-                                }
-                            }
-                            return $html;
-                        }
-                    @endphp
                     <select name="parent_id" id="category" class="form-select @error('parent_id') is-invalid @enderror">
                         <option value="">اختر القسم</option>
-                        {!! getSubCategoriesEdit($subCategories, '', $product->category_id) !!}
+                        {!! getSubCategories($subCategories, '', $product->category_id) !!}
                     </select>
                     @error('parent_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>

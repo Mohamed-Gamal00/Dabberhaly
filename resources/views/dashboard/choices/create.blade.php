@@ -10,6 +10,7 @@
 
 
 @section('section')
+    @include('dashboard.partials.category-options')
     <div class="col-lg-12">
         <div class="card">
             <div class="card-body">
@@ -84,34 +85,6 @@
                                             </div>
 
                                             <div class="row mb-3">
-                                                @php
-                                                    function buildCategoryOptions(
-                                                        $categories,
-                                                        $parent_id = null,
-                                                        $path = '',
-                                                    ) {
-                                                        $options = '';
-                                                        foreach ($categories as $category) {
-                                                            if ($category->parent_id == $parent_id) {
-                                                                $fullPath = $path
-                                                                    ? $path . ' / ' . $category->name
-                                                                    : $category->name;
-                                                                $options .=
-                                                                    '<option value="' .
-                                                                    $category->id .
-                                                                    '">' .
-                                                                    e($fullPath) .
-                                                                    '</option>';
-                                                                $options .= buildCategoryOptions(
-                                                                    $categories,
-                                                                    $category->id,
-                                                                    $fullPath,
-                                                                );
-                                                            }
-                                                        }
-                                                        return $options;
-                                                    }
-                                                @endphp
 
                                                 <div class="row mb-3">
                                                     <div class="form-group">

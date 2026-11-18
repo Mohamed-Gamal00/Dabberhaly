@@ -123,7 +123,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
 
     //----------------------------------------------/Clients routes
     Route::put('/clients/{id}/update_pass', [ClientsController::class, 'updatePassword'])->name('client.update_password');
-    Route::resource('/clients', ClientsController::class);
+    Route::resource('/clients', ClientsController::class)->except(['create', 'store', 'show']);
 
     //----------------------------------------------/Admins Rules routes
     Route::resource('/rules', RulesController::class);

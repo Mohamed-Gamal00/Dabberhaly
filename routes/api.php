@@ -165,7 +165,7 @@ Route::middleware(['changeLanguage'])->group(function () {
     Route::post('contact-us', [ContactUsController::class, 'sendMessage']);
 
     ########################################################################### Create New Guest
-    Route::post('create-guest', [GuestController::class, 'createGuest']);
+    Route::post('create-guest', [GuestController::class, 'createGuest'])->middleware('throttle:10,1');
 
     ########################################################################### Favorite Products
 

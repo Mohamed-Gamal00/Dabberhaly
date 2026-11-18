@@ -16,6 +16,7 @@
     $activeTab = $category->parent_id ? 'sub' : 'main';
 @endphp
 @section('section')
+    @include('dashboard.partials.category-options')
 
     <ul class="nav nav-tabs nav-tabs-custom nav-justified" role="tablist">
         <li class="nav-item">
@@ -197,21 +198,6 @@
 
 @endsection
 
-@php
-    function buildCategoryOptions($categories, $parent_id = null, $path = '', $selectedId = null)
-    {
-        $options = '';
-        foreach ($categories as $category) {
-            if ($category->parent_id == $parent_id) {
-                $fullPath = $path ? $path . ' / ' . $category->name : $category->name;
-                $selected = $selectedId == $category->id ? 'selected' : '';
-                $options .= '<option value="' . $category->id . '" ' . $selected . '>' . e($fullPath) . '</option>';
-                $options .= buildCategoryOptions($categories, $category->id, $fullPath, $selectedId);
-            }
-        }
-        return $options;
-    }
-@endphp
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

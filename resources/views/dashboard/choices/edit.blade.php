@@ -11,6 +11,7 @@
     $activeTab = $choice->parent_id ? 'sub' : 'main';
 @endphp
 @section('section')
+    @include('dashboard.partials.category-options')
 
     <ul class="nav nav-tabs nav-tabs-custom nav-justified" role="tablist">
         <li class="nav-item">
@@ -95,7 +96,7 @@
                                                 <select name='parent_id' class="form-select"
                                                     aria-label="Default select example">
                                                     <option selected>Open this select menu</option>
-                                                    {!! buildchoiceOptions($mainChoices, null, '', $choice->parent_id) !!}
+                                                    {!! buildCategoryOptions($mainChoices, null, '', $choice->parent_id) !!}
                                                 </select>
                                             </div>
                                         </div>
@@ -114,18 +115,3 @@
 
 @endsection
 
-@php
-    function buildchoiceOptions($categories, $parent_id = null, $path = '', $selectedId = null)
-    {
-        $options = '';
-        foreach ($categories as $choice) {
-            if ($choice->parent_id == $parent_id) {
-                $fullPath = $path ? $path . ' / ' . $choice->name : $choice->name;
-                $selected = $selectedId == $choice->id ? 'selected' : '';
-                $options .= '<option value="' . $choice->id . '" ' . $selected . '>' . e($fullPath) . '</option>';
-                $options .= buildchoiceOptions($categories, $choice->id, $fullPath, $selectedId);
-            }
-        }
-        return $options;
-    }
-@endphp

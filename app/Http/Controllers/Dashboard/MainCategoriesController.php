@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Helper\Helper;
+use App\Helper\SlugHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MainCategoryRequest;
 use App\Models\Choice;
@@ -57,7 +58,7 @@ class MainCategoriesController extends Controller
     // dd($data);
     // Common fields
     $data['image'] = $this->uploadedImage($request, 'image', 'main_categories');
-    $data['slug'] = str_replace(' ', '-', $request->name);
+    $data['slug'] = SlugHelper::unique('main_categories', str_replace(' ', '-', $request->name));
 
     if ($request->input('type') == 'sub') {
       $validated = $request->validate([
@@ -116,7 +117,7 @@ class MainCategoriesController extends Controller
     if ($request->hasFile('image')) {
       $data['image'] = $this->uploadedImage($request, 'image', 'main_categories');
     }
-    $data['slug'] = str_replace(' ', '-', $request->name);
+    $data['slug'] = SlugHelper::unique('main_categories', str_replace(' ', '-', $request->name), (int) $id);
 
     if ($request->input('type') == 'sub') {
       $validated = $request->validate([

@@ -33,6 +33,14 @@ class SettingsController extends Controller
         $data     = $request->validated();
         $settings = $this->settingRepo->getById($id);
 
+        // Secrets are never pre-filled in the form: a blank value means
+        // "keep the stored one", so it must not overwrite it.
+        foreach (['secret_key', 'sms_api_key'] as $secretField) {
+            if (empty($data[$secretField])) {
+                unset($data[$secretField]);
+            }
+        }
+
         // Favicon
         $newImage = $this->uploadedImage(request(), 'image', 'website_image');
         if ($newImage) {

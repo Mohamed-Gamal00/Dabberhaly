@@ -7,7 +7,6 @@ use App\Http\Requests\Dashboard\Client\ClientRequest;
 use App\Http\Requests\Dashboard\Client\ClientUpdatePasswordRequest;
 use App\Models\User;
 use App\Repositories\Client\ClientRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 
@@ -30,30 +29,6 @@ class ClientsController extends Controller
     // dd($clients);
 
     return view('dashboard.clients.index', compact('clients'));
-  }
-
-  /**
-   * Show the form for creating a new resource.
-   */
-  public function create()
-  {
-    //
-  }
-
-  /**
-   * Store a newly created resource in storage.
-   */
-  public function store(Request $request)
-  {
-    //
-  }
-
-  /**
-   * Display the specified resource.
-   */
-  public function show(string $id)
-  {
-    //
   }
 
   /**
