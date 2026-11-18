@@ -100,10 +100,6 @@
         </div>
     </div>
     <div class="footer">
-        @if(!empty($unsubscribeUrl))
-            لا ترغب في استلام نشرتنا بعد الآن؟
-            <a href="{{ $unsubscribeUrl }}">ألغِ اشتراكك من هنا</a><br>
-        @endif
         &copy; {{ date('Y') }} {{ config('app.name', 'Dabberhaly') }} — جميع الحقوق محفوظة<br>
         <a href="{{ url('/') }}">{{ url('/') }}</a>
     </div>

@@ -7,7 +7,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
 use Throwable;
 
 /**
@@ -28,7 +27,6 @@ class NewsletterNotification extends Notification implements ShouldQueue
 
     public string $title;
     public string $body;
-    public ?int $subscriberId = null;
     public ?string $subscriberEmail = null;
 
     /** How many times the job may be attempted in total (1 + 4 retries). */
@@ -42,9 +40,8 @@ class NewsletterNotification extends Notification implements ShouldQueue
         $this->title = $title;
         $this->body  = $body;
 
-        // Store scalars only: the whole Eloquent model must not be
+        // Store a scalar only: the whole Eloquent model must not be
         // serialized into the queue payload.
-        $this->subscriberId    = $user?->id ?? null;
         $this->subscriberEmail = $user?->subscription_email ?? $user?->email ?? null;
     }
 
@@ -72,19 +69,6 @@ class NewsletterNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $unsubscribeUrl = null;
-
-        if ($this->subscriberId) {
-            try {
-                $unsubscribeUrl = URL::signedRoute('newsletter.unsubscribe', [
-                    'subscriber' => $this->subscriberId,
-                ]);
-            } catch (Throwable $e) {
-                // A missing route must never break sending the newsletter.
-                Log::warning('Newsletter unsubscribe URL could not be generated: ' . $e->getMessage());
-            }
-        }
-
         return (new MailMessage)
             ->subject($this->title)
             ->view('emails.newsletter', [
@@ -94,7 +78,6 @@ class NewsletterNotification extends Notification implements ShouldQueue
                     ?? $notifiable->subscription_email
                     ?? $notifiable->email
                     ?? null,
-                'unsubscribeUrl' => $unsubscribeUrl,
             ]);
     }
 
