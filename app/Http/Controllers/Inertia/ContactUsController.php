@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Inertia;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\ContactUs;
+use App\Models\Setting;
 use App\Notifications\ContactMessageAdminNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -14,7 +15,15 @@ class ContactUsController extends Controller
 {
     public function index()
     {
-        return Inertia::render('ContactUs/Index');
+        $setting = Setting::first();
+
+        return Inertia::render('ContactUs/Index', [
+            'contact' => [
+                'phone' => $setting?->phone_number ?? $setting?->phone,
+                'email' => $setting?->email,
+                'address' => $setting?->address,
+            ],
+        ]);
     }
 
     public function store(Request $request)
