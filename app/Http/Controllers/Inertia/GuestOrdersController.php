@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inertia;
 
 use App\Enums\OrderStatus;
+use App\Events\OrderReturned;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Guest;
@@ -44,7 +45,7 @@ class GuestOrdersController extends Controller
         }
 
 
-        return to_route('guest.main.orders')->with('danger', 'تم مسح الطلب ');
+        return back()->with('danger', 'تم مسح الطلب ');
     }
 
     /* مرتجعات */
@@ -62,13 +63,32 @@ class GuestOrdersController extends Controller
     public function store(Request $request)
     {
         if ($request->return_order_id) {
-            Order::where('id', $request->return_order_id)->update([
-                'return_order' => true,
-                'status'       => OrderStatus::Pending,
-            ]);
+            // The order must belong to this guest's cart cookie.
+            $order = Order::where('id', $request->return_order_id)
+                ->where('cookie_id', Cart::getCookieId())
+                ->firstOrFail();
+
+            // Already returned (e.g. double click): succeed quietly, no second alert.
+            if (! $order->return_order) {
+                // Only a pending order can be returned — once it moves on,
+                // it is already being prepared.
+                if (! $order->canBeReturned()) {
+                    return back()->with('danger', __('flash.return_not_allowed'));
+                }
+
+                $order->update([
+                    'return_order' => true,
+                    'status'       => OrderStatus::Pending,
+                ]);
+
+                event(new OrderReturned($order));
+            }
         }
 
-        return to_route('guest.main.orders')->with('success', 'تم اضافة المنتج لقائمة الارجاع');
+        // NOTE: this controller currently has no web route and its old
+        // redirect target (guest.main.orders) does not exist, so redirect
+        // back instead of to a route name that would 404.
+        return back()->with('success', 'تم اضافة المنتج لقائمة الارجاع');
     }
 
     /* الطلبات */

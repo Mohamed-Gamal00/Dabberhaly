@@ -62,7 +62,7 @@
             </a>
             <ul class="sub-menu" aria-expanded="false">
                 <li><a href="{{ route('orders.index') }}">جميع الطلبات</a></li>
-                <li><a href="{{ route('return_orders.index') }}">المرتجعات</a></li>
+                <li><a href="{{ route('return_orders.index') }}">المرتجعات @if($unreadOrderReturnCount > 0)<span class="badge rounded-pill bg-danger">{{ $unreadOrderReturnCount }}</span>@endif</a></li>
                 <li><a href="{{ route('bulk_orders.index') }}">طلبات الجملة</a></li>
                 <li><a href="{{ route('representatives_orders.index') }}">طلبات المناديب</a></li>
             </ul>

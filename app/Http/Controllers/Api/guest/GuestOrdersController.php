@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\guest;
 
 use App\Enums\OrderStatus;
+use App\Events\OrderReturned;
 use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
@@ -146,16 +147,32 @@ class GuestOrdersController extends Controller
 
         // If return_order_id is provided, update the order to mark it as a return order
         if ($request->return_order_id) {
-            $order = Order::where('id', $request->return_order_id)->first();
+            // The order must belong to the guest identified by the guest-id header.
+            $order = Order::where('id', $request->return_order_id)
+                ->where('guest_id', $request->header('guest-id'))
+                ->first();
 
             if (!$order) {
                 return response()->json(['status_code' => 404, 'message' => 'Order not found'], 404);
+            }
+
+            // Already returned: succeed quietly, no second admin alert.
+            if ($order->return_order) {
+                return response()->json(['status_code' => 200, 'message' => 'تم ارجاع الطلب بنجاح']);
+            }
+
+            // Only a pending order can be returned — once it moves on, it
+            // is already being prepared.
+            if (! $order->canBeReturned()) {
+                return response()->json(['status_code' => 422, 'message' => 'لا يمكن إرجاع هذا الطلب'], 422);
             }
 
             $order->update([
                 'return_order' => true,
                 'status'       => OrderStatus::Pending,
             ]);
+
+            event(new OrderReturned($order));
         }
         return response()->json(['status_code' => 200, 'message' => 'تم ارجاع الطلب بنجاح']);
 

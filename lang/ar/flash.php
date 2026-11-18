@@ -40,6 +40,7 @@ return [
     'newsletter_already_subscribed' => 'أنت مشترك بالفعل في النشرة البريدية.',
     'newsletter_subscribed_success' => '✓ تم الاشتراك بنجاح!',
     'return_request_success' => 'تم تقديم طلب الإرجاع بنجاح.',
+    'return_not_allowed' => 'لا يمكن إرجاع هذا الطلب بعد الآن.',
     'product_already_reviewed' => 'لقد قمت بتقييم هذا المنتج مسبقاً.',
     'review_added_success' => 'تم إضافة تقييمك بنجاح.',
     'multiple_shipping_error' => 'لا يمكن تحديد أكثر من نوع شحن معاً.',

@@ -25,6 +25,9 @@ class SideBar extends Component
         $this->unreadOrderCreatedCount = $user->unReadNotifications()
             ->where('type', 'App\Notifications\OrderCreatedAdminNotification')
             ->count();
+        $this->unreadOrderReturnCount = $user->unReadNotifications()
+            ->where('type', 'App\Notifications\OrderReturnedAdminNotification')
+            ->count();
     }
 
     /**
