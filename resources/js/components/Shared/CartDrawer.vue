@@ -43,13 +43,15 @@
                             </span>
                         </div>
                         <div class="cd-progress">
-                            <div class="cd-progress-fill" :style="{ width: Math.min(shippingProgress, 100) + '%' }" />
                             <v-icon
                                 size="20"
                                 color="#76543D"
                                 class="cd-progress-truck"
                                 :style="{ insetInlineStart: 'calc(' + Math.min(Math.max(shippingProgress, 2), 96) + '% - 10px)' }"
                             >mdi-truck</v-icon>
+                            <div class="cd-progress-track">
+                                <div class="cd-progress-fill" :style="{ width: Math.min(shippingProgress, 100) + '%' }" />
+                            </div>
                         </div>
                     </div>
 
@@ -113,7 +115,9 @@ const { t } = useLocale();
 const Emitter = inject('Emitter');
 const drawer = ref(false);
 const cartItems = ref([]);
-const freeShippingThreshold = 500;
+// From the store settings (GET /cart); 500 is the fallback until
+// the first fetch returns the configured value.
+const freeShippingThreshold = ref(500);
 
 const total = computed(() =>
     cartItems.value.reduce((sum, item) => {
@@ -132,13 +136,20 @@ const totalSavings = computed(() =>
 );
 
 const shippingProgress = computed(() =>
-    parseInt((total.value / freeShippingThreshold) * 100)
+    parseInt((total.value / freeShippingThreshold.value) * 100)
 );
+
+function applyThreshold(data) {
+    if (data?.free_shipping_threshold !== undefined && data.free_shipping_threshold !== null) {
+        freeShippingThreshold.value = Number(data.free_shipping_threshold);
+    }
+}
 
 async function fetchCart() {
     try {
         const { data } = await axios.get('/cart');
         cartItems.value = data.items;
+        applyThreshold(data);
         Emitter.emit('cart-updated', data.count);
     } catch (e) {
         console.error('Cart fetch error', e);
@@ -151,6 +162,7 @@ async function changeQty(item, delta) {
     try {
         const { data } = await axios.patch(`/cart/${item.id}`, { quantity: newQty });
         cartItems.value = data.items;
+        applyThreshold(data);
         Emitter.emit('cart-updated', data.count);
     } catch (e) {
         console.error(e);
@@ -161,6 +173,7 @@ async function removeItem(id) {
     try {
         const { data } = await axios.delete(`/cart/${id}`);
         cartItems.value = data.items;
+        applyThreshold(data);
         Emitter.emit('cart-updated', data.count);
     } catch (e) {
         console.error(e);
@@ -317,10 +330,16 @@ onMounted(() => {
 
 .cd-progress {
     position: relative;
+    padding-top: 24px;
+    margin-top: 14px;
+}
+
+.cd-progress-track {
+    position: relative;
     height: 8px;
     background: #EFE7D8;
     border-radius: 4px;
-    margin-top: 14px;
+    overflow: hidden;
 }
 
 .cd-progress-fill {
@@ -335,8 +354,7 @@ onMounted(() => {
 
 .cd-progress-truck {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
     transition: inset-inline-start 0.3s ease;
 }
 
@@ -344,7 +362,7 @@ onMounted(() => {
    right-to-left, so the truck must face left (the direction it
    drives). In LTR it already faces the right way. */
 [dir="rtl"] .cd-progress-truck {
-    transform: translateY(-50%) scaleX(-1);
+    transform: scaleX(-1);
 }
 
 /* ===== Items ===== */

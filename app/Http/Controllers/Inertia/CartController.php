@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Inertia;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Repositories\Cart\CartRepository;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
@@ -45,6 +46,10 @@ class CartController extends Controller
             'items' => $this->mapItems($items),
             'count' => $items->count(),
             'total' => $this->cart->total(),
+            // Free-shipping threshold from the store settings (the
+            // cart drawer renders its progress bar against it). Falls
+            // back to 500 when no setting is stored yet.
+            'free_shipping_threshold' => (float) (Setting::first()?->free_shipping_threshold ?? 500),
         ];
 
         if ($message) {
