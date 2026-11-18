@@ -182,7 +182,6 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('/return_orders', [ReturnOrderController::class, 'index'])->name('return_orders.index');
     Route::get('/return_orders/{id}', [ReturnOrderController::class, 'show'])->name('return_orders.show');
     Route::delete('/return_orders/{id}/delete', [ReturnOrderController::class, 'destroy'])->name('return_orders.destroy');
-    Route::put('/return_orders/{id}/update', [ReturnOrderController::class, 'update'])->name('return_orders.update');
 
     //----------------------------------------------/ product_availability Route /---------------------------
     Route::resource('/product_availability', ProductAvailabilityController::class);

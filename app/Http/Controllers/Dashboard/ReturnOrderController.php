@@ -2,12 +2,8 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Order;
-use App\Models\Product;
 use App\Repositories\Order\ReturnOrderRepository;
-use Illuminate\Http\Request;
 
 class ReturnOrderController extends Controller
 {
@@ -27,22 +23,9 @@ class ReturnOrderController extends Controller
 
     public function show(string $id)
     {
-        $order    = $this->returnOrderRepository->show($id);
-        $statuses = OrderStatus::cases();
+        $order = $this->returnOrderRepository->show($id);
 
-        return view('dashboard.return_order.show', compact('order', 'statuses'));
-    }
-
-    public function update(Request $request, string $id)
-    {
-        $request->validate([
-            'status' => ['required', \Illuminate\Validation\Rules\Enum::class(OrderStatus::class)],
-        ]);
-
-        $this->returnOrderRepository->update($request, $id);
-
-        return redirect()->route('return_orders.index')
-            ->with('success', 'تم تحديث حالة الطلب بنجاح');
+        return view('dashboard.return_order.show', compact('order'));
     }
 
     public function destroy(string $id)
