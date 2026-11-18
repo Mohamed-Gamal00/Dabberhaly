@@ -340,6 +340,13 @@ onMounted(() => {
     transition: inset-inline-start 0.3s ease;
 }
 
+/* The mdi-truck glyph faces right; in RTL the fill travels
+   right-to-left, so the truck must face left (the direction it
+   drives). In LTR it already faces the right way. */
+[dir="rtl"] .cd-progress-truck {
+    transform: translateY(-50%) scaleX(-1);
+}
+
 /* ===== Items ===== */
 .cd-items {
     display: flex;
