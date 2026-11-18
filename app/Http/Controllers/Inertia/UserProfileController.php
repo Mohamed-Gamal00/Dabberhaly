@@ -104,4 +104,12 @@ class UserProfileController extends Controller
         $user->update(['password' => Hash::make($request->new_password)]);
         return to_route('user.info')->with('info', __('flash.password_changed'));
     }
+
+    public function updateUserInfo(UserRequest $request)
+    {
+        $user = Auth::user();
+        $user->update($request->validated());
+
+        return back()->with('success', __('flash.profile_updated'));
+    }
 }

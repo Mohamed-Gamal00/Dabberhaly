@@ -29,7 +29,7 @@ class UserRequest extends FormRequest
       'family_name' => 'nullable|string|max:255',
       'phone_number' => 'required|between:6,16',
       'email' => [
-        'required',
+        'sometimes',
         'string',
         'email',
         'max:255',

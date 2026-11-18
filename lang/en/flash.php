@@ -11,6 +11,7 @@ return [
     'otp_sent'             => 'Verification code sent to reset your password.',
     'password_updated'     => 'Password updated successfully.',
     'password_changed'     => 'Password changed successfully.',
+    'profile_updated'      => 'Profile updated successfully.',
     'contact_sent'         => 'Message sent successfully, we will contact you soon.',
     'address_added'        => 'Address added successfully.',
     'address_updated'      => 'Address updated successfully.',
