@@ -230,7 +230,7 @@
                         function getSubCategories($subCategories, $prefix = '') {
                             $html = '';
                             foreach ($subCategories as $category) {
-                                $html .= '<option value="' . $category->id . '">' . $prefix . $category->name . '</option>';
+                                $html .= '<option value="' . $category->id . '">' . e($prefix . $category->name) . '</option>';
                                 if ($category->children->isNotEmpty()) {
                                     $html .= getSubCategories($category->children, $prefix . $category->name . ' / ');
                                 }

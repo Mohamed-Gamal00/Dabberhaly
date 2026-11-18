@@ -30,9 +30,5 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-    'moyasar' => [
-        'key' => env('MOYASAR_KEY', config('services.moyasar.key')),
-        'secret' => env('MOYASAR_SECRET', config('services.moyasar.secret')),
-    ],
 
 ];

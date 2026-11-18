@@ -36,28 +36,28 @@ class RepresentativesOrderController extends Controller
   /**
    * Store a newly created resource in storage.
    */
-  // public function store(Request $request)
-  // {
-  //   $request->validate([
-  //     'name' => 'required|string|max:255',
-  //     'phone' => 'required|string|max:255',
-  //     'description' => 'required|string',
-  //   ]);
+  public function store(Request $request)
+  {
+    $request->validate([
+      'name' => 'required|string|max:255',
+      'phone' => 'required|string|max:255',
+      'description' => 'required|string',
+    ]);
 
-  //   $this->representativesOrders->store($request->all());
+    $this->representativesOrders->store($request->all());
 
-  //   return redirect()->route('representatives_orders.index')
-  //   ->with('success', 'Order created successfully.');
-  // }
+    return redirect()->route('representatives_orders.index')
+    ->with('success', 'Order created successfully.');
+  }
 
   /**
    * Display the specified resource.
    */
-  // public function show(string $id)
-  // {
-  //   $data = $this->representativesOrders->show($id);
-  //   return view('dashboard.representatives_orders.index', compact('data'));
-  // }
+  public function show(string $id)
+  {
+    $data = $this->representativesOrders->show($id);
+    return view('dashboard.representatives_orders.show', compact('data'));
+  }
 
   /**
    * Show the form for editing the specified resource.
@@ -90,11 +90,11 @@ class RepresentativesOrderController extends Controller
   /**
    * Remove the specified resource from storage.
    */
-  // public function destroy($id)
-  // {
-  //   $this->representativesOrders->delete($id);
+  public function destroy($id)
+  {
+    $this->representativesOrders->delete($id);
 
-  //   return redirect()->route('representatives_orders.index')
-  //   ->with('success', 'Order deleted successfully.');
-  // }
+    return redirect()->route('representatives_orders.index')
+    ->with('success', 'Order deleted successfully.');
+  }
 }

@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Repositories\Order\OrderRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rules\Enum;
 
 class OrderController extends Controller
@@ -21,6 +22,8 @@ class OrderController extends Controller
 
     public function index()
     {
+        Gate::authorize('order.view');
+
         $orders = $this->orderRepository->getAll();
         $user   = Auth::guard('admin')->user();
         $notifications = $user->notifications()
@@ -32,6 +35,8 @@ class OrderController extends Controller
 
     public function show(string $id)
     {
+        Gate::authorize('order.view');
+
         // A returned order no longer lives under /admin/orders: the
         // repository only finds orders with return_order = false, so
         // opening one (e.g. from the order-created notification, whose
@@ -49,6 +54,8 @@ class OrderController extends Controller
 
     public function update(Request $request, string $id)
     {
+        Gate::authorize('order.edit');
+
         $request->validate([
             'status' => ['required', new Enum(OrderStatus::class)],
         ]);
@@ -61,6 +68,8 @@ class OrderController extends Controller
 
     public function destroy(string $id)
     {
+        Gate::authorize('order.delete');
+
         $this->orderRepository->delete($id);
 
         return redirect()->back()->with('dark', __('messages.ORDER_DELETED'));

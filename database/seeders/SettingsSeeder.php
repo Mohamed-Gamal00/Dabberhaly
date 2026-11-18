@@ -31,8 +31,11 @@ class SettingsSeeder extends Seeder
                 'address'         => 'الرياض، المملكة العربية السعودية',
                 'description'     => 'متجر إلكتروني متكامل',
                 'value_added_tax' => 0,
-                'publishable_key' => env('MOYASAR_PUBLISHABLE_KEY') ?? "pk_test_r6D1NBB77sSPEn2i3oPWjdsJGoxKL639KJC1qsvF",
-                'secret_key'      => env('MOYASAR_SECRET_KEY') ?? "sk_test_abXcAgWyFyjyMbvdLGYds1xwPqvRZYkv6fZa23rm",
+                // Moyasar keys come from the environment only — no
+                // hardcoded fallback keys (a missing key must fail
+                // loudly instead of silently using shared test keys).
+                'publishable_key' => env('MOYASAR_PUBLISHABLE_KEY'),
+                'secret_key'      => env('MOYASAR_SECRET_KEY'),
                 'sms_api_key'     => env('SMS_API_KEY'),
                 'sms_user_name'   => env('SMS_USER_NAME'),
                 'sms_sender'      => env('SMS_SENDER', 'MyStore'),

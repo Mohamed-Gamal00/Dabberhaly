@@ -105,6 +105,7 @@ return [
     'MAIN_CHOICE_DELETED'         => 'Choice deleted successfully.',
 
     // Bulk Orders
+    'BULKORDER_CREATED'           => 'Bulk order created successfully.',
     'BULKORDER_UPDATED'           => 'Bulk order updated successfully.',
     'BULKORDER_DELETED'           => 'Bulk order deleted successfully.',
 

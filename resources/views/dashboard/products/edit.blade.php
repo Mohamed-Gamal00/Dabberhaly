@@ -276,7 +276,7 @@
                             $html = '';
                             foreach ($subCategories as $category) {
                                 $sel = $selectedId == $category->id ? 'selected' : '';
-                                $html .= '<option value="' . $category->id . '" ' . $sel . '>' . $prefix . $category->name . '</option>';
+                                $html .= '<option value="' . $category->id . '" ' . $sel . '>' . e($prefix . $category->name) . '</option>';
                                 if ($category->children->isNotEmpty()) {
                                     $html .= getSubCategoriesEdit($category->children, $prefix . $category->name . ' / ', $selectedId);
                                 }

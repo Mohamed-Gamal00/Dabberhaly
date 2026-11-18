@@ -156,7 +156,6 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/user_addresses/{address}/set_main', [UserProfileController::class, 'setMainAddress'])->name('user.addresses.set_main');
 
 
-    Route::get('/user_change_password', [UserProfileController::class, 'changePasswordView'])->name('user_password');
     Route::put('/user_update_info/update', [UserProfileController::class, 'updatePassword'])->name('update_password');
     Route::put('/user_normal_info/update', [UserProfileController::class, 'updateUserInfo'])->name('update_user_info');
     Route::post('/user_normal_info/verify_to_update', [UserProfileController::class, 'verify_to_update'])->name('verify_to_update');

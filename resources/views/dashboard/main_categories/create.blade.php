@@ -171,7 +171,7 @@
                                                                     '<option value="' .
                                                                     $category->id .
                                                                     '">' .
-                                                                    $fullPath .
+                                                                    e($fullPath) .
                                                                     '</option>';
                                                                 $options .= buildCategoryOptions(
                                                                     $categories,

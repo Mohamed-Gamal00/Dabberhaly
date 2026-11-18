@@ -122,7 +122,7 @@
             if ($choice->parent_id == $parent_id) {
                 $fullPath = $path ? $path . ' / ' . $choice->name : $choice->name;
                 $selected = $selectedId == $choice->id ? 'selected' : '';
-                $options .= '<option value="' . $choice->id . '" ' . $selected . '>' . $fullPath . '</option>';
+                $options .= '<option value="' . $choice->id . '" ' . $selected . '>' . e($fullPath) . '</option>';
                 $options .= buildchoiceOptions($categories, $choice->id, $fullPath, $selectedId);
             }
         }

@@ -29,7 +29,7 @@ class MainCategoriesController extends Controller
    */
   public function index()
   {
-    //Gate::authorize('category.view');
+    Gate::authorize('category.view');
 
     $categories = $this->categoryRepository->getMainCategory();
     return view('dashboard.main_categories.index', compact('categories'));
@@ -40,7 +40,7 @@ class MainCategoriesController extends Controller
    */
   public function create()
   {
-    //Gate::authorize('category.create');
+    Gate::authorize('category.create');
     $mainCategories = $this->categoryRepository->getMainCategory();
     $mainChoices = Choice::latest()->get();
     return view('dashboard.main_categories.create', compact('mainCategories', 'mainChoices'));
@@ -51,7 +51,7 @@ class MainCategoriesController extends Controller
    */
   public function store(MainCategoryRequest $request)
   {
-    //Gate::authorize('category.create');
+    Gate::authorize('category.create');
 
     $data = $request->validated();
     // dd($data);
@@ -85,7 +85,7 @@ class MainCategoriesController extends Controller
    */
   public function edit(string $id)
   {
-    //Gate::authorize('category.edit');
+    Gate::authorize('category.edit');
 
     $category = $this->categoryRepository->getById($id);
     $mainCategories = $this->categoryRepository->getAllMainCategoriesExcept($id);
@@ -107,7 +107,7 @@ class MainCategoriesController extends Controller
    */
   public function update(MainCategoryRequest $request, $id)
   {
-    //Gate::authorize('category.edit');
+    Gate::authorize('category.edit');
     $category = MainCategory::findOrFail($id);
 
     $data = $request->validated();
@@ -148,7 +148,7 @@ class MainCategoriesController extends Controller
 
   public function destroy(string $id)
   {
-    //Gate::authorize('category.delete');
+    Gate::authorize('category.delete');
 
     $this->categoryRepository->delete($id);
 

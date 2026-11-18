@@ -25,7 +25,7 @@ class DiscountCodeController extends Controller
    */
   public function index()
   {
-    //Gate::authorize('discount_code.view');
+    Gate::authorize('discount_code.view');
 
     $discounts = $this->discountRepository->getMainDiscountCode();
     return view('dashboard.discount_codes.index', compact('discounts'));
@@ -36,7 +36,7 @@ class DiscountCodeController extends Controller
    */
   public function create()
   {
-    //Gate::authorize('discount_code.create');
+    Gate::authorize('discount_code.create');
     $products = Product::select('id', 'name')->take(10)->get();
     return view('dashboard.discount_codes.create', compact('products'));
   }
@@ -65,7 +65,7 @@ class DiscountCodeController extends Controller
 
   public function store(DiscountCodeRequest $request)
   {
-    //Gate::authorize('discount_code.create');
+    Gate::authorize('discount_code.create');
     $validatedData = $request->validated();
     // $productIds = $validatedData['product_ids'];
     // Check if 'product_ids' is present in the request
@@ -94,7 +94,7 @@ class DiscountCodeController extends Controller
 
   public function edit(string $id)
   {
-    //Gate::authorize('discount_code.edit');
+    Gate::authorize('discount_code.edit');
 
     $products = Product::select('id', 'name')->latest()->take(10)->get();
     $discountCode = DiscountCode::findOrFail($id);
@@ -108,7 +108,7 @@ class DiscountCodeController extends Controller
 
   public function update(DiscountCodeRequest $request, string $id)
   {
-    //Gate::authorize('discount_code.edit');
+    Gate::authorize('discount_code.edit');
 
     // Validate the request data
     $data = $request->validated();
@@ -139,7 +139,7 @@ class DiscountCodeController extends Controller
    */
   public function destroy(string $id)
   {
-    //Gate::authorize('discount_code.delete');
+    Gate::authorize('discount_code.delete');
 
     $this->discountRepository->delete($id);
     return to_route('discount_code.index')->with('dark', __('messages.DISCOUNT_CODE_DELETED'));

@@ -105,6 +105,7 @@ return [
     'MAIN_CHOICE_DELETED'         => 'تم حذف الخيار بنجاح.',
 
     // Bulk Orders
+    'BULKORDER_CREATED'           => 'تم إنشاء الطلب الجماعي بنجاح.',
     'BULKORDER_UPDATED'           => 'تم تحديث الطلب الجماعي بنجاح.',
     'BULKORDER_DELETED'           => 'تم حذف الطلب الجماعي بنجاح.',
 

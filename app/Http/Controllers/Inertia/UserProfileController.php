@@ -133,17 +133,12 @@ class UserProfileController extends Controller
         ], fn ($value) => $value !== null);
     }
 
-    public function changePasswordView()
-    {
-        return Inertia::render('Profile/ChangePassword');
-    }
-
     public function updatePassword(Request $request)
     {
         $request->validate(['new_password' => 'required|confirmed|min:6']);
         $user = Auth::user();
         $user->update(['password' => Hash::make($request->new_password)]);
-        return to_route('user.info')->with('info', __('flash.password_changed'));
+        return back()->with('info', __('flash.password_changed'));
     }
 
     public function updateUserInfo(UserRequest $request)

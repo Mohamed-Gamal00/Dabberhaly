@@ -29,7 +29,7 @@ class DesignsController extends Controller
 
   public function index()
   {
-    //Gate::authorize('design.view');
+    Gate::authorize('design.view');
     $home_banners = $this->designRepo->getHomeBanners();
     $offer_banners = $this->designRepo->getOfferBageBanners();
     return view('dashboard.designs.index', compact('home_banners', 'offer_banners'));
@@ -40,7 +40,7 @@ class DesignsController extends Controller
    */
   public function create()
   {
-    //Gate::authorize('design.create');
+    Gate::authorize('design.create');
     return view('dashboard.designs.create');
   }
 
@@ -51,7 +51,7 @@ class DesignsController extends Controller
 
   public function store(DesignRequest $request)
   {
-    //Gate::authorize('design.create');
+    Gate::authorize('design.create');
     $data = $request->validated();
     $data['image'] = $this->uploadedImage($request, 'image', 'designs');
     $this->designRepo->store($data);
@@ -71,14 +71,14 @@ class DesignsController extends Controller
    */
   public function edit(string $id)
   {
-    //Gate::authorize('design.edit');
+    Gate::authorize('design.edit');
     $design = $this->designRepo->getById($id);
     return view('dashboard.designs.edit', compact('design'));
   }
 
   public function update(DesignRequest $request, string $id)
   {
-    //Gate::authorize('design.edit');
+    Gate::authorize('design.edit');
 
     $design = $this->designRepo->getById($id);
 
@@ -107,7 +107,7 @@ class DesignsController extends Controller
    */
   public function destroy(string $id)
   {
-    //Gate::authorize('design.delete');
+    Gate::authorize('design.delete');
 
     $this->designRepo->delete($id);
     return redirect()->back()->with('dark', 'تم حذف العنصر بنجاح');

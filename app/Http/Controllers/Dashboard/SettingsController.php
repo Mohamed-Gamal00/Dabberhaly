@@ -22,7 +22,7 @@ class SettingsController extends Controller
     }
     public function index()
     {
-        //Gate::authorize('settings.edit');
+        Gate::authorize('settings.edit');
 
         $setting = Setting::first();
         return view('dashboard.front_settings.edit', compact('setting'));

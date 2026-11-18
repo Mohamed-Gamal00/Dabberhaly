@@ -205,7 +205,7 @@
             if ($category->parent_id == $parent_id) {
                 $fullPath = $path ? $path . ' / ' . $category->name : $category->name;
                 $selected = $selectedId == $category->id ? 'selected' : '';
-                $options .= '<option value="' . $category->id . '" ' . $selected . '>' . $fullPath . '</option>';
+                $options .= '<option value="' . $category->id . '" ' . $selected . '>' . e($fullPath) . '</option>';
                 $options .= buildCategoryOptions($categories, $category->id, $fullPath, $selectedId);
             }
         }

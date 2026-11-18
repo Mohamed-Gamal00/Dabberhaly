@@ -23,7 +23,7 @@ class CountriesController extends Controller
    */
   public function index()
   {
-    //Gate::authorize('country.view');
+    Gate::authorize('country.view');
     $countries = $this->countryRepo->getMainCountry();
     return view('dashboard.countries.index', compact('countries'));
   }
@@ -33,7 +33,7 @@ class CountriesController extends Controller
    */
   public function create()
   {
-    //Gate::authorize('country.create');
+    Gate::authorize('country.create');
 
     $countries = Country::where('status', 'not_used')->get();
     $cities = City::where('status', 'not_used')->get();
@@ -46,7 +46,7 @@ class CountriesController extends Controller
    */
   public function store(CountryRequest $request)
   {
-    //Gate::authorize('country.create');
+    Gate::authorize('country.create');
     $data = $request->validated();
     // dd($data);
     $this->countryRepo->store($data);
@@ -63,7 +63,7 @@ class CountriesController extends Controller
    */
   public function edit(string $id)
   {
-    //Gate::authorize('country.edit');
+    Gate::authorize('country.edit');
 
     $selectedCountry = Country::where('id', $id)->first();
     $countries = Country::get();
@@ -77,7 +77,7 @@ class CountriesController extends Controller
    */
   public function update(CountryRequest $request, string $id)
   {
-    //Gate::authorize('country.edit');
+    Gate::authorize('country.edit');
 
     $data = $request->validated();
 
@@ -91,7 +91,7 @@ class CountriesController extends Controller
    */
   public function destroy(string $id)
   {
-    //Gate::authorize('country.delete');
+    Gate::authorize('country.delete');
 
     $this->countryRepo->delete($id);
     return to_route('countries.index')->with('dark', __('messages.COUNTRY_DELETED'));

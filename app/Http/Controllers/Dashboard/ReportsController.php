@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Repositories\Reports\ReportsRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class ReportsController extends Controller
 {
@@ -22,6 +23,8 @@ class ReportsController extends Controller
 
     public function index()
     {
+        Gate::authorize('report.create');
+
         $reportTitle = [
             'products-report' => 'تقرير المنتجات المتاحة',
             'return-products-report' => 'تقرير إرجاع الطلبات',
@@ -42,6 +45,8 @@ class ReportsController extends Controller
 
     public function searchReport(Request $request)
     {
+        Gate::authorize('report.create');
+
         $request->validate([
             'start_at' => 'nullable|',
             'end_at' => 'nullable|after:start_at'

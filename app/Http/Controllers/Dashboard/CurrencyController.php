@@ -22,7 +22,7 @@ class CurrencyController extends Controller
    */
   public function index()
   {
-    //Gate::authorize('currency.view');
+    Gate::authorize('currency.view');
 
     $currencies = $this->currencyRepo->getMainCurrency();
     $defaultCurrency = $this->currencyRepo->getDefaultCurrency();
@@ -35,7 +35,7 @@ class CurrencyController extends Controller
    */
   public function create()
   {
-    //Gate::authorize('currency.create');
+    Gate::authorize('currency.create');
     $currencies = Currency::where('default_currency', false)->get();
     $defaultCurrency = Currency::where('default_currency', true)->first();
     return view('dashboard.currencies.create', compact('currencies', 'defaultCurrency'));
@@ -46,7 +46,7 @@ class CurrencyController extends Controller
    */
   public function store(CurrencygRequest $request)
   {
-    //Gate::authorize('currency.create');
+    Gate::authorize('currency.create');
 
     $data = $request->validated();
 
@@ -68,7 +68,7 @@ class CurrencyController extends Controller
    */
   public function edit(string $id)
   {
-    //Gate::authorize('currency.edit');
+    Gate::authorize('currency.edit');
 
     $currencies = Currency::where('default_currency', false)->get();
     $currentCurrency = Currency::where('id', $id)->first();
@@ -82,7 +82,7 @@ class CurrencyController extends Controller
    */
   public function update(CurrencygRequest $request, string $id)
   {
-    //Gate::authorize('currency.edit');
+    Gate::authorize('currency.edit');
 
     $data = $request->validated();
 
@@ -99,14 +99,14 @@ class CurrencyController extends Controller
    */
   public function destroy(string $id)
   {
-    //Gate::authorize('currency.delete');
+    Gate::authorize('currency.delete');
     $this->currencyRepo->delete($id);
     return \to_route('currencies.index')->with('dark', __('messages.CURRENCY_DELETED'));
   }
 
   public function setDefaultCurrency()
   {
-    //Gate::authorize('currency.create');
+    Gate::authorize('currency.create');
     $currencies = Currency::get();
     $defaultCurrency = Currency::where('default_currency', true)->first();
     return view('dashboard.currencies.default_currency', compact('currencies', 'defaultCurrency'));
@@ -114,7 +114,7 @@ class CurrencyController extends Controller
 
   public function updateDefaultCurrency(Request $request)
   {
-    //Gate::authorize('currency.edit');
+    Gate::authorize('currency.edit');
 
     $data = $request->validate([
       'default_currency_id' => 'required|exists:currencies,id'
