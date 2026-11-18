@@ -7,6 +7,7 @@ use App\Http\Requests\Dashboard\CommonQuestion\CommonQuestionRequest;
 use App\Models\CommonQuestion;
 use App\Repositories\common_questions\CommonQuestionsRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class CommonQuestionController extends Controller
 {
@@ -21,6 +22,7 @@ class CommonQuestionController extends Controller
    */
   public function index()
   {
+    Gate::authorize('common_question.view');
     $questions = $this->commonQuestions->getMainCommon_questions();
     return view('dashboard.common_questions.index', compact('questions'));
   }
@@ -30,6 +32,7 @@ class CommonQuestionController extends Controller
    */
   public function create()
   {
+    Gate::authorize('common_question.create');
     return view('dashboard.common_questions.create');
   }
 
@@ -38,6 +41,7 @@ class CommonQuestionController extends Controller
    */
   public function store(CommonQuestionRequest $request)
   {
+    Gate::authorize('common_question.create');
 
     $data = $request->validated();
 
@@ -53,6 +57,7 @@ class CommonQuestionController extends Controller
    */
   public function show(string $id)
   {
+    Gate::authorize('common_question.view');
     //
   }
 
@@ -61,6 +66,7 @@ class CommonQuestionController extends Controller
    */
   public function edit(CommonQuestion $commonQuestion)
   {
+    Gate::authorize('common_question.edit');
     return view('dashboard.common_questions.edit', compact('commonQuestion'));
   }
 
@@ -69,6 +75,7 @@ class CommonQuestionController extends Controller
    */
   public function update(CommonQuestionRequest $request, $id)
   {
+    Gate::authorize('common_question.edit');
     $data = $request->validated();
 
     $this->commonQuestions->update($data, $id);
@@ -82,6 +89,7 @@ class CommonQuestionController extends Controller
    */
   public function destroy($id)
   {
+    Gate::authorize('common_question.delete');
     $this->commonQuestions->delete($id);
 
     return redirect()->route('common_questions.index')

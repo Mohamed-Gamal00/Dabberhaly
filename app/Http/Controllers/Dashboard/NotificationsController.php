@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Repositories\Notification\NotificationRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class NotificationsController extends Controller
 {
@@ -18,6 +19,7 @@ class NotificationsController extends Controller
 
     public function index()
     {
+        Gate::authorize('notification.view');
         $user = Auth::guard('admin')->user();
         $notifications = $this->notificationRepository->getAll($user);
 
@@ -29,6 +31,7 @@ class NotificationsController extends Controller
 
     public function markAsRead(Request $request)
     {
+        Gate::authorize('notification.view');
         $user = Auth::guard('admin')->user();
 
         if ($request->has('notification_id')) {

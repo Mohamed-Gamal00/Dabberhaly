@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\PaymentTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class PaymentController extends Controller
 {
     public function index(Request $request)
     {
+        Gate::authorize('payment.view');
         $query = PaymentTransaction::with('order')
             ->latest();
 
@@ -40,6 +42,7 @@ class PaymentController extends Controller
 
     public function show($id)
     {
+        Gate::authorize('payment.view');
         $transaction = PaymentTransaction::with('order.addresses', 'order.orderItems.product')
             ->findOrFail($id);
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Repositories\bulk_orders\BulkOrdersRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class BulkOrderController extends Controller
 {
@@ -19,6 +20,7 @@ class BulkOrderController extends Controller
    */
   public function index()
   {
+    Gate::authorize('bulk_order.view');
     $orders = $this->bulkOrders->getAll();
     return view('dashboard.bulk_orders.index', compact('orders'));
   }
@@ -28,6 +30,7 @@ class BulkOrderController extends Controller
    */
   public function create()
   {
+    Gate::authorize('bulk_order.create');
     return view('dashboard.bulk_orders.create');
   }
 
@@ -36,6 +39,7 @@ class BulkOrderController extends Controller
    */
   public function store(Request $request)
   {
+    Gate::authorize('bulk_order.create');
     $request->validate([
       'name' => 'required|string|max:255',
       'phone' => 'required|string|max:255',
@@ -54,6 +58,7 @@ class BulkOrderController extends Controller
    */
   public function show(string $id)
   {
+    Gate::authorize('bulk_order.view');
     //
   }
 
@@ -62,6 +67,7 @@ class BulkOrderController extends Controller
    */
   public function edit($id)
   {
+    Gate::authorize('bulk_order.edit');
     $order = $this->bulkOrders->getAll()->find($id);
     return view('dashboard.bulk_orders.edit', compact('order'));
   }
@@ -71,6 +77,7 @@ class BulkOrderController extends Controller
    */
   public function update(Request $request, $id)
   {
+    Gate::authorize('bulk_order.edit');
     $request->validate([
       'name' => 'required|string|max:255',
       'phone' => 'required|string|max:255',
@@ -88,6 +95,7 @@ class BulkOrderController extends Controller
    */
   public function destroy($id)
   {
+    Gate::authorize('bulk_order.delete');
     $this->bulkOrders->delete($id);
 
     return redirect()->route('bulk_orders.index')

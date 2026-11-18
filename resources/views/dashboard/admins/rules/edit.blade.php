@@ -54,7 +54,6 @@
 
             <x-admin.rules rules_type="products" title="المنتجات" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="categories" title="الأقسام" :rule_abilities="$rule_abilities" />
-            <x-admin.rules rules_type="filters" title="التصنيفات" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="companies" title="الشركات" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="designs" title="التصميم" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="admins" title="المدراء" :rule_abilities="$rule_abilities" />
@@ -65,11 +64,26 @@
             <x-admin.rules rules_type="settings" title="اعدادات الموقع" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="shipping" title="الشحن" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="discount_code" title="أكود الخصم" :rule_abilities="$rule_abilities" />
-            <x-admin.rules rules_type="order_status" title="حالات الطلب" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="product_availability" title="حالات التوفر" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="currencies" title="العملات" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="countries" title="الدول" :rule_abilities="$rule_abilities" />
             <x-admin.rules rules_type="colors" title="الالوان" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="reports" title="التقارير" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="dashboard" title="لوحة التحكم" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="payments" title="المدفوعات" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="bulk_orders" title="طلبات الجملة" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="representatives_orders" title="طلبات المناديب" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="store_features" title="ميزات المتجر" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="pages" title="صفحات الموقع" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="contact_us" title="رسائل التواصل" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="header_banner" title="بانر الهيدر" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="banners" title="البنرات" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="header_text" title="نصوص الهيدر" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="advertisements" title="الشريط الإعلاني" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="choices" title="الخيارات" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="cities" title="المدن" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="common_questions" title="الأسئلة الشائعة" :rule_abilities="$rule_abilities" />
+            <x-admin.rules rules_type="notifications" title="الإشعارات" :rule_abilities="$rule_abilities" />
 
 
             {{-- sub category in edit page --}}

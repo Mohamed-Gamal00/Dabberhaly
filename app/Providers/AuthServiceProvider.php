@@ -37,7 +37,19 @@ class AuthServiceProvider extends ServiceProvider
             }
         });
 
+        // Abilities live grouped by section in rules/rules.php; flatten
+        // the groups so every ability gets a Gate. A flat (non-array)
+        // entry is still accepted, so old-style entries keep working.
         foreach ($this->app->make('abilities') as $code => $label) {
+            if (is_array($label)) {
+                foreach ($label as $ability => $abilityLabel) {
+                    Gate::define($ability, function ($admin) use ($ability) {
+                        return $admin->hasAbility($ability);
+                    });
+                }
+                continue;
+            }
+
             Gate::define($code, function ($admin) use ($code) {
                 return $admin->hasAbility($code);
             });

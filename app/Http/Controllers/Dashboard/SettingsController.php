@@ -30,6 +30,7 @@ class SettingsController extends Controller
 
     public function update(SettingRequest $request, $id)
     {
+        Gate::authorize('settings.edit');
         $data     = $request->validated();
         $settings = $this->settingRepo->getById($id);
 

@@ -10,11 +10,13 @@ use App\Models\Product;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        Gate::authorize('dashboard.view');
         // ── Counts ──
         $productsCount  = Product::count();
         $ordersCount    = Order::where('return_order', false)->count();
