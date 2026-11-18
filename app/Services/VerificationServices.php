@@ -24,8 +24,7 @@ class VerificationServices
             'id' => $oldCode ? $oldCode->id : null
         ], [
             'user_id' => $userId,
-            // 'code' => $code,
-            'code' => 1111,
+            'code' => $code,
             'is_reset_password' => $isResetPassword,
             'verification_code_expires_at' => $expiresAt,
 
@@ -97,10 +96,11 @@ class VerificationServices
         return false;
     }
 
-    public function checkOTPCodePassword($user_id, $code)
+    public function checkOTPCodePassword($user_id, $code, $isResetPassword = false)
     {
 
-        $verificationData = User_verfication::where('user_id', $user_id)->first();
+        $verificationData = User_verfication::where('user_id', $user_id)
+            ->where('is_reset_password', $isResetPassword)->first();
         if ($verificationData) {
             if ($verificationData->code == $code) {
                 return true;

@@ -48,9 +48,10 @@ class UserService
         return $user;
     }
 
-    public function isVerificationCodeExpired($user)
+    public function isVerificationCodeExpired($user, $isResetPassword = false)
     {
-        $user_verificationCode = User_verfication::where('user_id', $user->id)->first();
+        $user_verificationCode = User_verfication::where('user_id', $user->id)
+            ->where('is_reset_password', $isResetPassword)->first();
 
         if ($user_verificationCode && $user_verificationCode->verification_code_expires_at) {
             return now()->greaterThan($user_verificationCode->verification_code_expires_at);

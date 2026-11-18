@@ -42,6 +42,11 @@ class PaymentController extends Controller
             ],
             'publishable_key' => $publishable_key,
             'callback_url'    => $callbackUrl,
+            // The exact amount Moyasar must charge (halalas). The page
+            // used to charge total_price + shipping_price, which
+            // double-charged shipping for web orders (their total_price
+            // already includes it).
+            'amount_halalas'  => $order->expectedPaymentAmountHalalas(),
         ]);
     }
 
@@ -71,6 +76,10 @@ class PaymentController extends Controller
             ->get("payments/{$paymentId}")
             ->json();
 
+        if (! is_array($payment)) {
+            $payment = [];
+        }
+
         // Auth error
         if (isset($payment['type']) && $payment['type'] === 'authentication_error') {
             return Inertia::render('Payment/Failed', [
@@ -80,7 +89,18 @@ class PaymentController extends Controller
         }
 
         $status = $payment['status'] ?? 'failed';
-        $order->update(['payment_status' => $status === 'paid' ? 'paid' : 'failed']);
+
+        // A payment only counts when Moyasar confirms it for THIS order:
+        // right amount (halalas), right currency, and the order number
+        // in the description. Without this, a payment made for a cheap
+        // order could be replayed against an expensive one.
+        $verifiedPaid = $status === 'paid'
+            && isset($payment['amount'])
+            && (int) $payment['amount'] === $order->expectedPaymentAmountHalalas()
+            && ($payment['currency'] ?? null) === 'SAR'
+            && str_contains((string) ($payment['description'] ?? ''), (string) $order->number);
+
+        $order->update(['payment_status' => $verifiedPaid ? 'paid' : 'failed']);
 
         // ── Save transaction to DB ──
         $source = $payment['source'] ?? [];
@@ -98,7 +118,14 @@ class PaymentController extends Controller
             'ip_address'         => $request->ip(),
         ]);
 
-        if ($status === 'paid') {
+        if ($status === 'paid' && ! $verifiedPaid) {
+            return Inertia::render('Payment/Failed', [
+                'order'   => $this->orderData($order),
+                'message' => 'تعذّر التحقق من عملية الدفع. يرجى التواصل مع الدعم.',
+            ]);
+        }
+
+        if ($verifiedPaid) {
             return Inertia::render('Payment/Success', [
                 'order' => $this->orderData($order),
             ]);

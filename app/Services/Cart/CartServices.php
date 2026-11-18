@@ -95,6 +95,7 @@ class CartServices
             'quantity' => ['required', 'int', 'min:1'],
         ]);
         Cart::where('id', '=', $id)->withoutGlobalScope('cookie_id')
+            ->where('user_id', $request->user()->id)
             ->update([
                 'quantity' => $request->post('quantity')
             ]);

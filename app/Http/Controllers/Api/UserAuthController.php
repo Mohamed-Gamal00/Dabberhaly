@@ -107,25 +107,30 @@ class UserAuthController extends Controller
             'verification_required' => true,
             'user_id' => $user->id,
         ];
-        return $this->telephoneVerification->SendVerificationCode($user, $data);
+        return $this->telephoneVerification->SendVerificationCode($user, $data, true);
     }
 
 
     public function resetPassword(Request $request)
     {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'code_verify' => 'required',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
         $user = User::where('id', $request->user_id)->first();
 
-        if ($this->userService->isVerificationCodeExpired($user)) {
+        if ($this->userService->isVerificationCodeExpired($user, true)) {
             return ApiResponse::sendResponse(403, "انتهت صلاحية رمز التحقق. يرجى طلب واحد جديدة.");
         }
 
-        $isValidCode = $this->sms_service->checkOTPCodePassword($user->id, $request->code_verify);
+        $isValidCode = $this->sms_service->checkOTPCodePassword($user->id, $request->code_verify, true);
         if ($isValidCode) {
-            $request->validate(['password' => 'required|string|min:6|confirmed']);
             $user->update(['password' => $request->password]);
             return ApiResponse::sendResponse(200, 'Password reset successfully.');
         } else {
-            return ApiResponse::sendResponse(200, 'Invalid verification code');
+            return ApiResponse::sendResponse(403, 'Invalid verification code');
         }
     }
 

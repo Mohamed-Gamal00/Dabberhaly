@@ -69,12 +69,13 @@ const publishableKey = computed(() => props.publishable_key);
 const callbackUrl    = computed(() => props.callback_url);
 const flash          = computed(() => props.flash || {});
 
-const totalAmount = computed(() =>
-    (order.value.total_price || 0) + (order.value.shipping_price || 0)
-);
+// Amount in halalas (smallest unit) — must be integer. Comes from the
+// server so the page charges exactly what the order costs; it used to
+// be computed here as total_price + shipping_price, which double-charged
+// shipping for web orders (their total_price already includes it).
+const amountInHalalas = computed(() => props.amount_halalas ?? 0);
 
-// Amount in halalas (smallest unit) — must be integer
-const amountInHalalas = computed(() => Math.round(totalAmount.value * 100));
+const totalAmount = computed(() => amountInHalalas.value / 100);
 
 function loadScript(src) {
     return new Promise((resolve, reject) => {

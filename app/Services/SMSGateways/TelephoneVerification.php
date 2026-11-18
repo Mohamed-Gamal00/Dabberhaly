@@ -17,9 +17,9 @@ class TelephoneVerification
         $this->moraSms = $moraSmsGateway;
     }
 
-    public function SendVerificationCode($user, $data)
+    public function SendVerificationCode($user, $data, $isResetPassword = false)
     {
-        $verificationData = $this->sms_service->setVerificationCode($user->id);
+        $verificationData = $this->sms_service->setVerificationCode($user->id, $isResetPassword);
         $message = $this->sms_service->getSMSVerifyMessageByAppName($verificationData->code);
         $smsSent = true;
 

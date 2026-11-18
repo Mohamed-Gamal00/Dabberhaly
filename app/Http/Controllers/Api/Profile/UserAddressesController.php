@@ -35,7 +35,7 @@ class UserAddressesController extends Controller
             'first_name' => $request->first_name,
             'family_name' => $request->last_name,
             'address' => $request->address,
-            'country_id' => $userCountry->country_id,
+            'country_id' => $userCountry?->country_id,
             'city_id' => $request->city_id,
             'phone_number' => $request->phone_number
         ]);
@@ -46,18 +46,20 @@ class UserAddressesController extends Controller
     public function updateAddress(UserAddressRequest $request, $id)
     {
         $user = request()->user();
-        $address = UserAddress::find($id);
+        // Scoped to the caller's own addresses: an unscoped find() let
+        // anyone edit (and reassign to themselves) another user's
+        // address, including their main address.
+        $address = $user->addresses()->find($id);
         $userCountry = $user->addresses->first();
 
         if ($address) {
 
             $address->update([
-                'user_id' => $user->id,
                 'address_title' => $request->address_title,
                 'first_name' => $request->first_name,
                 'family_name' => $request->last_name,
                 'address' => $request->address,
-                'country_id' => $userCountry->country_id,
+                'country_id' => $userCountry?->country_id,
                 'city_id' => $request->city_id,
                 'phone_number' => $request->phone_number
             ]);
@@ -70,7 +72,8 @@ class UserAddressesController extends Controller
 
     public function deleteAddress($id)
     {
-        $address = UserAddress::find($id);
+        $user = request()->user();
+        $address = $user->addresses()->find($id);
 
 //        return $address;
         if ($address) {
@@ -93,6 +96,10 @@ class UserAddressesController extends Controller
         $user = $request->user();
 
         $userCountry = $user->addresses->first();
+
+        if (!$userCountry) {
+            return ApiResponse::sendResponse(200, 'No Cities To Retrieved', []);
+        }
 
         $userCities = City::where('status', 'used')->where('country_id', $userCountry->country_id)->get();
 

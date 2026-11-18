@@ -37,11 +37,11 @@
     <script>
         Moyasar.init({
             element: '.mysr-form',
-            amount: {{ (intval($order->total_price) + ((float) $order->shipping_price ?? 0)) * 100 }},
+            amount: {{ $amountHalalas }},
             currency: 'SAR',
             description: 'Order number {{ $order->number }} by {{ Auth::guard('web')->user()->first_name ?? 'guest' }}',
             publishable_api_key: '{{ $publishable_key }}',
-            callback_url: "http://127.0.0.1:8000{{ URL::route('payment.callback', [$order->number], false) }}",
+            callback_url: "{{ route('payment.callback', [$order->number]) }}",
             methods: ['creditcard']
         })
     </script>

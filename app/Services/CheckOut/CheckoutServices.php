@@ -73,9 +73,10 @@ class CheckoutServices
         }
         // شحن بناء علي المدينة
         elseif ($request->has('shipping_based_on_city') && $shipping->add_price_based_on_city == 1) {
-            // لو اليوزر اختار عنوان محفوظ
+            // لو اليوزر اختار عنوان محفوظ — لازم يكون عنوانه هو، مش
+            // عنوان عميل تاني. الزائر معندوش عناوين محفوظة أصلاً.
             if ($request->has('user_address') && $request->user_address !== 'add_address') {
-                $userAddress = UserAddress::find($request->user_address);
+                $userAddress = $user ? $user->addresses()->find($request->user_address) : null;
                 if (!$userAddress) {
                     throw new \Exception('العنوان المحدد غير موجود. يرجى التحقق من صحة العنوان.', 400);
                 }
@@ -177,9 +178,9 @@ class CheckoutServices
 
     public function isAddingNewAddress($order, $request, $user)
     {
-        // الحالة الأولى: اليوزر اختار عنوان محفوظ
+        // الحالة الأولى: اليوزر اختار عنوان محفوظ — لازم يكون عنوانه هو
         if ($request->has('user_address') && $request->user_address !== 'add_address') {
-            $UserAddress = UserAddress::where('id', $request->user_address)->first();
+            $UserAddress = $user ? $user->addresses()->find($request->user_address) : null;
             if ($UserAddress) {
                 $order->addresses()->create([
                     'type'         => 'shipping',

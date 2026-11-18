@@ -69,8 +69,16 @@ class GuestOrdersController extends Controller
         ]);
 
 
-        $order = Order::where('number', $request->order_number)->firstOrFail();
+        $order = Order::where('number', $request->order_number)
+            ->where('guest_id', $request->header('guest-id'))
+            ->firstOrFail();
         $orderItem = $order->orderItems()->where('product_id', $request->product_id)->firstOrFail();
+
+        // Only a pending order can still be edited — once it moves on,
+        // it is already being prepared / paid for.
+        if ($order->return_order || $order->status !== OrderStatus::Pending) {
+            return ApiResponse::sendResponse(422, 'لا يمكن تعديل هذا الطلب');
+        }
 
         if ($orderItem->quantity > 1) {
             $orderItem->decrement('quantity', 1);

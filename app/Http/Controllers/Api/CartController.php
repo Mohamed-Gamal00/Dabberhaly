@@ -30,9 +30,11 @@ class CartController extends Controller
         return $this->cart->addProductToCart($data, $user);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $cart = Cart::withoutGlobalScope('cookie_id')->findOrFail($id);
+        $cart = Cart::withoutGlobalScope('cookie_id')
+            ->where('user_id', $request->user()->id)
+            ->findOrFail($id);
         return $this->cart->deleteCartItem($cart);
     }
 
