@@ -71,7 +71,7 @@
                         <v-btn icon size="small" variant="text" color="grey" @click="openEdit(addr)">
                             <v-icon size="18">mdi-pencil-outline</v-icon>
                         </v-btn>
-                        <v-btn icon size="small" variant="text" color="error" @click="remove(addr.id)">
+                        <v-btn v-if="!addr.main_address" icon size="small" variant="text" color="error" @click="remove(addr.id)">
                             <v-icon size="18">mdi-delete-outline</v-icon>
                         </v-btn>
                     </div>

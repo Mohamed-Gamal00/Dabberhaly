@@ -61,7 +61,7 @@ class UserProfileController extends Controller
     public function userAddressesStore(CreateNewAddressRequest $request)
     {
         UserAddress::create($request->all());
-        return to_route('user.addresses')->with('success', __('flash.address_added'));
+        return back()->with('success', __('flash.address_added'));
     }
 
     public function userAddressesEdit($addressId)
@@ -75,13 +75,22 @@ class UserProfileController extends Controller
     {
         $address = UserAddress::findOrFail($addressId);
         $address->update($request->all());
-        return to_route('user.addresses')->with('success', __('flash.address_updated'));
+        return back()->with('success', __('flash.address_updated'));
     }
 
     public function userAddressesDestroy($addressId)
     {
-        UserAddress::findOrFail($addressId)->delete();
-        return to_route('user.addresses')->with('danger', __('flash.address_deleted'));
+        $address = UserAddress::findOrFail($addressId);
+
+        // The main address feeds the customer's data into orders,
+        // so it can never be deleted (same rule as the mobile API).
+        if ($address->main_address) {
+            return back()->with('danger', __('flash.cannot_delete_main_address'));
+        }
+
+        $address->delete();
+
+        return back()->with('danger', __('flash.address_deleted'));
     }
 
     public function setMainAddress($addressId)
