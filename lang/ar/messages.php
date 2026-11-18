@@ -34,10 +34,8 @@ return [
     'PAGE_UPDATED'                => 'تم تحديث الصفحة بنجاح.',
 
     // Order Status
-    'ORDER_STATUS_CREATED'        => 'تم إنشاء حالة الطلب بنجاح.',
     'ORDER_STATUS_UPDATED'        => 'تم تحديث حالة الطلب بنجاح.',
-    'ORDER_STATUS_DELETED'        => 'تم حذف حالة الطلب بنجاح.',
-    'ORDER_STATUS_REPEAT'         => 'تم اكتشاف حالة طلب مكررة. يرجى مراجعة اختيارك.',
+    'ORDER_STATUS_INVALID_TRANSITION' => 'لا يمكن تغيير حالة الطلب بهذه الطريقة من الحالة الحالية.',
 
     // Orders
     'ORDER_DELETED'               => 'تم حذف الطلب بنجاح.',
@@ -51,6 +49,7 @@ return [
     // Main Categories
     'MAIN_CATEGORY_CREATED'       => 'تم إنشاء الفئة بنجاح.',
     'MAIN_CATEGORY_UPDATED'       => 'تم تحديث الفئة بنجاح.',
+    'MAIN_CATEGORY_DELETED'       => 'تم حذف الفئة بنجاح.',
 
     // Discount Codes
     'DISCOUNT_CODE_CREATED'       => 'تم إنشاء كود الخصم بنجاح.',
@@ -105,6 +104,7 @@ return [
     'MAIN_CHOICE_DELETED'         => 'تم حذف الخيار بنجاح.',
 
     // Bulk Orders
+    'BULKORDER_CREATED'           => 'تم إنشاء الطلب الجماعي بنجاح.',
     'BULKORDER_UPDATED'           => 'تم تحديث الطلب الجماعي بنجاح.',
     'BULKORDER_DELETED'           => 'تم حذف الطلب الجماعي بنجاح.',
 

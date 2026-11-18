@@ -30,16 +30,6 @@ class ReturnOrderRepository implements ReturnOrderInterface
     ->findOrFail($id);
   }
 
-  public function update($request, $id)
-  {
-    $order = $this->order->findOrFail($id);
-    $order->update([
-      'status' => $request->status,
-    ]);
-
-    return $order;
-  }
-
   public function delete($id)
   {
     $order = $this->order->findOrFail($id);

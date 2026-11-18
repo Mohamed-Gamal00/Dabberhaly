@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Helper\Helper;
+use App\Helper\SlugHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MainCategoryRequest;
 use App\Models\Choice;
@@ -29,7 +30,7 @@ class MainCategoriesController extends Controller
    */
   public function index()
   {
-    //Gate::authorize('category.view');
+    Gate::authorize('category.view');
 
     $categories = $this->categoryRepository->getMainCategory();
     return view('dashboard.main_categories.index', compact('categories'));
@@ -40,7 +41,7 @@ class MainCategoriesController extends Controller
    */
   public function create()
   {
-    //Gate::authorize('category.create');
+    Gate::authorize('category.create');
     $mainCategories = $this->categoryRepository->getMainCategory();
     $mainChoices = Choice::latest()->get();
     return view('dashboard.main_categories.create', compact('mainCategories', 'mainChoices'));
@@ -51,13 +52,13 @@ class MainCategoriesController extends Controller
    */
   public function store(MainCategoryRequest $request)
   {
-    //Gate::authorize('category.create');
+    Gate::authorize('category.create');
 
     $data = $request->validated();
     // dd($data);
     // Common fields
     $data['image'] = $this->uploadedImage($request, 'image', 'main_categories');
-    $data['slug'] = str_replace(' ', '-', $request->name);
+    $data['slug'] = SlugHelper::unique('main_categories', str_replace(' ', '-', $request->name));
 
     if ($request->input('type') == 'sub') {
       $validated = $request->validate([
@@ -85,7 +86,7 @@ class MainCategoriesController extends Controller
    */
   public function edit(string $id)
   {
-    //Gate::authorize('category.edit');
+    Gate::authorize('category.edit');
 
     $category = $this->categoryRepository->getById($id);
     $mainCategories = $this->categoryRepository->getAllMainCategoriesExcept($id);
@@ -107,7 +108,7 @@ class MainCategoriesController extends Controller
    */
   public function update(MainCategoryRequest $request, $id)
   {
-    //Gate::authorize('category.edit');
+    Gate::authorize('category.edit');
     $category = MainCategory::findOrFail($id);
 
     $data = $request->validated();
@@ -116,7 +117,7 @@ class MainCategoriesController extends Controller
     if ($request->hasFile('image')) {
       $data['image'] = $this->uploadedImage($request, 'image', 'main_categories');
     }
-    $data['slug'] = str_replace(' ', '-', $request->name);
+    $data['slug'] = SlugHelper::unique('main_categories', str_replace(' ', '-', $request->name), (int) $id);
 
     if ($request->input('type') == 'sub') {
       $validated = $request->validate([
@@ -148,7 +149,7 @@ class MainCategoriesController extends Controller
 
   public function destroy(string $id)
   {
-    //Gate::authorize('category.delete');
+    Gate::authorize('category.delete');
 
     $this->categoryRepository->delete($id);
 

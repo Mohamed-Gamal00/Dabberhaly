@@ -26,13 +26,10 @@ use Inertia\Inertia;
 
     Route::post('/login', [UserAuthController::class, 'login'])->name('auth.login');
     Route::post('/register', [UserAuthController::class, 'register'])->name('auth.register');
-    Route::post('/verify', [UserAuthController::class, 'verifyCode'])->name('auth.verify');
-    Route::post('/verify-resend', [UserAuthController::class, 'resendVerificationCode'])->name('auth.verify.resend');
+    Route::post('/verify', [UserAuthController::class, 'verifyCode'])->middleware('throttle:5,1')->name('auth.verify');
+    Route::post('/verify-resend', [UserAuthController::class, 'resendVerificationCode'])->middleware('throttle:5,1')->name('auth.verify.resend');
     Route::post('/forgot-password', [UserAuthController::class, 'forgotPassword'])->name('auth.forgot');
     Route::post('/update-password', [UserAuthController::class, 'passwordUpdate'])->name('auth.update');
-    Route::post('/logout', [UserAuthController::class, 'logout'])->name('auth.logout');
-
-
 Route::middleware('auth:web')->group(function () {
     Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
     // صفحة الحساب الشخصي
@@ -156,19 +153,10 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/user_addresses/{address}/set_main', [UserProfileController::class, 'setMainAddress'])->name('user.addresses.set_main');
 
 
-    Route::get('/user_change_password', [UserProfileController::class, 'changePasswordView'])->name('user_password');
     Route::put('/user_update_info/update', [UserProfileController::class, 'updatePassword'])->name('update_password');
     Route::put('/user_normal_info/update', [UserProfileController::class, 'updateUserInfo'])->name('update_user_info');
     Route::post('/user_normal_info/verify_to_update', [UserProfileController::class, 'verify_to_update'])->name('verify_to_update');
     Route::post('/user_normal_info/resendVerifyCode_to_update', [UserProfileController::class, 'resendVerifyCodeToupdate'])->name('resendVerifyCode_to_update');
-
-
-    // /* مشاهدة الطلب */
-    // Route::get('/user_orders/{number}', [UserOrdersController::class, 'showOrder'])->name('user.orders');
-    // /* الطلبات */
-    // Route::get('/user_main_orders', [UserOrdersController::class, 'mainOrders'])->name('user.main.orders');
-    // /* حذف طلب */
-    // Route::delete('/user_orders/delete', [UserOrdersController::class, 'destroy'])->name('order.delete');
 
 
     // /* المرتجعات */

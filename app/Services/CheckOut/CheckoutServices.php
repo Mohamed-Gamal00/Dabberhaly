@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Models\Admin;
 use App\Models\Cart;
 use App\Models\City;
+use App\Models\DiscountCode;
 use App\Models\Guest;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -13,6 +14,7 @@ use App\Models\Product;
 use App\Models\SendNewsToUser;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\UserAddress;
+use App\Models\UserDiscountCode;
 use App\Notifications\OrderCreatedAdminNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -73,9 +75,10 @@ class CheckoutServices
         }
         // شحن بناء علي المدينة
         elseif ($request->has('shipping_based_on_city') && $shipping->add_price_based_on_city == 1) {
-            // لو اليوزر اختار عنوان محفوظ
+            // لو اليوزر اختار عنوان محفوظ — لازم يكون عنوانه هو، مش
+            // عنوان عميل تاني. الزائر معندوش عناوين محفوظة أصلاً.
             if ($request->has('user_address') && $request->user_address !== 'add_address') {
-                $userAddress = UserAddress::find($request->user_address);
+                $userAddress = $user ? $user->addresses()->find($request->user_address) : null;
                 if (!$userAddress) {
                     throw new \Exception('العنوان المحدد غير موجود. يرجى التحقق من صحة العنوان.', 400);
                 }
@@ -95,11 +98,43 @@ class CheckoutServices
         return (float) $shippingPrice;
     }
 
+    /**
+     * Record a discount code's use, exactly once, when the order is
+     * created (inside the checkout transaction). Applying a code only
+     * discounts the cart — abandoning checkout must not burn a use.
+     */
+    protected function consumeDiscountCode(): ?int
+    {
+        $discountCodeId = session('applied_discount_code_id');
+
+        if (! $discountCodeId) {
+            return null;
+        }
+
+        $code = DiscountCode::where('id', $discountCodeId)->lockForUpdate()->first();
+
+        if (! $code || $code->status !== 'active' || $code->number_of_used <= 0) {
+            throw new \Exception('كود الخصم غير متاح', 400);
+        }
+
+        UserDiscountCode::create([
+            'cookie_id' => Cart::getCookieId(),
+            'discount_id' => $code->id,
+        ]);
+        $code->decrement('number_of_used');
+
+        return $code->id;
+    }
+
     public function createOrder($request, $user, $shippingPrice): Order
     {
         $totalPrice          = $this->calculateTotal($user);
         $totalBeforeDiscount = $this->calculateTotalBeforeDiscount($user);
         $cookieId = Cart::getCookieId();
+
+        // Consume the applied discount code now (not at apply time),
+        // so an abandoned checkout never burns a use.
+        $discountCodeId = $this->consumeDiscountCode();
 
         // For guest checkout: create or update a Guest record
         $guestId = null;
@@ -119,10 +154,10 @@ class CheckoutServices
             $guestId = $guest->id;
         }
 
-        return Order::create([
+        return Order::createWithUniqueNumber([
             'user_id'             => $user?->id,
             'guest_id'            => $guestId,
-            'discount_code_id'    => session('applied_discount_code_id'),
+            'discount_code_id'    => $discountCodeId,
             'payment_method'      => $request->payment_method,
             'status'              => OrderStatus::Pending,
             'note'                => $request->note,
@@ -138,6 +173,15 @@ class CheckoutServices
         $cartItems = $this->getCartItems($user);
 
         foreach ($cartItems as $cartItem) {
+            // Lock the product row and refuse to oversell: without the
+            // check the quantity could go negative. Checked before the
+            // item is created so a failure leaves nothing behind.
+            $product = Product::where('id', $cartItem->product_id)->lockForUpdate()->first();
+
+            if (! $product || $product->quantity < $cartItem->quantity) {
+                throw new \Exception('الكمية المطلوبة غير متوفرة.', 400);
+            }
+
             $orderItem = OrderItem::create([
                 'order_id'     => $order->id,
                 'product_id'   => $cartItem->product_id,
@@ -146,7 +190,7 @@ class CheckoutServices
                 'quantity'     => $cartItem->quantity,
             ]);
 
-            $cartItem->product->decrement('quantity', $cartItem->quantity);
+            $product->decrement('quantity', $cartItem->quantity);
         }
     }
 
@@ -177,9 +221,9 @@ class CheckoutServices
 
     public function isAddingNewAddress($order, $request, $user)
     {
-        // الحالة الأولى: اليوزر اختار عنوان محفوظ
+        // الحالة الأولى: اليوزر اختار عنوان محفوظ — لازم يكون عنوانه هو
         if ($request->has('user_address') && $request->user_address !== 'add_address') {
-            $UserAddress = UserAddress::where('id', $request->user_address)->first();
+            $UserAddress = $user ? $user->addresses()->find($request->user_address) : null;
             if ($UserAddress) {
                 $order->addresses()->create([
                     'type'         => 'shipping',
@@ -260,7 +304,7 @@ class CheckoutServices
         // تعطيل المنتج لو الكمية وصلت للصفر أو أقل
         foreach ($cartItems as $item) {
             $product = Product::where('id', $item->product_id)->first();
-            if ($product && $product->quantity <= 1) {
+            if ($product && $product->quantity <= 0) {
                 $product->update(['status' => 'archived']);
             }
         }

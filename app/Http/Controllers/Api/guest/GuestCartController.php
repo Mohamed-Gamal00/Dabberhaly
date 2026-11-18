@@ -47,12 +47,19 @@ class GuestCartController extends Controller
     public function guestStore(Request $request)
     {
         $request->validate([
-            'cookie_id'  => 'required|string',
             'product_id' => 'required|exists:products,id',
             'quantity'   => 'required|integer|min:1',
         ]);
 
-        $cookieId = $request->cookie_id;
+        // The guest identity comes from the guest-id header, never from
+        // the request body — a body cookie_id would let any guest write
+        // into any other guest's cart.
+        $cookieId = $request->header('guest-id');
+
+        if (!$cookieId) {
+            return response()->json(['error' => 'not found'], 401);
+        }
+
         $product  = Product::findOrFail($request->product_id);
         $quantity = $request->quantity;
 
@@ -90,9 +97,10 @@ class GuestCartController extends Controller
         ], 200);
     }
 
-    public function guestDestroy($id)
+    public function guestDestroy(Request $request, $id)
     {
         Cart::where('id', $id)->withoutGlobalScope('cookie_id')
+            ->where('cookie_id', $request->header('guest-id'))
             ->update(['status' => 1]);
 
         return ApiResponse::sendResponse(200, 'تم الحذف بنجاح', []);
@@ -105,16 +113,9 @@ class GuestCartController extends Controller
         ]);
 
         Cart::where('id', $id)->withoutGlobalScope('cookie_id')
+            ->where('cookie_id', $request->header('guest-id'))
             ->update(['quantity' => $request->post('quantity')]);
 
         return ApiResponse::sendResponse(200, 'تم التعديل بنجاح', []);
-    }
-
-    public function totalBeforeDiscount(Request $request): float
-    {
-        return Cart::with('product')->withoutGlobalScope('cookie_id')
-            ->where('user_id', $request->user()->id)
-            ->where('status', 0)->get()
-            ->sum(fn ($item) => $item->quantity * $item->product->price);
     }
 }

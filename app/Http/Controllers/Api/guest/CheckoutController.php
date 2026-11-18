@@ -20,6 +20,7 @@ use App\Models\UserAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Throwable;
 
 class CheckoutController extends Controller
 {
@@ -93,7 +94,7 @@ class CheckoutController extends Controller
         // شحن بناء علي الوزن
         elseif ($request->has('shipping_based_on_weight') && $request->shipping_based_on_weight == 1 && $shipping->add_wight_price == 1) {
             $Cartitems = Cart::withoutGlobalScope('cookie_id')
-                ->where('user_id', $user->id)
+                ->where('cookie_id', $guestId)
                 ->where('status', 0)->get();
 
             $productWeight = [];
@@ -140,7 +141,7 @@ class CheckoutController extends Controller
 
             $guest = Guest::where('cookie_id', $guestId)->first();
 
-            $order = Order::create([
+            $order = Order::createWithUniqueNumber([
                 'guest_id' => $guest?->id,
                 'payment_method' => $request->payment_method, // cash on deleviry
                 'status' => OrderStatus::Pending,
@@ -156,17 +157,25 @@ class CheckoutController extends Controller
 
             /* items of cart items */
             foreach ($items as $cart_items) {
-                // العناصر اللي في السلة هعمل بيها اوردر
+                // Check stock before creating the item, so a failure
+                // leaves nothing behind.
+                $product = Product::where('id', $cart_items->product_id)->lockForUpdate()->first();
+                if (! $product || $product->quantity < $cart_items->quantity) {
+                    throw new \Exception('الكمية المطلوبة غير متوفرة.', 400);
+                }
+
+                // Unit price — the admin view shows price as the unit
+                // price and price * quantity as the line total, so the
+                // line total must NOT be stored here.
                 $item = OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $cart_items->product_id,
                     'product_name' => $cart_items->product->name, // product is the relation
-                    'price' => $cart_items->product->price * $cart_items->quantity, // product is the relation
+                    'price' => $cart_items->discounted_price ?? $cart_items->product->price, // product is the relation
                     'quantity' => $cart_items->quantity,
                 ]);
 
                 # NOTE:: Ensure that the user cannot add more items to the cart than the available quantity of the product.
-                $product = Product::where('id', $item->product_id)->first();
                 Product::where('id', $item->product_id)->update([
                     'quantity' => $product->quantity - $item->quantity
                 ]);
@@ -188,7 +197,7 @@ class CheckoutController extends Controller
             foreach ($items as $item) {
                 $product = Product::where('id', $item->product_id)->first();
                 # TODO::check what is this mean ? check product quantity after checkout
-                if ($product->quantity <= 1) {
+                if ($product->quantity <= 0) {
                     $product->update([
                         'status' => 'archived'
                     ]);

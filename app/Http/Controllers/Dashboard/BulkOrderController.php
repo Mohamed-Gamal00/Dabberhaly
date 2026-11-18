@@ -32,6 +32,24 @@ class BulkOrderController extends Controller
   }
 
   /**
+   * Store a newly created resource in storage.
+   */
+  public function store(Request $request)
+  {
+    $request->validate([
+      'name' => 'required|string|max:255',
+      'phone' => 'required|string|max:255',
+      'company_name' => 'required|string|max:255',
+      'description' => 'required|string',
+    ]);
+
+    $this->bulkOrders->store($request->all());
+
+    return redirect()->route('bulk_orders.index')
+    ->with('success', __('messages.BULKORDER_CREATED'));
+  }
+
+  /**
    * Display the specified resource.
    */
   public function show(string $id)

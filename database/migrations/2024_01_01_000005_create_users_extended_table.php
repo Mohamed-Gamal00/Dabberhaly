@@ -25,7 +25,7 @@ return new class extends Migration {
             }
         });
 
-        if (!Schema::hasTable('users_verificationcodes')) {
+        if (!Schema::hasTable('users_verificationCodes')) {
             Schema::create('users_verificationCodes', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();

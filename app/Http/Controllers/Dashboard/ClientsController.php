@@ -7,7 +7,6 @@ use App\Http\Requests\Dashboard\Client\ClientRequest;
 use App\Http\Requests\Dashboard\Client\ClientUpdatePasswordRequest;
 use App\Models\User;
 use App\Repositories\Client\ClientRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,7 +23,7 @@ class ClientsController extends Controller
    */
   public function index()
   {
-    //Gate::authorize('client.view');
+    Gate::authorize('client.view');
     // $clients = User::with('addresses.country')->latest()->paginate();
     $clients = $this->clientRepo->getMainClient();
     // dd($clients);
@@ -33,35 +32,11 @@ class ClientsController extends Controller
   }
 
   /**
-   * Show the form for creating a new resource.
-   */
-  public function create()
-  {
-    //
-  }
-
-  /**
-   * Store a newly created resource in storage.
-   */
-  public function store(Request $request)
-  {
-    //
-  }
-
-  /**
-   * Display the specified resource.
-   */
-  public function show(string $id)
-  {
-    //
-  }
-
-  /**
    * Show the form for editing the specified resource.
    */
   public function edit(string $id)
   {
-    //Gate::authorize('client.change_password');
+    Gate::authorize('client.edit');
     $client = User::findOrFail($id);
     return view('dashboard.clients.edit', compact('client'));
   }
@@ -69,7 +44,7 @@ class ClientsController extends Controller
 
   public function updatePassword(ClientUpdatePasswordRequest $request, string $id)
   {
-    //Gate::authorize('client.change_password');
+    Gate::authorize('client.edit');
     $data = $request->validated();
     $this->clientRepo->updatePassword($data, $id);
     return back()->with('success', __('messages.CLIENT_UPDATED_PASSWORD'));
@@ -77,7 +52,7 @@ class ClientsController extends Controller
 
   public function update(ClientRequest $request, string $id)
   {
-    //Gate::authorize('client.edit');
+    Gate::authorize('client.edit');
 
     $data = $request->validated();
 
@@ -94,7 +69,7 @@ class ClientsController extends Controller
    */
   public function destroy(string $id)
   {
-    //Gate::authorize('client.delete');
+    Gate::authorize('client.delete');
 
     $this->clientRepo->delete($id);
     return back()->with('dark', __('messages.CLIENT_DELETE'));

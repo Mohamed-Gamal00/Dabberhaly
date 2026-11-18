@@ -17,6 +17,11 @@ class CheckDiscountService
             ->first();
     }
 
+    /**
+     * Has this guest/user already used the code? Read-only check — the
+     * usage row is created only when the discount actually applies to
+     * a non-empty cart (see CheckDiscountController).
+     */
     public function checkIfUserUseDiscountCode($discountCode)
     {
         $userDiscountCodeExists = UserDiscountCode::where([
@@ -27,14 +32,15 @@ class CheckDiscountService
         if ($userDiscountCodeExists) {
             return ApiResponse::sendResponse(400, __('flash.discount_already_used'));
         }
-        UserDiscountCode::create([
-            'cookie_id' => Cart::getCookieIdApi(),
-            'discount_id' => $discountCode->id
-        ]);
 
         return null;
     }
 
+    /**
+     * Apply the discount to the cart items. Returns the response data
+     * on success, or null when the cart is empty (so the caller can
+     * skip consuming the code).
+     */
     public function applyDiscountToCartItems($discountCode, $isGlobalDiscount, $user)
     {
         $cartItems = Cart::with('product')->withoutGlobalScope('cookie_id')
@@ -42,7 +48,7 @@ class CheckDiscountService
             ->where('status', 0)->get();
 
         if ($cartItems->isEmpty()) {
-            return ApiResponse::sendResponse(200, __('flash.discount_cart_empty'));
+            return null;
         }
 
         foreach ($cartItems as $item) {
@@ -61,10 +67,9 @@ class CheckDiscountService
             }
         }
 
-        $data = [
+        return [
             'discount_code' => $discountCode->code,
             'discount_price' => $discountCode->price,
         ];
-        return ApiResponse::sendResponse(200, __('flash.success'), $data);
     }
 }

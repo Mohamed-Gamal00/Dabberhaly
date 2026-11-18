@@ -96,7 +96,7 @@ class ProductsController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        //Gate::authorize('product.create');
+        Gate::authorize('product.create');
         $data = $request->validated();
         $data['category_id'] = $data['parent_id'];
         // dd($data);
@@ -127,7 +127,7 @@ class ProductsController extends Controller
      */
     public function edit(string $id)
     {
-        //Gate::authorize('product.edit');
+        Gate::authorize('product.edit');
         $product = Product::with('colors', 'choices', 'parent', 'availability', 'features')->findOrFail($id);
 
         $categories = MainCategory::all();

@@ -22,7 +22,7 @@ class ProductAvailabilityController extends Controller
    */
   public function index()
   {
-    //Gate::authorize('product_availability.view');
+    Gate::authorize('product_availability.view');
 
     $availabilities = $this->productAvailabilityRepository->getMainProductAvailability();
     return view('dashboard.product_availability.index', [
@@ -35,7 +35,7 @@ class ProductAvailabilityController extends Controller
    */
   public function create()
   {
-    //Gate::authorize('product_availability.create');
+    Gate::authorize('product_availability.create');
 
     return view('dashboard.product_availability.create');
   }
@@ -45,7 +45,7 @@ class ProductAvailabilityController extends Controller
    */
   public function store(ProductAvailabilityRequest $request)
   {
-    //Gate::authorize('product_availability.create');
+    Gate::authorize('product_availability.create');
     $data = $request->validated();
 
     $this->productAvailabilityRepository->store($data);
@@ -67,7 +67,7 @@ class ProductAvailabilityController extends Controller
    */
   public function edit(string $id)
   {
-    //Gate::authorize('product_availability.edit');
+    Gate::authorize('product_availability.edit');
 
     $availability = ProductAvailability::findOrFail($id);
     return view('dashboard.product_availability.edit', \compact('availability'));
@@ -78,7 +78,7 @@ class ProductAvailabilityController extends Controller
    */
   public function update(ProductAvailabilityRequest $request, string $id)
   {
-    //Gate::authorize('product_availability.edit');
+    Gate::authorize('product_availability.edit');
 
     $data = $request->validated();
 
@@ -100,7 +100,7 @@ class ProductAvailabilityController extends Controller
    */
   public function destroy(string $id)
   {
-    //Gate::authorize('product_availability.delete');
+    Gate::authorize('product_availability.delete');
     $this->productAvailabilityRepository->delete($id);
     return to_route('product_availability.index')
       ->with('danger', __('messages.STATUS_AVAILABILITY_DELETED'));

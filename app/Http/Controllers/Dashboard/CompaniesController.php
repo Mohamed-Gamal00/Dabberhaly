@@ -29,7 +29,7 @@ class CompaniesController extends Controller
 
   public function index()
   {
-    //Gate::authorize('company.view');
+    Gate::authorize('company.view');
     $companies = $this->companyRepo->getMainCompany();
     return view('dashboard.companies.index', compact('companies'));
   }
@@ -39,7 +39,7 @@ class CompaniesController extends Controller
    */
   public function create()
   {
-    //Gate::authorize('company.create');
+    Gate::authorize('company.create');
     return view('dashboard.companies.create');
   }
 
@@ -48,7 +48,7 @@ class CompaniesController extends Controller
    */
   public function store(CompanyRequest $request)
   {
-    //Gate::authorize('company.create');
+    Gate::authorize('company.create');
 
     $data = $request->validated();
     $data['image'] = $this->uploadedImage($request, 'image', 'companies');
@@ -67,7 +67,7 @@ class CompaniesController extends Controller
    */
   public function edit(string $id)
   {
-    //Gate::authorize('company.edit');
+    Gate::authorize('company.edit');
     $company = Company::findOrFail($id);
     return view('dashboard.companies.edit', compact('company'));
   }
@@ -77,7 +77,7 @@ class CompaniesController extends Controller
    */
   public function update(CompanyRequest $request, string $id)
   {
-    //Gate::authorize('company.edit');
+    Gate::authorize('company.edit');
     $data = $request->validated();
 
     $company = $this->companyRepo->getById($id);
@@ -102,7 +102,7 @@ class CompaniesController extends Controller
    */
   public function destroy(string $id)
   {
-    //Gate::authorize('company.delete');
+    Gate::authorize('company.delete');
     $this->companyRepo->delete($id);
     return back()->with('dark', __('messages.COMPANY_DELETED'));
   }

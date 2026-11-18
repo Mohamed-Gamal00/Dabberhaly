@@ -32,6 +32,11 @@ class SettingRequest extends FormRequest
             'tiktok'                   => 'nullable',
             'publishable_key'          => 'nullable',
             'secret_key'               => 'nullable',
+            'sms_api_key'              => 'nullable',
+            'sms_user_name'            => 'nullable',
+            'sms_sender'               => 'nullable',
+            'apple_store'              => 'nullable',
+            'google_play'              => 'nullable',
 
             // SEO
             'seo_meta_title'           => 'nullable|string|max:160',

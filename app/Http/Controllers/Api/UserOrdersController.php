@@ -40,10 +40,10 @@ class UserOrdersController extends Controller
     public function showOrder(Request $request, $number)
     {
         $user = $request->user();
-        $number = $request->header('number');
+
         if (!$number) {
             return response()->json([
-                'message' => 'Order number is required in the header',
+                'message' => 'Order number is required',
                 'errors' => [
                     'number' => ['Order number is required.']
                 ]
@@ -59,7 +59,7 @@ class UserOrdersController extends Controller
             ->first();
 
         if (!$order) {
-            return ApiResponse::sendResponse(200, 'الطلب غير موجود');
+            return ApiResponse::sendResponse(404, 'الطلب غير موجود');
         }
 //        return $order;
         $data = [
@@ -83,8 +83,16 @@ class UserOrdersController extends Controller
 //        // Delete the order item
 //        $orderItem->delete();
 
-        $order = Order::where('number', $request->order_number)->firstOrFail();
+        $order = Order::where('number', $request->order_number)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
         $orderItem = $order->orderItems()->where('product_id', $request->product_id)->firstOrFail();
+
+        // Only a pending order can still be edited — once it moves on,
+        // it is already being prepared / paid for.
+        if ($order->return_order || $order->status !== OrderStatus::Pending) {
+            return ApiResponse::sendResponse(422, 'لا يمكن تعديل هذا الطلب');
+        }
 
         if ($orderItem->quantity > 1) {
             $orderItem->decrement('quantity', 1);

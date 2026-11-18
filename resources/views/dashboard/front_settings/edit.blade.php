@@ -293,7 +293,7 @@
                             <label class="form-label fw-semibold">المفتاح السري (Secret Key)</label>
                             <div class="input-group">
                                 <input type="password" name="secret_key" id="secretKeyInput" class="form-control"
-                                    value="{{ old('secret_key', $setting->secret_key) }}" dir="ltr" />
+                                    placeholder="اتركه فارغًا للاحتفاظ بالمفتاح الحالي" dir="ltr" />
                                 <button type="button" class="btn btn-outline-secondary"
                                     onclick="toggleSecret()">
                                     <i class="mdi mdi-eye-outline" id="secretEyeIcon"></i>
@@ -312,8 +312,8 @@
                     <div class="card-body d-flex flex-column gap-3">
                         <div>
                             <label class="form-label fw-semibold">مفتاح API</label>
-                            <input type="text" name="sms_api_key" class="form-control"
-                                value="{{ old('sms_api_key', $setting->sms_api_key) }}" dir="ltr" />
+                            <input type="password" name="sms_api_key" class="form-control"
+                                placeholder="اتركه فارغًا للاحتفاظ بالمفتاح الحالي" dir="ltr" />
                         </div>
                         <div>
                             <label class="form-label fw-semibold">اسم المستخدم</label>

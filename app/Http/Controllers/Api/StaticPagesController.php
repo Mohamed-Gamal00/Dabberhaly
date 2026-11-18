@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\SettingResource;
 use App\Models\CommonQuestion;
 use App\Models\Page;
+use App\Services\HtmlSanitizer;
 use Illuminate\Http\Request;
 
 class StaticPagesController extends Controller
@@ -16,19 +17,19 @@ class StaticPagesController extends Controller
         $page = Page::select('title', 'content')->where('id', '3')->first();
 
         if ($page) {
-            $page->content = translateWithHTMLTags($page->content);
+            $page->content = HtmlSanitizer::purify(translateWithHTMLTags($page->content));
             $page->title = translateWithHTMLTags($page->title);
         }
 
         $shipping_policy = Page::select('title', 'content')->where('id', '2')->first();
         if ($shipping_policy) {
-            $shipping_policy->content = translateWithHTMLTags($shipping_policy->content);
+            $shipping_policy->content = HtmlSanitizer::purify(translateWithHTMLTags($shipping_policy->content));
             $shipping_policy->title = translateWithHTMLTags($shipping_policy->title);
         }
 
         $Terms_and_Conditions = Page::select('title', 'content')->where('id', '1')->first();
         if ($Terms_and_Conditions) {
-            $Terms_and_Conditions->content = translateWithHTMLTags($Terms_and_Conditions->content);
+            $Terms_and_Conditions->content = HtmlSanitizer::purify(translateWithHTMLTags($Terms_and_Conditions->content));
             $Terms_and_Conditions->title = translateWithHTMLTags($Terms_and_Conditions->title);
 
         }

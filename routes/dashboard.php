@@ -22,7 +22,6 @@ use App\Http\Controllers\Dashboard\MainCategoriesController;
 use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\PageController;
 use App\Http\Controllers\Dashboard\ProductsController;
-use App\Http\Controllers\Dashboard\ProductsFeatures;
 use App\Http\Controllers\Dashboard\ReportsController;
 use App\Http\Controllers\Dashboard\ReturnOrderController;
 use App\Http\Controllers\Dashboard\RulesController;
@@ -34,7 +33,6 @@ use App\Http\Controllers\Dashboard\ProfileController;
 use App\Http\Controllers\Dashboard\ProfileSettingsController;
 use App\Http\Controllers\Dashboard\RepresentativesOrderController;
 use App\Http\Controllers\Dashboard\StoreFatuerController;
-use App\Livewire\Categories;
 use Illuminate\Support\Facades\Route;
 
 //=============================================== Dashboard Routes
@@ -103,7 +101,6 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
 
     Route::post('/product_images/delete', [ProductsController::class, 'imageDelete'])->name('image.delete');
 
-    Route::post('/search', [ProductsController::class, 'search'])->name('search');
     Route::get('/products/out_of_stock', [ProductsController::class, 'outOfStock'])->name('out_of_stock');
     Route::get('/fetch-choices', [ProductsController::class, 'fetchChoices'])->name('fetch.choices');
 
@@ -116,7 +113,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::resource('/companies', CompaniesController::class);
 
     //----------------------------------------------/stores routes
-    Route::resource('/store_featuers', StoreFatuerController::class);
+    Route::resource('/store_featuers', StoreFatuerController::class)->except('show');
 
     //----------------------------------------------/Admins routes
     Route::put('/admins/{id}/update_password', [AdminsController::class, 'ChangePassword'])->name('admins.update_password');
@@ -124,7 +121,7 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
 
     //----------------------------------------------/Clients routes
     Route::put('/clients/{id}/update_pass', [ClientsController::class, 'updatePassword'])->name('client.update_password');
-    Route::resource('/clients', ClientsController::class);
+    Route::resource('/clients', ClientsController::class)->except(['create', 'store', 'show']);
 
     //----------------------------------------------/Admins Rules routes
     Route::resource('/rules', RulesController::class);
@@ -136,14 +133,10 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('/header_banner', [HeaderBanerController::class, 'index'])->name('header_banner.index');
     Route::post('/header_banner/delete', [HeaderBanerController::class, 'frontHeaderRemoveImage'])->name('headerImage.remove');
     Route::post('/header_banner/store', [HeaderBanerController::class, 'frontHeaderStoreAndUpdate'])->name('header_banner.sotreAndUpdate');
-    /*english header banners*/
-    Route::get('/header_banner_en', [HeaderBanerController::class, 'index_en'])->name('header_banner_en.index');
-    Route::post('/header_banner_en/delete', [HeaderBanerController::class, 'frontHeaderRemoveImage_en'])->name('headerImage_en.remove');
-    Route::post('/header_banner_en/store', [HeaderBanerController::class, 'frontHeaderStoreAndUpdate_en'])->name('header_banner_en.sotreAndUpdate');
 
     //----------------------------------------------/Animated Advertisements
     Route::post('advertisements/{advertisement}/toggle', [AdvertisementController::class, 'toggle'])->name('advertisements.toggle');
-    Route::resource('advertisements', AdvertisementController::class);
+    Route::resource('advertisements', AdvertisementController::class)->except('show');
 
     //----------------------------------------------/static pages
     Route::resource('pages', PageController::class);
@@ -182,13 +175,12 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
     Route::get('/return_orders', [ReturnOrderController::class, 'index'])->name('return_orders.index');
     Route::get('/return_orders/{id}', [ReturnOrderController::class, 'show'])->name('return_orders.show');
     Route::delete('/return_orders/{id}/delete', [ReturnOrderController::class, 'destroy'])->name('return_orders.destroy');
-    Route::put('/return_orders/{id}/update', [ReturnOrderController::class, 'update'])->name('return_orders.update');
 
     //----------------------------------------------/ product_availability Route /---------------------------
     Route::resource('/product_availability', ProductAvailabilityController::class);
 
     //----------------------------------------------/DiscountCode routes
-    Route::resource('/discount_code', DiscountCodeController::class);
+    Route::resource('/discount_code', DiscountCodeController::class)->except('show');
     Route::get('/api/search-products', [DiscountCodeController::class, 'searchProducts'])->name('search.products');
 
     //----------------------------------------------/ Orders Routes

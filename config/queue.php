@@ -38,7 +38,10 @@ return [
             'driver' => 'database',
             'table' => 'jobs',
             'queue' => 'default',
-            'retry_after' => 90,
+            // Must stay above the longest job timeout (the newsletter
+            // listener runs up to 120s) or a slow job is released while
+            // still running and gets executed twice.
+            'retry_after' => 180,
             'after_commit' => true,
         ],
 

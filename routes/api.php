@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\AllProductsController;
 use App\Http\Controllers\Api\BrandsController;
 use App\Http\Controllers\Api\CitiesController;
 use App\Http\Controllers\Api\ColorsController;
-use App\Http\Controllers\Api\CountriesController;
 use App\Http\Controllers\Api\CurrenciesController;
 use App\Http\Controllers\Api\DiscountsController;
 use App\Http\Controllers\Api\FilterProductsController;
@@ -52,7 +51,7 @@ Route::middleware(['changeLanguage'])->group(function () {
 
 
     ###########################################################################-- User Profile
-    Route::middleware('auth:user')->group(function () {
+    Route::middleware(['auth:user', 'is_user_verified'])->group(function () {
         #----------------------------------------------------------------------------------- Personal Info
         Route::post('change-personal-info', [PersonalInfoController::class, 'changePersonalInfo']);
         Route::post('change-password', [PersonalInfoController::class, 'changePassword']);
@@ -72,9 +71,6 @@ Route::middleware(['changeLanguage'])->group(function () {
             Route::post('add', [CartController::class, 'store']);
             Route::post('/update/{id}', [CartController::class, 'update']);
             Route::post('/delete/{id}', [CartController::class, 'destroy']);
-            Route::get('/count', [CartController::class, 'getCartCount']);
-            Route::get('/total-price', [CartController::class, 'getTotalPrice']);
-            Route::get('/total-quantity', [CartController::class, 'getTotalQuantity']);
             Route::get('/', [CartController::class, 'index']);
         });
 
@@ -108,10 +104,8 @@ Route::middleware(['changeLanguage'])->group(function () {
 
 
     ###########################################################################-- Get All Countries
-    // Route::get('get-countries', [CountriesController::class, 'allCountries']);
 
-    ###########################################################################-- Get All Countries
-    Route::get('get-cities', [CitiesController::class, 'allCities']);
+    ###########################################################################-- Get All Cities
 
     ####################################### Settings #############################################
     Route::get('settings', [SettingsController::class, 'settings']);
@@ -157,7 +151,6 @@ Route::middleware(['changeLanguage'])->group(function () {
 
     ###########################################################################-- Product Details Page
     Route::get('product-details/{id}', [ProductDetailsController::class, 'getProductDetails']);
-    Route::get('product-colors/{id}', [ProductDetailsController::class, 'productColors']);
     Route::get('product-features/{id}', [ProductDetailsController::class, 'productFeatures']);
     Route::get('related-products/{id}', [ProductDetailsController::class, 'relatedProducts']);
 
@@ -169,7 +162,7 @@ Route::middleware(['changeLanguage'])->group(function () {
     Route::post('contact-us', [ContactUsController::class, 'sendMessage']);
 
     ########################################################################### Create New Guest
-    Route::post('create-guest', [GuestController::class, 'createGuest']);
+    Route::post('create-guest', [GuestController::class, 'createGuest'])->middleware('throttle:10,1');
 
     ########################################################################### Favorite Products
 
@@ -177,9 +170,7 @@ Route::middleware(['changeLanguage'])->group(function () {
     Route::post('user-fav-product-add-or-delete', [AddToFavProductsController::class, 'userAddFavProducts'])->middleware('auth:user');
 
     Route::get('all-guest-fav-products', [GetAllFavProductsController::class, 'guestFavProducts']);
-    Route::post('guest-fav-product-add-or-delete', [AddToFavProductsController::class, 'guestAddFavProducts']);
     Route::get('check-if-auth', [AddToFavProductsController::class, 'checkIfAuth'])->middleware('auth:user');
-    Route::get('check-if-product-exists', [AddToFavProductsController::class, 'checkIfProductExists']);
 
 
     ############################################ orders ########################################
@@ -194,13 +185,11 @@ Route::middleware(['changeLanguage'])->group(function () {
             Route::post('add', [GuestCartController::class, 'guestStore']);
             Route::post('/update/{id}', [GuestCartController::class, 'guestUpdate']);
             Route::post('/delete/{id}', [GuestCartController::class, 'guestDestroy']);
-            Route::get('/count', [GuestCartController::class, 'guestGetCartCount']);
-            Route::get('/total-price', [GuestCartController::class, 'guestGetTotalPrice']);
-            Route::get('/total-quantity', [GuestCartController::class, 'guestGetTotalQuantity']);
             Route::get('/', [GuestCartController::class, 'guestIndex']);
         });
         
         Route::post('/guest-checkout', [\App\Http\Controllers\Api\guest\CheckoutController::class, 'guestCheckout']);
+        Route::post('guest-fav-product-add-or-delete', [AddToFavProductsController::class, 'guestAddFavProducts']);
         Route::post('/guest-check-discount', \App\Http\Controllers\Api\guest\GuestCheckDiscountController::class);
 
         #-------------------------------------- guest-orders --------------------------------------------
@@ -222,6 +211,6 @@ Route::middleware(['changeLanguage'])->group(function () {
 });
 
 
-Route::get('/payment-page/{order_number}', [\App\Http\Controllers\Api\PaymentController::class, 'index'])->name('user.payment');
+Route::get('/payment-page/{order_number}', [\App\Http\Controllers\Api\PaymentController::class, 'index'])->name('api.user.payment');
 /*عملية الدفع*/
-Route::get('/payment-page/{number}/payment/callback', [\App\Http\Controllers\Api\PaymentController::class, 'callback'])->name('payment.callback');
+Route::get('/payment-page/{number}/payment/callback', [\App\Http\Controllers\Api\PaymentController::class, 'callback'])->name('api.payment.callback');

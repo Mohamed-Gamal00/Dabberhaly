@@ -22,7 +22,7 @@ class ShippingController extends Controller
   }
   public function index()
   {
-    //Gate::authorize('shipping.edit');
+    Gate::authorize('shipping.edit');
 
     $countries = $this->shippingRepository->getCountriesWithStatus('used');
     $cities = $this->shippingRepository->getCitiesWithStatus('used');
@@ -53,7 +53,7 @@ class ShippingController extends Controller
   }
   public function update(Request $request, $id)
   {
-    //Gate::authorize('shipping.edit');
+    Gate::authorize('shipping.edit');
 
     $request->validate([
       'add_pickup_from_store' => 'nullable|boolean',

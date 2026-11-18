@@ -80,6 +80,20 @@ class UserAuthController extends Controller
     {
         $user = User::where('phone_number', $request->phone_number)->first();
         if ($user && Hash::check($request->password, $user->password)) {
+            // Accounts registered through the API must verify their OTP
+            // before they can log in. Users with no verification row
+            // (e.g. registered on the website, where verification happens
+            // before the account is created) are not blocked — and note
+            // users.is_verified is never set anywhere, so it must not
+            // be used as the check here.
+            $verification = $user->verificationCode;
+            if ($verification && ! $verification->is_verified) {
+                return ApiResponse::sendResponse(403, 'Account not verified', [
+                    'verification_required' => true,
+                    'user_id' => $user->id,
+                ]);
+            }
+
             $token = $user->createToken('-AuthToken')->plainTextToken;
             $data = [
                 'token' => $token,
@@ -107,25 +121,30 @@ class UserAuthController extends Controller
             'verification_required' => true,
             'user_id' => $user->id,
         ];
-        return $this->telephoneVerification->SendVerificationCode($user, $data);
+        return $this->telephoneVerification->SendVerificationCode($user, $data, true);
     }
 
 
     public function resetPassword(Request $request)
     {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'code_verify' => 'required',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
         $user = User::where('id', $request->user_id)->first();
 
-        if ($this->userService->isVerificationCodeExpired($user)) {
+        if ($this->userService->isVerificationCodeExpired($user, true)) {
             return ApiResponse::sendResponse(403, "انتهت صلاحية رمز التحقق. يرجى طلب واحد جديدة.");
         }
 
-        $isValidCode = $this->sms_service->checkOTPCodePassword($user->id, $request->code_verify);
+        $isValidCode = $this->sms_service->checkOTPCodePassword($user->id, $request->code_verify, true);
         if ($isValidCode) {
-            $request->validate(['password' => 'required|string|min:6|confirmed']);
             $user->update(['password' => $request->password]);
             return ApiResponse::sendResponse(200, 'Password reset successfully.');
         } else {
-            return ApiResponse::sendResponse(200, 'Invalid verification code');
+            return ApiResponse::sendResponse(403, 'Invalid verification code');
         }
     }
 

@@ -51,6 +51,7 @@ class PersonalInfoController extends Controller
     public function changePassword(Request $request)
     {
         $request->validate([
+            'current_password' => ['required', 'current_password:user'],
             'password' => ['required', 'confirmed', 'min:8']
         ]);
 

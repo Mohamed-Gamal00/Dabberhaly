@@ -34,10 +34,8 @@ return [
     'PAGE_UPDATED'                => 'Page updated successfully.',
 
     // Order Status
-    'ORDER_STATUS_CREATED'        => 'Order status created successfully.',
     'ORDER_STATUS_UPDATED'        => 'Order status updated successfully.',
-    'ORDER_STATUS_DELETED'        => 'Order status deleted successfully.',
-    'ORDER_STATUS_REPEAT'         => 'Duplicate order status detected. Please check your selection.',
+    'ORDER_STATUS_INVALID_TRANSITION' => 'This status change is not allowed for the current order status.',
 
     // Orders
     'ORDER_DELETED'               => 'Order deleted successfully.',
@@ -51,6 +49,7 @@ return [
     // Main Categories
     'MAIN_CATEGORY_CREATED'       => 'Category created successfully.',
     'MAIN_CATEGORY_UPDATED'       => 'Category updated successfully.',
+    'MAIN_CATEGORY_DELETED'       => 'Category deleted successfully.',
 
     // Discount Codes
     'DISCOUNT_CODE_CREATED'       => 'Discount code created successfully.',
@@ -105,6 +104,7 @@ return [
     'MAIN_CHOICE_DELETED'         => 'Choice deleted successfully.',
 
     // Bulk Orders
+    'BULKORDER_CREATED'           => 'Bulk order created successfully.',
     'BULKORDER_UPDATED'           => 'Bulk order updated successfully.',
     'BULKORDER_DELETED'           => 'Bulk order deleted successfully.',
 

@@ -160,8 +160,8 @@
                                 <td class="text-center">
                                     <span class="badge bg-light text-dark border">{{ $item->quantity }}</span>
                                 </td>
-                                <td class="text-center">{{ number_format($item->price / max($item->quantity,1), 2) }} ر.س</td>
-                                <td class="text-center fw-bold text-primary">{{ number_format($item->price, 2) }} ر.س</td>
+                                <td class="text-center">{{ number_format($item->price, 2) }} ر.س</td>
+                                <td class="text-center fw-bold text-primary">{{ number_format($item->price * $item->quantity, 2) }} ر.س</td>
                             </tr>
                             @empty
                             <tr><td colspan="4" class="text-center text-muted py-4">لا توجد منتجات</td></tr>

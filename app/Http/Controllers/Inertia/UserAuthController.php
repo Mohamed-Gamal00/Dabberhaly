@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Inertia;
 
 use App\Events\UserForgotPassword;
-use App\Events\UserRegistered;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\profile\CreateNewAddressRequest;
 use App\Http\Requests\profile\UpdateNewAddressRequest;
 use App\Http\Requests\profile\UserRequest;
-use App\Models\City;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\User_verfication;
@@ -50,14 +49,6 @@ class UserProfileController extends Controller
         return Inertia::render('Profile/Index', compact('user'));
     }
 
-    public function userAddressesCreate()
-    {
-        $user = Auth::user();
-        $countryId = $user->addresses()->where('main_address', 1)->value('country_id');
-        $cities = City::where('country_id', $countryId)->where('status', 'used')->get();
-        return Inertia::render('Profile/Addresses/Create', compact('cities'));
-    }
-
     public function userAddressesStore(CreateNewAddressRequest $request)
     {
         $user = Auth::user();
@@ -69,13 +60,6 @@ class UserProfileController extends Controller
         ], $this->addressAccountData($user)));
 
         return back()->with('success', __('flash.address_added'));
-    }
-
-    public function userAddressesEdit($addressId)
-    {
-        $address = UserAddress::findOrFail($addressId);
-        $cities = City::where('country_id', $address->country_id)->where('status', 'used')->get();
-        return Inertia::render('Profile/Addresses/Edit', compact('address', 'cities'));
     }
 
     public function userAddressesUpdate(UpdateNewAddressRequest $request, $addressId)
@@ -133,17 +117,12 @@ class UserProfileController extends Controller
         ], fn ($value) => $value !== null);
     }
 
-    public function changePasswordView()
-    {
-        return Inertia::render('Profile/ChangePassword');
-    }
-
     public function updatePassword(Request $request)
     {
         $request->validate(['new_password' => 'required|confirmed|min:6']);
         $user = Auth::user();
         $user->update(['password' => Hash::make($request->new_password)]);
-        return to_route('user.info')->with('info', __('flash.password_changed'));
+        return back()->with('info', __('flash.password_changed'));
     }
 
     public function updateUserInfo(UserRequest $request)

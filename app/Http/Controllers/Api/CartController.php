@@ -30,25 +30,16 @@ class CartController extends Controller
         return $this->cart->addProductToCart($data, $user);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $cart = Cart::withoutGlobalScope('cookie_id')->findOrFail($id);
+        $cart = Cart::withoutGlobalScope('cookie_id')
+            ->where('user_id', $request->user()->id)
+            ->findOrFail($id);
         return $this->cart->deleteCartItem($cart);
     }
 
     public function update(Request $request, $id)
     {
         return $this->cart->UpdateCartProductCount($request, $id);
-    }
-
-    public function totalBeforeDiscount(Request $request): float
-    {
-        $user_id = $request->user()->id;
-        return Cart::with('product')->withoutGlobalScope('cookie_id')
-            ->where('user_id', $user_id)
-            ->where('status', 0)->get()
-            ->sum(function ($item) {
-                return $item->quantity * $item->product->price;
-            });
     }
 }

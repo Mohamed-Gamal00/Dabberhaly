@@ -21,7 +21,7 @@ class ColorController extends Controller
    */
   public function index()
   {
-    //Gate::authorize('color.view');
+    Gate::authorize('color.view');
 
     // $colors = Color::paginate();
     $colors = $this->colorRepo->getMainColor();
@@ -33,7 +33,7 @@ class ColorController extends Controller
    */
   public function create()
   {
-    //Gate::authorize('color.create');
+    Gate::authorize('color.create');
 
     return view('dashboard.colors.create');
   }
@@ -43,7 +43,7 @@ class ColorController extends Controller
    */
   public function store(ColorRequest $request)
   {
-    //Gate::authorize('color.create');
+    Gate::authorize('color.create');
     $data = $request->validated();
     $this->colorRepo->store($data);
     return \to_route('colors.index')->with('success', __('messages.COLOR_CREATED'));
@@ -62,7 +62,7 @@ class ColorController extends Controller
    */
   public function edit(string $id)
   {
-    //Gate::authorize('color.edit');
+    Gate::authorize('color.edit');
 
     $color = Color::findOrFail($id);
     return view('dashboard.colors.edit', \compact('color'));
@@ -73,7 +73,7 @@ class ColorController extends Controller
    */
   public function update(ColorRequest $request, string $id)
   {
-    //Gate::authorize('color.edit');
+    Gate::authorize('color.edit');
     $data = $request->validated();
     $this->colorRepo->update($data, $id);
 
@@ -85,7 +85,7 @@ class ColorController extends Controller
    */
   public function destroy(string $id)
   {
-    //Gate::authorize('color.delete');
+    Gate::authorize('color.delete');
     $this->colorRepo->delete($id);
     return back()->with('dark', __('messages.COLOR_DELETED'));
   }

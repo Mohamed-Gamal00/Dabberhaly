@@ -91,7 +91,7 @@ class CheckoutController extends Controller
         // ===== Validation =====
 
         // Terms always required
-        $request->validate(['terms' => 'nullable'], [
+        $request->validate(['terms' => 'required|accepted'], [
             'terms.required' => 'يجب الموافقة على الشروط والأحكام',
         ]);
 
@@ -244,9 +244,11 @@ class CheckoutController extends Controller
             return response()->json(['message' => __('flash.discount_already_used')], 422);
         }
 
-        // Register usage & decrement
-        UserDiscountCode::create(['cookie_id' => $cookieId, 'discount_id' => $code->id]);
-        $code->decrement('number_of_used');
+        // Already applied to this checkout (consumption happens at
+        // order creation, so there is no usage row yet to check).
+        if (session('applied_discount_code_id') == $code->id) {
+            return response()->json(['message' => __('flash.discount_already_used')], 422);
+        }
 
         // Apply discount to matching cart items only
         foreach ($cartItems as $item) {

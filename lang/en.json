@@ -9,8 +9,6 @@
   "register": "New Account",
   "logout": "Logout",
   "my_account": "My Account",
-  "cart": "Cart",
-  "language": "English",
 
   "search_placeholder": "Search for a product...",
   "searching": "Searching...",
@@ -25,6 +23,10 @@
   "wishlist_login_required": "Please login to add products to your wishlist",
   "added_to_wishlist": "Added to wishlist",
   "removed_from_wishlist": "Removed from wishlist",
+  "add_to_wishlist": "Add to wishlist",
+  "left_in_stock": "left in stock",
+  "no_content": "No content",
+  "no_products_brand": "No products for this brand",
   "product_added_to_cart": "Product added to cart",
 
   "all_products": "All Products",
@@ -35,7 +37,6 @@
   "no_products_hint": "Try changing your search or filter criteria",
   "search_in_products": "Search products...",
   "results_for": "Results:",
-  "filter": "Filter",
   "clear_filters": "Clear Filters",
   "clear": "Clear",
   "apply": "Apply",
@@ -96,7 +97,6 @@
   "cart_checkout": "Checkout",
   "cart_continue": "Continue Shopping",
 
-  "checkout_title": "Checkout",
   "shipping_method": "Shipping Method",
   "pickup_from_store": "Pickup from Store",
   "fixed_shipping": "Fixed Shipping Cost",
@@ -108,7 +108,6 @@
   "discount_code": "Discount Code",
   "discount_applied": "Code applied",
   "discount_value": "Discount",
-  "discount_remove": "Remove",
   "discount_placeholder": "Enter discount code",
   "discount_apply": "Apply",
   "discount_login_required": "You must",
@@ -167,7 +166,6 @@
   "contact_support": "Contact Support",
   "problem_persists": "If the problem persists, please",
 
-  "product_details": "Product Details",
   "in_stock": "In Stock",
   "not_available": "Not Available",
   "quantity": "Quantity",
@@ -204,10 +202,6 @@
   "profile_address_label": "address",
   "profile_wishlist_label": "wishlist",
 
-  "account_title": "My Account",
-  "account_desc": "Manage your personal account and orders",
-  "go_to_profile": "Go to Profile",
-  "back_to_home_btn": "Back to Home",
 
   "login_welcome": "Welcome Back 👋",
   "login_subtitle": "Login to continue",
@@ -368,10 +362,7 @@
   "quickview_details": "Details",
   "quickview_rating": "rating",
 
-  "newsletter_placeholder": "Your email...",
   "subscribe": "Subscribe",
-  "subscribed_success": "✓ Subscribed successfully!",
-  "already_subscribed": "You are already subscribed",
 
   "save_changes": "Save Changes",
   "profile_updated": "Profile updated successfully",
@@ -392,11 +383,6 @@
   "return_submitted": "A return request has been submitted and is under review",
   "return_success": "Return request submitted successfully",
 
-  "status_pending": "Pending",
-  "status_approved": "Approved",
-  "status_in_progress": "In Progress",
-  "status_completed": "Completed",
-  "status_rejected": "Rejected",
 
   "no_addresses": "No addresses registered yet",
   "add_first_address": "Add your first address",
@@ -419,7 +405,6 @@
   "under_review": "Under Review",
   "return_submitted_review": "A return request has been submitted and is under review by our team",
 
-  "agree_terms_required": "You must agree to the terms and conditions",
   "first_name_required": "First name is required",
   "last_name_required": "Last name is required",
   "phone_required": "Phone number is required",

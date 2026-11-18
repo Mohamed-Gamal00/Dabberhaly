@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Order;
-use App\Models\Product;
 use App\Repositories\Order\ReturnOrderRepository;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ReturnOrderController extends Controller
 {
@@ -20,6 +17,8 @@ class ReturnOrderController extends Controller
 
     public function index()
     {
+        Gate::authorize('return_order.view');
+
         $orders = $this->returnOrderRepository->getAll();
 
         return view('dashboard.return_order.index', compact('orders'));
@@ -27,26 +26,17 @@ class ReturnOrderController extends Controller
 
     public function show(string $id)
     {
-        $order    = $this->returnOrderRepository->show($id);
-        $statuses = OrderStatus::cases();
+        Gate::authorize('return_order.view');
 
-        return view('dashboard.return_order.show', compact('order', 'statuses'));
-    }
+        $order = $this->returnOrderRepository->show($id);
 
-    public function update(Request $request, string $id)
-    {
-        $request->validate([
-            'status' => ['required', \Illuminate\Validation\Rules\Enum::class(OrderStatus::class)],
-        ]);
-
-        $this->returnOrderRepository->update($request, $id);
-
-        return redirect()->route('return_orders.index')
-            ->with('success', 'تم تحديث حالة الطلب بنجاح');
+        return view('dashboard.return_order.show', compact('order'));
     }
 
     public function destroy(string $id)
     {
+        Gate::authorize('return_order.delete');
+
         $this->returnOrderRepository->delete($id);
 
         return redirect()->back()->with('dark', __('messages.RETURN_ORDER_DELETE'));

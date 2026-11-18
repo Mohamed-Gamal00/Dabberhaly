@@ -255,36 +255,12 @@
     </div>
 </div>
 
-{{-- ===== Update status ===== --}}
-<div class="card border-0 shadow-sm">
-    <div class="card-body">
-        <h5 class="card-title fw-bold mb-4">
-            <i class="mdi mdi-pencil me-2 text-warning"></i>
-            تحديث حالة طلب الإرجاع
-        </h5>
-        <form action="{{ route('return_orders.update', $order->id) }}" method="post">
-            @csrf
-            @method('put')
-            <div class="row align-items-end g-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">الحالة الجديدة</label>
-                    <select class="form-select" name="status" required>
-                        @foreach($statuses as $s)
-                            <option value="{{ $s->value }}" @selected($order->status === $s)>
-                                {{ $s->labelAr() }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-auto">
-                    <button type="submit" class="btn btn-warning px-4 text-dark fw-bold">
-                        <i class="mdi mdi-content-save me-1"></i>
-                        حفظ الحالة
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+{{-- Status changes were removed: the six order statuses describe the
+     forward lifecycle (pending → confirmed → processing → shipped →
+     delivered), none of them describes a returned order, so changing
+     one here was meaningless — and setting a returned order to
+     "delivered" misrepresented it on the timeline above. A returned
+     order stays pending; the admin clears it with delete once the
+     return has been handled. --}}
 
 @endsection

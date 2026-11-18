@@ -10,7 +10,6 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\UserAddress;
-use App\Models\UserToken;
 
 class User extends Authenticatable
 {
