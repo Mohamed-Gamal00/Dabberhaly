@@ -8,15 +8,15 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-            background: #f0f2f8;
-            color: #111827;
+            background: #F7F0E5;
+            color: #302F2B;
             direction: rtl;
         }
         .wrapper { max-width: 620px; margin: 32px auto; padding: 0 16px 40px; }
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            background: linear-gradient(135deg, #76543D 0%, #8d6b51 100%);
             border-radius: 16px 16px 0 0;
             padding: 32px 32px 24px;
             text-align: center;
@@ -50,8 +50,8 @@
 
         /* Alert banner */
         .alert-banner {
-            background: #e8f5e9;
-            border: 1px solid #a5d6a7;
+            background: #F7F0E5;
+            border: 1px solid #D7CDBD;
             border-radius: 10px;
             padding: 14px 18px;
             display: flex;
@@ -59,7 +59,7 @@
             gap: 10px;
             margin-bottom: 24px;
             font-size: 14px;
-            color: #1b5e20;
+            color: #76543D;
             font-weight: 600;
         }
 
@@ -67,12 +67,12 @@
         .section-title {
             font-size: 13px;
             font-weight: 700;
-            color: #6b7280;
+            color: #77736B;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 12px;
             padding-bottom: 8px;
-            border-bottom: 1px solid #f3f4f6;
+            border-bottom: 1px solid #E6D3BB;
         }
 
         /* Info grid */
@@ -83,22 +83,22 @@
             margin-bottom: 24px;
         }
         .info-item {
-            background: #f8f9fb;
+            background: #F7F0E5;
             border-radius: 10px;
             padding: 12px 14px;
         }
         .info-label {
             font-size: 11px;
-            color: #9ca3af;
+            color: #77736B;
             font-weight: 600;
             margin-bottom: 3px;
         }
         .info-value {
             font-size: 14px;
             font-weight: 700;
-            color: #111827;
+            color: #302F2B;
         }
-        .info-value.highlight { color: #1a237e; font-size: 16px; }
+        .info-value.highlight { color: #76543D; font-size: 16px; }
 
         /* Products table */
         .products-table {
@@ -108,23 +108,23 @@
             font-size: 13px;
         }
         .products-table th {
-            background: #f3f4f6;
+            background: #F7F0E5;
             padding: 10px 12px;
             text-align: right;
             font-weight: 700;
-            color: #374151;
+            color: #302F2B;
             font-size: 12px;
         }
         .products-table td {
             padding: 10px 12px;
-            border-bottom: 1px solid #f3f4f6;
-            color: #374151;
+            border-bottom: 1px solid #E6D3BB;
+            color: #302F2B;
         }
         .products-table tr:last-child td { border-bottom: none; }
 
         /* Totals */
         .totals {
-            background: #f8f9fb;
+            background: #F7F0E5;
             border-radius: 10px;
             padding: 14px 16px;
             margin-bottom: 24px;
@@ -133,14 +133,14 @@
             display: flex;
             justify-content: space-between;
             font-size: 13px;
-            color: #6b7280;
+            color: #77736B;
             padding: 4px 0;
         }
         .totals-row.total {
             font-size: 16px;
             font-weight: 800;
-            color: #1a237e;
-            border-top: 1px solid #e5e7eb;
+            color: #76543D;
+            border-top: 1px solid #D7CDBD;
             margin-top: 8px;
             padding-top: 10px;
         }
@@ -152,7 +152,7 @@
         }
         .cta a {
             display: inline-block;
-            background: linear-gradient(135deg, #1a237e, #3949ab);
+            background: #76543D;
             color: #fff;
             text-decoration: none;
             padding: 13px 32px;
@@ -164,8 +164,8 @@
 
         /* Customer info */
         .customer-box {
-            background: #f0f2ff;
-            border: 1px solid #c5cae9;
+            background: #F7F0E5;
+            border: 1px solid #D7CDBD;
             border-radius: 10px;
             padding: 14px 16px;
             margin-bottom: 24px;
@@ -176,20 +176,20 @@
             gap: 8px;
             margin-bottom: 4px;
         }
-        .customer-box .lbl { color: #6b7280; min-width: 90px; }
-        .customer-box .val { color: #111827; font-weight: 600; }
+        .customer-box .lbl { color: #77736B; min-width: 90px; }
+        .customer-box .val { color: #302F2B; font-weight: 600; }
 
         /* Footer */
         .footer {
-            background: #f8f9fb;
+            background: #F7F0E5;
             border-radius: 0 0 16px 16px;
             padding: 20px 32px;
             text-align: center;
             font-size: 12px;
-            color: #9ca3af;
-            border-top: 1px solid #e5e7eb;
+            color: #77736B;
+            border-top: 1px solid #D7CDBD;
         }
-        .footer a { color: #3949ab; text-decoration: none; }
+        .footer a { color: #76543D; text-decoration: none; }
 
         @media (max-width: 480px) {
             .info-grid { grid-template-columns: 1fr; }
@@ -295,7 +295,7 @@
                 <tr>
                     <td>{{ $item->product_name }}</td>
                     <td style="text-align:center">{{ $item->quantity }}</td>
-                    <td style="text-align:left; font-weight:700; color:#1a237e">
+                    <td style="text-align:left; font-weight:700; color:#76543D">
                         {{ number_format($item->price, 2) }} ر.س
                     </td>
                 </tr>
