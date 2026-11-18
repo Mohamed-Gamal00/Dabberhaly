@@ -25,9 +25,6 @@ class UserAddressesController extends Controller
     public function createAddress(UserAddressRequest $request)
     {
         $user = request()->user();
-        $userCountry = $user->addresses->first();
-
-//        return $userCountry;
 
         $address = UserAddress::create([
             'user_id' => $user->id,
@@ -35,7 +32,12 @@ class UserAddressesController extends Controller
             'first_name' => $request->first_name,
             'family_name' => $request->last_name,
             'address' => $request->address,
-            'country_id' => $userCountry?->country_id,
+            // الدولة مش بتتبعت من الموبايل أصلاً — اشتقها من المدينة
+            // (المدينة تابعة لدولة واحدة). قبل كده كانت بتتاخد من أول
+            // عنوان عند اليوزر، فلو معندوش عناوين كانت بتتسجل null.
+            'country_id' => $request->country_id
+                ?? City::find($request->city_id)?->country_id
+                ?? $user->addresses->first()?->country_id,
             'city_id' => $request->city_id,
             'phone_number' => $request->phone_number
         ]);
@@ -50,7 +52,6 @@ class UserAddressesController extends Controller
         // anyone edit (and reassign to themselves) another user's
         // address, including their main address.
         $address = $user->addresses()->find($id);
-        $userCountry = $user->addresses->first();
 
         if ($address) {
 
@@ -59,7 +60,11 @@ class UserAddressesController extends Controller
                 'first_name' => $request->first_name,
                 'family_name' => $request->last_name,
                 'address' => $request->address,
-                'country_id' => $userCountry?->country_id,
+                // الدولة مش بتتبعت من الموبايل أصلاً — اشتقها من المدينة
+                // (أنظر createAddress).
+                'country_id' => $request->country_id
+                    ?? City::find($request->city_id)?->country_id
+                    ?? $user->addresses->first()?->country_id,
                 'city_id' => $request->city_id,
                 'phone_number' => $request->phone_number
             ]);
