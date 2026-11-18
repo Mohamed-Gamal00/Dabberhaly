@@ -1,104 +1,105 @@
 <template>
     <div>
-        <v-navigation-drawer v-model="drawer" temporary location="left" width="370" class="pa-2">
+        <v-navigation-drawer v-model="drawer" temporary location="left" width="400" class="cart-drawer">
+            <div class="cart-drawer-inner">
 
-            <!-- Header -->
-            <v-card class="px-0" elevation="0">
-                <v-card-title class="pl-0 pr-0 d-flex justify-space-between align-center w-100" style="font-size:17px;font-weight:bold">
-                    {{ t('cart_title') }}                    <v-icon @click="drawer = false">mdi-close</v-icon>
-                </v-card-title>
-                <v-card-text class="px-0" style="color:#77736B">{{ cartItems.length }} {{ t('cart_items') }}</v-card-text>
-                <v-card-text class="px-0 text-center" style="color:#77736B" v-if="!cartItems.length">
-                    {{ t('cart_empty') }}
-                </v-card-text>
-
-                <!-- Free shipping progress -->
-                <template v-if="cartItems.length">
-                    <div class="position-relative mt-4 mx-2">
-                        <!-- Truck icon -->
-                        <svg
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="30px"
-                            viewBox="0 0 512 512"
-                            :fill="shippingProgress < 50 ? '#f44336' : shippingProgress < 100 ? '#ff9800' : '#4caf50'"
-                            :style="`
-                                position: absolute;
-                                bottom: 50%;
-                                z-index: 1;
-                                right: calc(${Math.min(shippingProgress, 100)}% - 30px);
-                                transition: all 0.3s ease-in-out;
-                            `"
-                        >
-                            <g>
-                                <path d="M43.297,157.656L6.109,262.219C2.406,271.031,0,285.313,0,292.109s0,41.234,0,41.234
-                                c0,11.188,9.156,20.375,20.375,20.375h24.391C47.219,379,68.516,398.75,94.438,398.75s47.234-19.75,49.688-45.031h45.109V139.75
-                                H73.391C62.188,139.75,48.641,147.813,43.297,157.656z M94.438,373.781c-13.781,0-24.969-11.188-24.969-24.969
-                                s11.188-24.938,24.969-24.938c13.797,0,24.969,11.156,24.969,24.938S108.234,373.781,94.438,373.781z M165.797,166.313v79.516
-                                H46.875l23.375-71.609c2.047-3.781,9-7.906,13.281-7.906H165.797z"/>
-                                <path d="M217.797,113.25v240.469h147.109c2.422,25.281,23.734,45.031,49.656,45.031
-                                c25.938,0,47.219-19.75,49.703-45.031H512V113.25H217.797z M414.563,373.781c-13.781,0-24.969-11.188-24.969-24.969
-                                s11.188-24.938,24.969-24.938c13.797,0,24.969,11.156,24.969,24.938S428.359,373.781,414.563,373.781z"/>
-                            </g>
-                        </svg>
-                        <v-progress-linear
-                            :color="shippingProgress < 50 ? 'red' : shippingProgress < 100 ? 'orange' : 'green'"
-                            height="10"
-                            :model-value="Math.min(shippingProgress, 100)"
-                            striped
-                        />
+                <!-- Header -->
+                <div class="cd-header">
+                    <div class="cd-header-title">
+                        <v-icon size="20" color="#76543D">mdi-cart-outline</v-icon>
+                        <span>{{ t('cart_title') }}</span>
+                        <span v-if="cartItems.length" class="cd-count">{{ cartItems.length }}</span>
                     </div>
-                    <v-card-text class="px-0 pt-1" style="color:#77736B; font-size:13px">
-                        <span v-if="total < freeShippingThreshold">
-                            {{ freeShippingThreshold - total }} ر.س {{ t('cart_free_shipping_remaining') }}
-                        </span>
-                        <span v-else class="text-green">{{ t('cart_free_shipping_congrats') }}</span>
-                    </v-card-text>
-                </template>
-            </v-card>
-
-            <!-- Items list -->
-            <v-card class="pa-0 mt-3" elevation="0" v-if="cartItems.length" max-height="350" style="overflow-y:auto">
-                <v-container class="px-1">
-                    <div v-for="item in cartItems" :key="item.id" class="cart-item">
-                        <div class="cart-item-image">
-                            <img :src="item.image" alt="product" />
-                        </div>
-                        <div class="cart-item-details">
-                            <div class="cart-item-name">{{ item.name }}</div>
-                            <div class="cart-item-price">
-                                {{ Math.ceil(item.discount_price || item.price) }} ر.س
-                            </div>
-                            <div class="cart-item-footer">
-                                <!-- Quantity control -->
-                                <div class="cart-qty-control">
-                                    <v-icon size="18" class="qty-icon" @click="changeQty(item, -1)">mdi-minus</v-icon>
-                                    <span class="qty-value">{{ item.quantity }}</span>
-                                    <v-icon size="18" class="qty-icon" @click="changeQty(item, 1)">mdi-plus</v-icon>
-                                </div>
-                                <v-icon size="20" color="#77736B" @click="removeItem(item.id)">mdi-delete-outline</v-icon>
-                            </div>
-                        </div>
-                    </div>
-                </v-container>
-            </v-card>
-
-            <!-- Footer actions -->
-            <v-card class="mt-4" elevation="0" v-if="cartItems.length">
-                <div class="d-flex justify-space-between px-2 mb-3">
-                    <span style="font-weight:600; color:#302F2B">{{ t('cart_total') }}</span>
-                    <span style="font-weight:700; font-size:16px; color:#76543D">{{ total }} ر.س</span>
+                    <button class="cd-close" @click="drawer = false">
+                        <v-icon size="18">mdi-close</v-icon>
+                    </button>
                 </div>
-                <v-card-actions class="flex-column gap-2">
-                    <v-btn block variant="elevated" color="primary" height="44" style="border-radius:22px; text-transform:none" href="/checkout">
-                        {{ t('cart_checkout') }}
-                    </v-btn>
-                    <v-btn block variant="outlined" color="primary" height="44" style="border-radius:22px; text-transform:none" @click="drawer = false">
-                        {{ t('cart_continue') }}
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
 
+                <!-- Empty state -->
+                <div v-if="!cartItems.length" class="cd-empty">
+                    <div class="cd-empty-icon">
+                        <v-icon size="44" color="#76543D">mdi-cart-outline</v-icon>
+                    </div>
+                    <div class="cd-empty-title">{{ t('cart_empty_title') }}</div>
+                    <p class="cd-empty-sub">{{ t('cart_empty_sub') }}</p>
+                    <v-btn color="primary" height="46" rounded="lg" class="cd-empty-btn" href="/products">
+                        <v-icon size="18" class="me-1">mdi-shopping-outline</v-icon>
+                        {{ t('cart_browse_products') }}
+                    </v-btn>
+                </div>
+
+                <!-- Filled state -->
+                <template v-else>
+                    <!-- Free shipping progress -->
+                    <div class="cd-shipping">
+                        <div class="cd-shipping-head">
+                            <v-icon size="18" color="#76543D">mdi-truck-outline</v-icon>
+                            <span v-if="total < freeShippingThreshold" class="cd-shipping-text">
+                                {{ t('cart_free_shipping_remaining') }} — <strong>{{ freeShippingThreshold - total }} ر.س</strong>
+                            </span>
+                            <span v-else class="cd-shipping-text cd-shipping-text--done">
+                                <v-icon size="16" color="#15803d">mdi-check-circle</v-icon>
+                                {{ t('cart_free_shipping_congrats') }}
+                            </span>
+                        </div>
+                        <div class="cd-progress">
+                            <div class="cd-progress-fill" :style="{ width: Math.min(shippingProgress, 100) + '%' }" />
+                            <v-icon
+                                size="20"
+                                color="#76543D"
+                                class="cd-progress-truck"
+                                :style="{ insetInlineStart: 'calc(' + Math.min(Math.max(shippingProgress, 2), 96) + '% - 10px)' }"
+                            >mdi-truck</v-icon>
+                        </div>
+                    </div>
+
+                    <!-- Items list -->
+                    <div class="cd-items">
+                        <div v-for="item in cartItems" :key="item.id" class="cd-item">
+                            <img :src="item.image" class="cd-item-img" alt="product" />
+                            <div class="cd-item-details">
+                                <div class="cd-item-name">{{ item.name }}</div>
+                                <div class="cd-item-price-row">
+                                    <span class="cd-item-price">{{ Math.ceil(item.discount_price || item.price) }} ر.س</span>
+                                    <span v-if="item.discount_price && Number(item.discount_price) < Number(item.price)" class="cd-item-old-price">{{ Math.ceil(item.price) }} ر.س</span>
+                                </div>
+                                <div class="cd-item-footer">
+                                    <div class="cd-qty">
+                                        <v-icon size="16" class="cd-qty-icon" @click="changeQty(item, -1)">mdi-minus</v-icon>
+                                        <span class="cd-qty-value">{{ item.quantity }}</span>
+                                        <v-icon size="16" class="cd-qty-icon" @click="changeQty(item, 1)">mdi-plus</v-icon>
+                                    </div>
+                                    <span class="cd-item-total">{{ Math.ceil((Number(item.discount_price) || Number(item.price)) * Number(item.quantity)) }} ر.س</span>
+                                </div>
+                            </div>
+                            <button class="cd-remove" @click="removeItem(item.id)">
+                                <v-icon size="17">mdi-trash-can-outline</v-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="cd-footer">
+                        <div v-if="totalSavings > 0" class="cd-sum-row cd-sum-saving">
+                            <span><v-icon size="14" color="#15803d" class="me-1">mdi-tag-outline</v-icon>{{ t('cart_you_save') }}</span>
+                            <span>- {{ totalSavings }} ر.س</span>
+                        </div>
+                        <div class="cd-sum-row cd-sum-total">
+                            <span>{{ t('cart_total') }}</span>
+                            <span>{{ total }} ر.س</span>
+                        </div>
+                        <p class="cd-shipping-note">{{ t('cart_shipping_note') }}</p>
+                        <v-btn block color="primary" height="48" rounded="lg" class="cd-cta" href="/checkout">
+                            {{ t('cart_checkout') }}
+                            <v-icon size="18" class="ms-1">mdi-arrow-left</v-icon>
+                        </v-btn>
+                        <v-btn block variant="outlined" color="primary" height="44" rounded="lg" class="mt-2 cd-continue" @click="drawer = false">
+                            {{ t('cart_continue') }}
+                        </v-btn>
+                    </div>
+                </template>
+
+            </div>
         </v-navigation-drawer>
     </div>
 </template>
@@ -118,6 +119,15 @@ const total = computed(() =>
     cartItems.value.reduce((sum, item) => {
         const price = item.discount_price || item.price;
         return sum + Math.ceil(price) * item.quantity;
+    }, 0)
+);
+
+const totalSavings = computed(() =>
+    cartItems.value.reduce((sum, item) => {
+        if (item.discount_price && Number(item.discount_price) < Number(item.price)) {
+            return sum + Math.ceil(Number(item.price) - Number(item.discount_price)) * item.quantity;
+        }
+        return sum;
     }, 0)
 );
 
@@ -171,89 +181,334 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.v-navigation-drawer {
+.cart-drawer {
+    background: #F7F0E5;
     overflow-y: auto;
     &::-webkit-scrollbar { width: 4px; }
     &::-webkit-scrollbar-thumb { background: #D7CDBD; border-radius: 4px; }
 }
 
-/* Cart Items */
-.cart-item {
-    display: flex;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid #E6D3BB;
-}
-
-.cart-item:last-child {
-    border-bottom: none;
-}
-
-.cart-item-image {
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0;
-
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 8px;
-    }
-}
-
-.cart-item-details {
-    flex: 1;
+.cart-drawer-inner {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    min-height: 100%;
+    padding: 18px 16px;
 }
 
-.cart-item-name {
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.3;
+/* ===== Header ===== */
+.cd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #E6DCCB;
+    margin-bottom: 16px;
+}
+
+.cd-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 800;
     color: #302F2B;
 }
 
-.cart-item-price {
+.cd-count {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 11px;
+    background: #76543D;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cd-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid #E6DCCB;
+    color: #77736B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    &:hover { color: #76543D; border-color: #76543D; }
+}
+
+/* ===== Empty state ===== */
+.cd-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 56px 16px 32px;
+}
+
+.cd-empty-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: #EFE7D8;
+    border: 1px solid #E6D3BB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cd-empty-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #302F2B;
+    margin-top: 20px;
+}
+
+.cd-empty-sub {
+    font-size: 13.5px;
+    color: #77736B;
+    line-height: 1.9;
+    max-width: 260px;
+    margin: 6px 0 0;
+}
+
+.cd-empty-btn {
+    margin-top: 22px;
+    min-width: 200px;
+    text-transform: none;
     font-size: 14px;
     font-weight: 700;
+}
+
+/* ===== Free shipping ===== */
+.cd-shipping {
+    background: white;
+    border: 1px solid #E9DFCE;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.cd-shipping-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cd-shipping-text {
+    font-size: 12.5px;
+    color: #77736B;
+    strong { color: #76543D; }
+}
+
+.cd-shipping-text--done {
+    color: #15803d;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cd-progress {
+    position: relative;
+    height: 8px;
+    background: #EFE7D8;
+    border-radius: 4px;
+    margin-top: 14px;
+}
+
+.cd-progress-fill {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, #C69763, #76543D);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.cd-progress-truck {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: inset-inline-start 0.3s ease;
+}
+
+/* ===== Items ===== */
+.cd-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding-inline-end: 2px;
+    margin-bottom: 14px;
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-thumb { background: #D7CDBD; border-radius: 4px; }
+}
+
+.cd-item {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    background: white;
+    border: 1px solid #E9DFCE;
+    border-radius: 14px;
+    padding: 12px;
+}
+
+.cd-item-img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #E6DCCB;
+    flex-shrink: 0;
+}
+
+.cd-item-details {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-inline-end: 22px;
+}
+
+.cd-item-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #302F2B;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cd-item-price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cd-item-price {
+    font-size: 14px;
+    font-weight: 800;
     color: #76543D;
 }
 
-.cart-item-footer {
+.cd-item-old-price {
+    font-size: 12px;
+    color: #B0A696;
+    text-decoration: line-through;
+}
+
+.cd-item-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-top: auto;
+    padding-top: 6px;
 }
 
-.cart-qty-control {
+.cd-qty {
     display: flex;
     align-items: center;
-    padding: 4px 8px;
-    border: 1px solid #D7CDBD;
+    gap: 10px;
+    padding: 3px 8px;
+    border: 1.5px solid #E6DCCB;
     border-radius: 20px;
-    gap: 8px;
-    background: white;
+    background: #FAF6EE;
 }
 
-.qty-icon {
+.cd-qty-icon {
     color: #77736B;
     cursor: pointer;
     transition: color 0.2s;
-
-    &:hover {
-        color: #76543D;
-    }
+    &:hover { color: #76543D; }
 }
 
-.qty-value {
+.cd-qty-value {
     font-size: 13px;
-    min-width: 20px;
+    min-width: 18px;
     text-align: center;
     color: #302F2B;
-    font-weight: 600;
+    font-weight: 700;
+}
+
+.cd-item-total {
+    font-size: 14px;
+    font-weight: 800;
+    color: #76543D;
+}
+
+.cd-remove {
+    position: absolute;
+    top: 10px;
+    inset-inline-end: 10px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: #B0A696;
+    cursor: pointer;
+    transition: color 0.15s;
+    &:hover { color: #dc2626; }
+}
+
+/* ===== Footer ===== */
+.cd-footer {
+    background: white;
+    border: 1px solid #E9DFCE;
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: auto;
+}
+
+.cd-sum-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13.5px;
+    color: #77736B;
+    padding: 3px 0;
+}
+
+.cd-sum-saving { color: #15803d; font-weight: 600; }
+
+.cd-sum-total {
+    font-size: 16px;
+    font-weight: 800;
+    color: #302F2B;
+    padding-top: 10px;
+    border-top: 1px solid #EFE7D8;
+    margin-top: 6px;
+    span:last-child { color: #76543D; font-size: 18px; }
+}
+
+.cd-shipping-note {
+    font-size: 12px;
+    color: #77736B;
+    text-align: center;
+    margin: 8px 0 14px;
+}
+
+.cd-cta {
+    text-transform: none;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(118, 84, 61, 0.25);
+}
+
+.cd-continue {
+    text-transform: none;
+    font-size: 14px;
+    font-weight: 700;
 }
 </style>

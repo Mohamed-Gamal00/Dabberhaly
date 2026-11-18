@@ -89,7 +89,11 @@
   "compare_clear": "Clear",
 
   "cart_title": "Shopping Cart",
-  "cart_empty": "Cart is empty",
+  "cart_empty_title": "Your cart is empty",
+  "cart_empty_sub": "Add your favorite products and they'll show up here",
+  "cart_browse_products": "Browse Products",
+  "cart_shipping_note": "Shipping is calculated at checkout",
+  "cart_you_save": "You save",
   "cart_items": "items",
   "cart_free_shipping_remaining": "remaining for free shipping",
   "cart_free_shipping_congrats": "Congrats! Free shipping on your order",

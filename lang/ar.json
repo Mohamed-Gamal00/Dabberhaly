@@ -89,7 +89,11 @@
   "compare_clear": "مسح",
 
   "cart_title": "سلة التسوق",
-  "cart_empty": "السلة فارغة",
+  "cart_empty_title": "سلتك فارغة",
+  "cart_empty_sub": "أضف منتجاتك المفضلة وستظهر هنا لتكمل طلبك",
+  "cart_browse_products": "تصفح المنتجات",
+  "cart_shipping_note": "الشحن يُحسب عند إتمام الطلب",
+  "cart_you_save": "وفّرت",
   "cart_items": "منتج",
   "cart_free_shipping_remaining": "متبقية للشحن المجاني",
   "cart_free_shipping_congrats": "تهانينا! شحن مجاني على طلبك",
