@@ -139,6 +139,12 @@ class Order extends Model
         });
     }
 
+    /** Whether the customer can still request a return for this order. */
+    public function canBeReturned(): bool
+    {
+        return ! $this->return_order && $this->status->canReturn();
+    }
+
     public function billingAddress()
     {
         // will return colleciton
