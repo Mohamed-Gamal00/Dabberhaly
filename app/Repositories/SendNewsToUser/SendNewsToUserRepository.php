@@ -22,6 +22,14 @@ class SendNewsToUserRepository implements SendNewsToUserInterface
     return $this->sendNewsToUser->all();
   }
 
+  public function paginateSubscribers(?string $search = null, int $perPage = 50)
+  {
+    return $this->sendNewsToUser
+      ->when($search, fn ($query) => $query->where('subscription_email', 'like', '%' . $search . '%'))
+      ->orderBy('id')
+      ->paginate($perPage);
+  }
+
   public function sendNewsMail($data)
   {
     return SendNewsToUser::whereIn('id', $data['users'])->get();

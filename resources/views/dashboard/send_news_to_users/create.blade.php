@@ -23,7 +23,7 @@
                 </div>
                 <div>
                     <div class="text-muted small">إجمالي المشتركين</div>
-                    <div class="fw-bold fs-4">{{ $users->count() }} مشترك</div>
+                    <div class="fw-bold fs-4">{{ $totalSubscribers }} مشترك</div>
                 </div>
                 <div class="ms-auto">
                     <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2" style="font-size:13px">
@@ -43,7 +43,21 @@
                 إرسال نشرة بريدية
             </div>
             <div class="card-body">
-                <form action="{{ route('user_news.send') }}" method="post">
+                {{-- Search subscribers (GET, paginated below) --}}
+                <form action="{{ route('user_news.create') }}" method="get" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" dir="ltr"
+                            placeholder="ابحث بالبريد الإلكتروني..." value="{{ $search }}" />
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="mdi mdi-magnify"></i> بحث
+                        </button>
+                        @if($search)
+                            <a href="{{ route('user_news.create') }}" class="btn btn-outline-secondary">مسح</a>
+                        @endif
+                    </div>
+                </form>
+
+                <form action="{{ route('user_news.send') }}" method="post" id="newsletterForm">
                     @csrf
 
                     <div class="mb-3">
@@ -64,34 +78,55 @@
                         @enderror
                     </div>
 
-                    {{-- Subscriber selection --}}
+                    {{-- Subscriber selection (50 per page, selection is kept across pages) --}}
                     <div class="mb-4">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <label class="form-label fw-semibold mb-0">اختر المشتركين</label>
-                            <div class="form-check mb-0">
-                                <input class="form-check-input" type="checkbox" id="selectAll">
-                                <label class="form-check-label fw-semibold text-primary" for="selectAll">
-                                    تحديد الكل ({{ $users->count() }})
-                                </label>
-                            </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="send_to_all" value="1" id="sendToAll">
+                            <label class="form-check-label fw-semibold" for="sendToAll">
+                                إرسال إلى كل المشتركين ({{ $totalSubscribers }})
+                            </label>
                         </div>
 
-                        @error('users')
-                            <div class="text-danger small mb-2">{{ $message }}</div>
-                        @enderror
-
-                        <div class="border rounded p-3" style="max-height:220px; overflow-y:auto; background:#f8f9fb">
-                            @forelse($users as $user)
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input subscriber-cb" type="checkbox"
-                                        name="users[]" value="{{ $user->id }}" id="u_{{ $user->id }}">
-                                    <label class="form-check-label" for="u_{{ $user->id }}" dir="ltr">
-                                        {{ $user->subscription_email }}
-                                    </label>
+                        <div id="subscriberPicker">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label fw-semibold mb-0">اختر المشتركين</label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span id="selectedCount" class="text-muted small"></span>
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="checkbox" id="selectAll">
+                                        <label class="form-check-label fw-semibold text-primary" for="selectAll">
+                                            تحديد الكل في هذه الصفحة
+                                        </label>
+                                    </div>
                                 </div>
-                            @empty
-                                <p class="text-muted mb-0 text-center py-3">لا يوجد مشتركين بعد</p>
-                            @endforelse
+                            </div>
+
+                            @error('users')
+                                <div class="text-danger small mb-2">{{ $message }}</div>
+                            @enderror
+
+                            <div class="border rounded p-3" style="max-height:220px; overflow-y:auto; background:#f8f9fb">
+                                @forelse($users as $user)
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input subscriber-cb" type="checkbox"
+                                            name="users[]" value="{{ $user->id }}" id="u_{{ $user->id }}">
+                                        <label class="form-check-label" for="u_{{ $user->id }}" dir="ltr">
+                                            {{ $user->subscription_email }}
+                                        </label>
+                                    </div>
+                                @empty
+                                    <p class="text-muted mb-0 text-center py-3">لا يوجد مشتركين بعد</p>
+                                @endforelse
+                            </div>
+
+                            @if($users->total())
+                                <div class="d-flex align-items-center justify-content-between mt-2 flex-wrap gap-2">
+                                    <span class="text-muted small">
+                                        عرض {{ $users->firstItem() }} - {{ $users->lastItem() }} من {{ $users->total() }}
+                                    </span>
+                                    {{ $users->withQueryString()->links() }}
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -124,7 +159,7 @@
                         <tbody>
                             @foreach($users as $i => $user)
                             <tr>
-                                <td class="ps-3 text-muted small">{{ $i + 1 }}</td>
+                                <td class="ps-3 text-muted small">{{ $users->firstItem() + $i }}</td>
                                 <td dir="ltr" style="font-size:13px">{{ $user->subscription_email }}</td>
                             </tr>
                             @endforeach
@@ -144,9 +179,96 @@
 </div>
 
 <script>
-    document.getElementById('selectAll').addEventListener('change', function () {
-        document.querySelectorAll('.subscriber-cb').forEach(cb => cb.checked = this.checked);
-    });
+    // Selections are kept across pagination/search pages in sessionStorage,
+    // because the list shows only 50 subscribers per page. On submit, the
+    // stored IDs are injected as hidden inputs so the POST carries every
+    // selected subscriber, not just the ones visible on this page.
+    // A successful send clears the stored selection; a validation error
+    // keeps it, so nothing the admin picked is lost.
+    (function () {
+        var STORAGE_KEY = 'newsletter_selected';
+        var form = document.getElementById('newsletterForm');
+        var sendToAll = document.getElementById('sendToAll');
+        var selectAll = document.getElementById('selectAll');
+        var picker = document.getElementById('subscriberPicker');
+        var counter = document.getElementById('selectedCount');
+
+        function getSelected() {
+            try {
+                return new Set(JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]'));
+            } catch (e) {
+                return new Set();
+            }
+        }
+
+        function saveSelected(selected) {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(selected)));
+        }
+
+        function updateCounter(selected) {
+            if (counter) {
+                counter.textContent = selected.size ? ('تم تحديد ' + selected.size + ' مشترك') : '';
+            }
+        }
+
+        function togglePickerDisabled() {
+            var disabled = sendToAll.checked;
+            picker.style.opacity = disabled ? '0.5' : '';
+            picker.querySelectorAll('input').forEach(function (input) {
+                input.disabled = disabled;
+            });
+            if (selectAll) selectAll.disabled = disabled;
+        }
+
+        // A fresh successful send: forget the previous selection.
+        if (document.querySelector('.alert-success')) {
+            sessionStorage.removeItem(STORAGE_KEY);
+        }
+
+        var selected = getSelected();
+
+        document.querySelectorAll('.subscriber-cb').forEach(function (cb) {
+            if (selected.has(cb.value)) cb.checked = true;
+            cb.addEventListener('change', function () {
+                if (cb.checked) selected.add(cb.value);
+                else selected.delete(cb.value);
+                saveSelected(selected);
+                updateCounter(selected);
+            });
+        });
+
+        updateCounter(selected);
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function () {
+                document.querySelectorAll('.subscriber-cb').forEach(function (cb) {
+                    cb.checked = selectAll.checked;
+                    if (cb.checked) selected.add(cb.value);
+                    else selected.delete(cb.value);
+                });
+                saveSelected(selected);
+                updateCounter(selected);
+            });
+        }
+
+        if (sendToAll) sendToAll.addEventListener('change', togglePickerDisabled);
+        togglePickerDisabled();
+
+        if (form) {
+            form.addEventListener('submit', function () {
+                if (sendToAll.checked) return; // the server sends to everyone
+                selected.forEach(function (id) {
+                    if (!form.querySelector('.subscriber-cb[value="' + id + '"]:checked')) {
+                        var hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.name = 'users[]';
+                        hidden.value = id;
+                        form.appendChild(hidden);
+                    }
+                });
+            });
+        }
+    })();
 </script>
 
 @endsection

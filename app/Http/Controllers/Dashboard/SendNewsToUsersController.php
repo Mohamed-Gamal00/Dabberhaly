@@ -2,59 +2,65 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Events\NewsletterRequested;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\Notifications\SendNewsToUserRequest;
-use App\Notifications\NewsletterNotification;
-
 use App\Models\SendNewsToUser;
-use App\Models\User;
 use App\Repositories\SendNewsToUser\SendNewsToUserRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class SendNewsToUsersController extends Controller
 {
-  public $SendNewsToUser;
-  public function __construct(SendNewsToUserRepository $repo)
-  {
-    $this->SendNewsToUser = $repo;
-  }
+    public $SendNewsToUser;
 
-  public function create()
-  {
-    //Gate::authorize('news.view');
-    $users = $this->SendNewsToUser->create();
-    return view('dashboard.send_news_to_users.create', compact('users'));
-  }
-
-  public function sendNewsMail(SendNewsToUserRequest $request)
-  {
-    $userIds = (array) $request->input('users', []);
-    $users   = SendNewsToUser::whereIn('id', $userIds)->get();
-    $sent    = 0;
-    $failed  = 0;
-
-    foreach ($users as $user) {
-      try {
-        $user->notify(new NewsletterNotification(
-          $request->input('title'),
-          $request->input('body'),
-          $user
-        ));
-        $sent++;
-        // Respect Mailtrap / SMTP rate limits — 1 second between sends
-        if ($users->count() > 1) usleep(1100000);
-      } catch (\Exception $e) {
-        \Log::error('Newsletter send failed for: ' . $user->subscription_email . ' — ' . $e->getMessage());
-        $failed++;
-      }
+    public function __construct(SendNewsToUserRepository $repo)
+    {
+        $this->SendNewsToUser = $repo;
     }
 
-    $msg = "تم إرسال النشرة البريدية بنجاح إلى {$sent} مشترك.";
-    if ($failed > 0) {
-      $msg .= " (فشل الإرسال لـ {$failed} بريد)";
+    public function create(Request $request)
+    {
+        //Gate::authorize('news.view');
+        // Paginated on purpose: loading every subscriber at once
+        // (SendNewsToUser::all()) breaks the page with tens of
+        // thousands of subscribers. 50 per page + email search.
+        $search           = $request->query('search');
+        $users            = $this->SendNewsToUser->paginateSubscribers($search);
+        $totalSubscribers = SendNewsToUser::count();
+
+        return view('dashboard.send_news_to_users.create', compact('users', 'search', 'totalSubscribers'));
     }
 
-    return redirect()->back()->with('success', $msg);
-  }
+    public function sendNewsMail(SendNewsToUserRequest $request)
+    {
+        $title = $request->input('title');
+        $body  = $request->input('body');
+
+        // Dispatch one event per subscriber (chunked, so a large list
+        // never loads fully into memory). Nothing is sent here:
+        // SendNewsletterMail is ShouldQueue, so dispatching the event
+        // only pushes a job to the `jobs` table and returns immediately.
+        // The queue worker runs the listener in the background, retries
+        // failures with backoff, and records exhausted jobs in
+        // `failed_jobs`. The old synchronous loop + usleep(1.1s) per
+        // mail — which timed out the admin request on large lists —
+        // is intentionally gone.
+        //
+        // With send_to_all the query streams over every subscriber in
+        // chunks — no ID list is ever built or posted, so 50k
+        // subscribers cost the request nothing extra.
+        $query = SendNewsToUser::query()->orderBy('id');
+
+        if (! $request->boolean('send_to_all')) {
+            $query->whereIn('id', (array) $request->input('users', []));
+        }
+
+        $query->chunk(200, function ($users) use ($title, $body) {
+            foreach ($users as $user) {
+                event(new NewsletterRequested($user, $title, $body));
+            }
+        });
+
+        return redirect()->back()->with('success', 'تم إرسال النشرة بنجاح');
+    }
 }
