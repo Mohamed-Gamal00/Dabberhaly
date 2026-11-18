@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Order;
 
+use App\Enums\OrderStatus;
 use App\Helper\Helper;
 use App\Models\Order;
 use App\Repositories\Order\OrderInterface;
@@ -36,9 +37,22 @@ class OrderRepository implements OrderInterface
     public function update($request, $id)
     {
         $order = $this->order->findOrFail($id);
-        $order->update([
-            'status' => $request->status,
-        ]);
+
+        $status = $request->status instanceof OrderStatus
+            ? $request->status->value
+            : $request->status;
+
+        $data = [
+            'status' => $status,
+        ];
+
+        // Once the order is delivered, the payment is considered collected,
+        // so the order is marked as paid as well.
+        if ($status === OrderStatus::Delivered->value) {
+            $data['payment_status'] = 'paid';
+        }
+
+        $order->update($data);
 
         return $order;
     }
