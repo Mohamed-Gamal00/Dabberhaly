@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Dashboard\Notifications;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SendNewsToUserRequest extends FormRequest
 {
@@ -22,10 +23,12 @@ class SendNewsToUserRequest extends FormRequest
   public function rules()
   {
     return [
-      'title'    => 'required|string|max:255',
-      'body'     => 'required|string',
-      'users'    => 'required|array|min:1',
-      'users.*'  => 'required|integer|exists:send_news_to_users,id',
+      'title'       => 'required|string|max:255',
+      'body'        => 'required|string',
+      // Send to every subscriber: no user list needs to be posted.
+      'send_to_all' => 'nullable|boolean',
+      'users'       => [Rule::requiredIf(fn () => ! $this->boolean('send_to_all')), 'array', 'min:1'],
+      'users.*'     => 'required|integer|exists:send_news_to_users,id',
     ];
   }
 }

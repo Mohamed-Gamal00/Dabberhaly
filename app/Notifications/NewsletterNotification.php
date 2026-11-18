@@ -6,22 +6,25 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
+/**
+ * Newsletter broadcast notification — mail representation only.
+ *
+ * It carries no queue, retry or backoff logic. That lives in
+ * App\Listeners\SendNewsletterMail, which is ShouldQueue and is
+ * triggered by App\Events\NewsletterRequested — the same pattern
+ * as the verification / password-reset notifications in this project.
+ */
 class NewsletterNotification extends Notification
 {
     use Queueable;
 
     public string $title;
     public string $body;
-    public $user;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct(string $title, string $body, $user = null)
+    public function __construct(string $title, string $body)
     {
         $this->title = $title;
         $this->body  = $body;
-        $this->user  = $user;
     }
 
     /**
@@ -33,16 +36,17 @@ class NewsletterNotification extends Notification
     }
 
     /**
-     * Mail representation for newsletter broadcast.
+     * Mail representation: Vanilla Latte Blade template, not the
+     * default Laravel MailMessage lines.
      */
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject($this->title)
-            ->greeting('مرحباً!')
-            ->line($this->body)
-            ->action('تسوق الآن', url('/'))
-            ->line('نشكرك لاشتراكك في نشرتنا البريدية.');
+            ->view('emails.newsletter', [
+                'title' => $this->title,
+                'body'  => $this->body,
+            ]);
     }
 
     /**
