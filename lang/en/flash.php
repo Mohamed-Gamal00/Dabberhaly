@@ -31,6 +31,7 @@ return [
     'verification_code_expired' => 'Verification code has expired. Please request a new one.',
     'account_not_verified' => 'Your account is not verified. A new verification code has been sent to your phone number.',
     'order_creation_failed' => 'Order creation failed.',
+    'order_placed_success' => 'Your order was placed successfully! Your order number is #:number — thank you for trusting Dabberhaly products, we will contact you soon to confirm delivery.',
     'cart_empty_checkout' => 'Cannot complete order with empty cart.',
     'login_required_discount' => 'You must login first to use a discount code.',
     'invalid_discount_code' => 'Invalid or expired discount code.',

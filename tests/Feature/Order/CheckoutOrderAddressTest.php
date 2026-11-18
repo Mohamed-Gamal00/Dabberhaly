@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\UserAddress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use App\Events\UserOrder;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
@@ -71,7 +72,7 @@ class CheckoutOrderAddressTest extends TestCase
 
     public function test_web_checkout_with_saved_address_copies_city_and_country(): void
     {
-        Event::fake();
+        Event::fake([UserOrder::class]);
         [$user, $address] = $this->makeUserWithAddress($this->cityId, $this->countryId);
         $this->putItemInCart($user);
 
@@ -94,7 +95,7 @@ class CheckoutOrderAddressTest extends TestCase
 
     public function test_web_checkout_with_saved_address_missing_city_country_falls_back_to_main_address(): void
     {
-        Event::fake();
+        Event::fake([UserOrder::class]);
         [$user, $main] = $this->makeUserWithAddress($this->cityId, $this->countryId);
         $second = UserAddress::create([
             'user_id' => $user->id,
@@ -130,7 +131,7 @@ class CheckoutOrderAddressTest extends TestCase
 
     public function test_web_checkout_with_only_address_missing_city_country_still_stores_nulls(): void
     {
-        Event::fake();
+        Event::fake([UserOrder::class]);
         [$user, $address] = $this->makeUserWithAddress(null, null);
         $this->putItemInCart($user);
 
@@ -155,7 +156,7 @@ class CheckoutOrderAddressTest extends TestCase
 
     public function test_api_user_checkout_with_new_flat_address_creates_order_address(): void
     {
-        Event::fake();
+        Event::fake([UserOrder::class]);
         [$user] = $this->makeUserWithAddress($this->cityId, $this->countryId);
         $this->putItemInCart($user);
 

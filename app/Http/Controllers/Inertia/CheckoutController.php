@@ -6,6 +6,7 @@ use App\Events\UserOrder;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\DiscountCode;
+use App\Models\Order;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\UserDiscountCode;
 use App\Repositories\Cart\CartRepository;
@@ -190,7 +191,33 @@ class CheckoutController extends Controller
         // order that actually exists — never for a rolled-back one.
         event(new UserOrder($order));
 
-        return $this->checkoutService->checkPaymentMethod($request, $order);
+        return $this->checkoutService->checkPaymentMethod($request, $order, $user);
+    }
+
+    /**
+     * Order success page — the landing for guest cash-on-delivery
+     * orders (logged-in customers land on their profile instead).
+     */
+    public function success(Request $request)
+    {
+        $order = Order::where('number', $request->query('order_number'))
+            ->with('orderItems')
+            ->first();
+
+        if (! $order) {
+            return redirect()->route('home');
+        }
+
+        return Inertia::render('Checkout/Success', [
+            'order' => [
+                'number'         => $order->number,
+                'items_count'    => $order->orderItems->sum('quantity'),
+                'total_price'    => (float) $order->total_price,
+                'shipping_price' => (float) ($order->shipping_price ?? 0),
+                'payment_method' => $order->payment_method,
+                'is_guest'       => is_null($order->user_id),
+            ],
+        ]);
     }
 
     /**

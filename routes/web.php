@@ -91,6 +91,7 @@ Route::delete('/cart/{id}', [\App\Http\Controllers\Inertia\CartController::class
 
 // Checkout
 Route::get('/checkout', [\App\Http\Controllers\Inertia\CheckoutController::class, 'create'])->name('checkout');
+Route::get('/checkout/success', [\App\Http\Controllers\Inertia\CheckoutController::class, 'success'])->name('checkout.success');
 Route::post('/checkout', [\App\Http\Controllers\Inertia\CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('/checkout/apply-discount', [\App\Http\Controllers\Inertia\CheckoutController::class, 'applyDiscount'])->name('checkout.discount');
 
