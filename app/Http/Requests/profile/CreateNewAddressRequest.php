@@ -19,17 +19,22 @@ class CreateNewAddressRequest extends FormRequest
    *
    * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
    */
+  /**
+   * Only the address itself is validated from the request.
+   *
+   * The owner (user_id) and the contact data (first_name, family_name,
+   * phone_number) are never accepted from the client: they always come
+   * from the authenticated user's account, server-side. city/country
+   * are optional — the address form does not collect them and the
+   * database columns are nullable.
+   */
   public function rules(): array
   {
     return [
       'address_title' => 'required|string|max:255',
       'address' => 'required|string|max:255',
-      'first_name' => 'required|string|max:255',
-      'family_name' => 'nullable|string|max:255',
-      'phone_number' => 'required|between:6,16',
-      'user_id' => 'required|exists:users,id',
-      'city_id' => 'required|exists:cities,id',
-      'country_id' => 'required|exists:countries,id',
+      'city_id' => 'nullable|exists:cities,id',
+      'country_id' => 'nullable|exists:countries,id',
     ];
   }
 }
