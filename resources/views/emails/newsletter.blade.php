@@ -56,17 +56,6 @@
             padding: 13px 36px;
         }
         .cta-note { text-align: center; font-size: 13px; color: #77736B; margin-bottom: 8px; }
-        .info-box {
-            background: #F7F0E5;
-            border: 1px solid #D7CDBD;
-            border-radius: 12px;
-            padding: 16px 18px;
-            margin-top: 24px;
-            font-size: 13px;
-            color: #77736B;
-            line-height: 1.8;
-        }
-        .info-box strong { color: #76543D; }
         .footer { text-align: center; font-size: 12px; color: #77736B; margin-top: 24px; line-height: 1.8; }
         .footer a { color: #76543D; text-decoration: none; }
     </style>
@@ -74,7 +63,7 @@
 <body>
 <div class="wrapper">
     <div class="header">
-        <div class="brand">دبّرها</div>
+        <div class="brand">دبّرهالي</div>
         <div class="brand-en">DABBERHALY</div>
         <div class="badge">النشرة البريدية</div>
     </div>
@@ -88,16 +77,7 @@
         <div class="cta">
             <a href="{{ url('/') }}">تسوق الآن</a>
         </div>
-        <p class="cta-note">اكتشف أحدث المنتجات والعروض من دبّرها — مستلزمات بيتك العملية في مكان واحد.</p>
-
-        <div class="info-box">
-            <strong>لماذا تصلك هذه الرسالة؟</strong><br>
-            لأنك اشتركت في النشرة البريدية لموقع دبّرها
-            @if(!empty($subscriberEmail))
-                بالبريد <span dir="ltr">{{ $subscriberEmail }}</span>
-            @endif
-            ، سواء من الفوتر أو أثناء إتمام طلبك.
-        </div>
+        <p class="cta-note">اكتشف أحدث المنتجات والعروض من دبّرهالي — مستلزمات بيتك العملية في مكان واحد.</p>
     </div>
     <div class="footer">
         &copy; {{ date('Y') }} {{ config('app.name', 'Dabberhaly') }} — جميع الحقوق محفوظة<br>

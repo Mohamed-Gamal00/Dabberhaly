@@ -41,8 +41,7 @@ class SendNewsletterMail implements ShouldQueue
         try {
             $event->subscriber->notify(new NewsletterNotification(
                 $event->title,
-                $event->body,
-                $event->subscriber
+                $event->body
             ));
         } catch (Throwable $e) {
             Log::warning('Failed to send newsletter mail.', [

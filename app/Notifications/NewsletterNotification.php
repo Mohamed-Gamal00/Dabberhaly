@@ -20,16 +20,11 @@ class NewsletterNotification extends Notification
 
     public string $title;
     public string $body;
-    public ?string $subscriberEmail = null;
 
-    public function __construct(string $title, string $body, $user = null)
+    public function __construct(string $title, string $body)
     {
         $this->title = $title;
         $this->body  = $body;
-
-        // Store a scalar only: the whole Eloquent model must not be
-        // serialized into the queue payload.
-        $this->subscriberEmail = $user?->subscription_email ?? $user?->email ?? null;
     }
 
     /**
@@ -49,12 +44,8 @@ class NewsletterNotification extends Notification
         return (new MailMessage)
             ->subject($this->title)
             ->view('emails.newsletter', [
-                'title'          => $this->title,
-                'body'           => $this->body,
-                'subscriberEmail' => $this->subscriberEmail
-                    ?? $notifiable->subscription_email
-                    ?? $notifiable->email
-                    ?? null,
+                'title' => $this->title,
+                'body'  => $this->body,
             ]);
     }
 
