@@ -36,6 +36,11 @@ class AddToFavProductsController extends Controller
     {
         $guestId = $request->header('guest-id');
         $guest = Guest::where('id', $guestId)->first();
+
+        if (!$guest) {
+            return ApiResponse::sendResponse(401, 'Guest not found', []);
+        }
+
         $productId = $request->header('productId');
         $isExist = Product::where('id', $productId)->exists();
 

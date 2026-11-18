@@ -49,7 +49,10 @@ class NotificationsController extends Controller
                 return redirect()->to($target);
             }
 
-            return redirect()->to($url);
+            // No path (e.g. https://evil.com) — never redirect to the
+            // raw URL, it would leave the site. Fall back to the
+            // notifications page instead.
+            return redirect()->back();
         }
 
         return redirect()->back();

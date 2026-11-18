@@ -62,6 +62,47 @@ enum OrderStatus: string
         return $this === self::Pending;
     }
 
+    /**
+     * Forward-only lifecycle: pending → confirmed → processing →
+     * shipped → delivered, with cancel allowed from any state except
+     * delivered. Delivered and cancelled are terminal — an order must
+     * never move backwards (e.g. delivered → pending) or come back
+     * from cancelled.
+     */
+    /**
+     * Is moving from this status to $to allowed? Rules:
+     * - delivered and cancelled are terminal — nothing moves out of them.
+     * - cancel is allowed from any non-terminal state.
+     * - any forward move along the lifecycle is allowed (admins may
+     *   skip steps, e.g. mark a pending order delivered directly).
+     * - moving backwards (e.g. shipped -> confirmed) is not allowed:
+     *   it would corrupt the order timeline and the paid flag.
+     */
+    public function canTransitionTo(self $to): bool
+    {
+        if ($this === $to) {
+            return true;
+        }
+
+        if ($this === self::Delivered || $this === self::Cancelled) {
+            return false;
+        }
+
+        if ($to === self::Cancelled) {
+            return true;
+        }
+
+        $order = [
+            self::Pending->value => 0,
+            self::Confirmed->value => 1,
+            self::Processing->value => 2,
+            self::Shipped->value => 3,
+            self::Delivered->value => 4,
+        ];
+
+        return $order[$to->value] > $order[$this->value];
+    }
+
     /** All cases as a select-box array [value => label] */
     public static function options(): array
     {

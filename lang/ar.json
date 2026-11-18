@@ -25,6 +25,10 @@
   "wishlist_login_required": "يجب تسجيل الدخول أولاً لإضافة المنتج للمفضلة",
   "added_to_wishlist": "تمت الإضافة للمفضلة",
   "removed_from_wishlist": "تمت الإزالة من المفضلة",
+  "add_to_wishlist": "أضف إلى المفضلة",
+  "left_in_stock": "متبقٍ في المخزون",
+  "no_content": "لا يوجد محتوى",
+  "no_products_brand": "لا توجد منتجات لهذه العلامة التجارية",
   "product_added_to_cart": "تم إضافة المنتج للسلة",
 
   "all_products": "جميع المنتجات",

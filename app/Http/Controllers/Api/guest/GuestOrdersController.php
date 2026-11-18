@@ -33,10 +33,9 @@ class GuestOrdersController extends Controller
     public function showOrder(Request $request, $number)
     {
         $guest = $request->header('guest-id');
-        $number = $request->header('number');
         if (!$number) {
             return response()->json([
-                'message' => 'Order number is required in the header',
+                'message' => 'Order number is required',
                 'errors' => [
                     'number' => ['Order number is required.']
                 ]
@@ -51,7 +50,7 @@ class GuestOrdersController extends Controller
             ->first();
 
         if (!$order) {
-            return ApiResponse::sendResponse(200, 'الطلب غير موجود');
+            return ApiResponse::sendResponse(404, 'الطلب غير موجود');
         }
 //        return $order;
         $data = [

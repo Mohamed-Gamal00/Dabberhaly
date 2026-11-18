@@ -36,6 +36,7 @@ return [
     // Order Status
     'ORDER_STATUS_CREATED'        => 'تم إنشاء حالة الطلب بنجاح.',
     'ORDER_STATUS_UPDATED'        => 'تم تحديث حالة الطلب بنجاح.',
+    'ORDER_STATUS_INVALID_TRANSITION' => 'لا يمكن تغيير حالة الطلب بهذه الطريقة من الحالة الحالية.',
     'ORDER_STATUS_DELETED'        => 'تم حذف حالة الطلب بنجاح.',
     'ORDER_STATUS_REPEAT'         => 'تم اكتشاف حالة طلب مكررة. يرجى مراجعة اختيارك.',
 
@@ -51,6 +52,7 @@ return [
     // Main Categories
     'MAIN_CATEGORY_CREATED'       => 'تم إنشاء الفئة بنجاح.',
     'MAIN_CATEGORY_UPDATED'       => 'تم تحديث الفئة بنجاح.',
+    'MAIN_CATEGORY_DELETED'       => 'تم حذف الفئة بنجاح.',
 
     // Discount Codes
     'DISCOUNT_CODE_CREATED'       => 'تم إنشاء كود الخصم بنجاح.',

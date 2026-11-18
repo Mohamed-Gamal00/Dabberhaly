@@ -60,6 +60,14 @@ class OrderController extends Controller
             'status' => ['required', new Enum(OrderStatus::class)],
         ]);
 
+        $order = Order::findOrFail($id);
+        $newStatus = OrderStatus::from($request->status);
+
+        if (! $order->status->canTransitionTo($newStatus)) {
+            return redirect()->back()
+                ->with('error', __('messages.ORDER_STATUS_INVALID_TRANSITION'));
+        }
+
         $this->orderRepository->update($request, $id);
 
         return redirect()->route('orders.index')

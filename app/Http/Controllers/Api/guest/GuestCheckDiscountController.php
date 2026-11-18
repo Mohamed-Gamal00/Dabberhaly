@@ -47,15 +47,6 @@ class GuestCheckDiscountController extends Controller
             ], 400);
         }
 
-        // Create a record for the user using the discount code
-        UserDiscountCode::create([
-            'cookie_id' => Cart::getCookieIdApi(), // منتجات السلة دي
-            'discount_id' => $discountCode->id // هيطبق عليها الخصم ده
-        ]);
-
-        // Decrement the number of uses for this discount code
-        $discountCode->decrement('number_of_used');
-
         // بشوف لو كود الخصم مش متحدد لمنتجات معينة هيبقي خصم علي كل المنتجات
         $isGlobalDiscount = $discountCode->products()->count() === 0;
 
@@ -66,9 +57,19 @@ class GuestCheckDiscountController extends Controller
             ->where('cookie_id', $guestId)
             ->where('status', 0)->get();
 
+        // Empty cart: consume nothing.
         if ($cartItems->isEmpty()) {
             return ApiResponse::sendResponse(200, 'لا يمكن استخدام كود الخصم والسلة فارغة');
         }
+
+        // Create a record for the user using the discount code
+        UserDiscountCode::create([
+            'cookie_id' => Cart::getCookieIdApi(), // منتجات السلة دي
+            'discount_id' => $discountCode->id // هيطبق عليها الخصم ده
+        ]);
+
+        // Decrement the number of uses for this discount code
+        $discountCode->decrement('number_of_used');
 
         foreach ($cartItems as $item) {
             if ($isGlobalDiscount || $discountCode->products->contains($item->product_id)) {

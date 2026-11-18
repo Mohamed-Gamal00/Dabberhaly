@@ -36,6 +36,7 @@ return [
     // Order Status
     'ORDER_STATUS_CREATED'        => 'Order status created successfully.',
     'ORDER_STATUS_UPDATED'        => 'Order status updated successfully.',
+    'ORDER_STATUS_INVALID_TRANSITION' => 'This status change is not allowed for the current order status.',
     'ORDER_STATUS_DELETED'        => 'Order status deleted successfully.',
     'ORDER_STATUS_REPEAT'         => 'Duplicate order status detected. Please check your selection.',
 
@@ -51,6 +52,7 @@ return [
     // Main Categories
     'MAIN_CATEGORY_CREATED'       => 'Category created successfully.',
     'MAIN_CATEGORY_UPDATED'       => 'Category updated successfully.',
+    'MAIN_CATEGORY_DELETED'       => 'Category deleted successfully.',
 
     // Discount Codes
     'DISCOUNT_CODE_CREATED'       => 'Discount code created successfully.',

@@ -40,10 +40,10 @@ class UserOrdersController extends Controller
     public function showOrder(Request $request, $number)
     {
         $user = $request->user();
-        $number = $request->header('number');
+
         if (!$number) {
             return response()->json([
-                'message' => 'Order number is required in the header',
+                'message' => 'Order number is required',
                 'errors' => [
                     'number' => ['Order number is required.']
                 ]
@@ -59,7 +59,7 @@ class UserOrdersController extends Controller
             ->first();
 
         if (!$order) {
-            return ApiResponse::sendResponse(200, 'الطلب غير موجود');
+            return ApiResponse::sendResponse(404, 'الطلب غير موجود');
         }
 //        return $order;
         $data = [

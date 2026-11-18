@@ -25,6 +25,10 @@
   "wishlist_login_required": "Please login to add products to your wishlist",
   "added_to_wishlist": "Added to wishlist",
   "removed_from_wishlist": "Removed from wishlist",
+  "add_to_wishlist": "Add to wishlist",
+  "left_in_stock": "left in stock",
+  "no_content": "No content",
+  "no_products_brand": "No products for this brand",
   "product_added_to_cart": "Product added to cart",
 
   "all_products": "All Products",

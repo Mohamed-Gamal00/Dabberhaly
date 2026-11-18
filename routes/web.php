@@ -26,13 +26,10 @@ use Inertia\Inertia;
 
     Route::post('/login', [UserAuthController::class, 'login'])->name('auth.login');
     Route::post('/register', [UserAuthController::class, 'register'])->name('auth.register');
-    Route::post('/verify', [UserAuthController::class, 'verifyCode'])->name('auth.verify');
-    Route::post('/verify-resend', [UserAuthController::class, 'resendVerificationCode'])->name('auth.verify.resend');
+    Route::post('/verify', [UserAuthController::class, 'verifyCode'])->middleware('throttle:5,1')->name('auth.verify');
+    Route::post('/verify-resend', [UserAuthController::class, 'resendVerificationCode'])->middleware('throttle:5,1')->name('auth.verify.resend');
     Route::post('/forgot-password', [UserAuthController::class, 'forgotPassword'])->name('auth.forgot');
     Route::post('/update-password', [UserAuthController::class, 'passwordUpdate'])->name('auth.update');
-    Route::post('/logout', [UserAuthController::class, 'logout'])->name('auth.logout');
-
-
 Route::middleware('auth:web')->group(function () {
     Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
     // صفحة الحساب الشخصي

@@ -80,6 +80,20 @@ class UserAuthController extends Controller
     {
         $user = User::where('phone_number', $request->phone_number)->first();
         if ($user && Hash::check($request->password, $user->password)) {
+            // Accounts registered through the API must verify their OTP
+            // before they can log in. Users with no verification row
+            // (e.g. registered on the website, where verification happens
+            // before the account is created) are not blocked — and note
+            // users.is_verified is never set anywhere, so it must not
+            // be used as the check here.
+            $verification = $user->verificationCode;
+            if ($verification && ! $verification->is_verified) {
+                return ApiResponse::sendResponse(403, 'Account not verified', [
+                    'verification_required' => true,
+                    'user_id' => $user->id,
+                ]);
+            }
+
             $token = $user->createToken('-AuthToken')->plainTextToken;
             $data = [
                 'token' => $token,
