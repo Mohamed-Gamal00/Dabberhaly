@@ -63,13 +63,10 @@ class UserProfileController extends Controller
         $user = Auth::user();
 
         // The address belongs to the logged-in user and carries his
-        // account name/phone — none of that is accepted from the client.
+        // account data — none of that is accepted from the client.
         UserAddress::create(array_merge($request->validated(), [
             'user_id' => $user->id,
-            'first_name' => $user->first_name,
-            'family_name' => $user->family_name,
-            'phone_number' => $user->phone_number,
-        ]));
+        ], $this->addressAccountData($user)));
 
         return back()->with('success', __('flash.address_added'));
     }
@@ -86,12 +83,8 @@ class UserProfileController extends Controller
         $user = Auth::user();
         $address = $user->addresses()->findOrFail($addressId);
 
-        // The contact data always mirrors the account, even on edit.
-        $address->update(array_merge($request->validated(), [
-            'first_name' => $user->first_name,
-            'family_name' => $user->family_name,
-            'phone_number' => $user->phone_number,
-        ]));
+        // The contact and location data always mirror the account, even on edit.
+        $address->update(array_merge($request->validated(), $this->addressAccountData($user)));
 
         return back()->with('success', __('flash.address_updated'));
     }
@@ -117,6 +110,27 @@ class UserProfileController extends Controller
         $user->addresses()->update(['main_address' => 0]);
         $user->addresses()->where('id', $addressId)->update(['main_address' => 1]);
         return back()->with('success', __('flash.main_address_updated'));
+    }
+
+    /**
+     * The data every address takes from the customer's account: the
+     * name and phone from the user record, the country/city from his
+     * main address. The users table has no city/country columns —
+     * registration stores them on the main address, so that is the
+     * source of truth. Nulls are dropped so an update never wipes an
+     * address's existing values when the account has none.
+     */
+    private function addressAccountData(User $user): array
+    {
+        $main = $user->addresses()->where('main_address', true)->first();
+
+        return array_filter([
+            'first_name' => $user->first_name,
+            'family_name' => $user->family_name,
+            'phone_number' => $user->phone_number,
+            'country_id' => $main?->country_id,
+            'city_id' => $main?->city_id,
+        ], fn ($value) => $value !== null);
     }
 
     public function changePasswordView()

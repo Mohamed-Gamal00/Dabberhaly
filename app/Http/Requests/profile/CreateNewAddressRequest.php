@@ -22,19 +22,17 @@ class CreateNewAddressRequest extends FormRequest
   /**
    * Only the address itself is validated from the request.
    *
-   * The owner (user_id) and the contact data (first_name, family_name,
-   * phone_number) are never accepted from the client: they always come
-   * from the authenticated user's account, server-side. city/country
-   * are optional — the address form does not collect them and the
-   * database columns are nullable.
+   * The owner (user_id), the contact data (first_name, family_name,
+   * phone_number) and the location (city_id, country_id) are never
+   * accepted from the client: they always come from the authenticated
+   * user's account, server-side (name/phone from the user record,
+   * city/country from his main address).
    */
   public function rules(): array
   {
     return [
       'address_title' => 'required|string|max:255',
       'address' => 'required|string|max:255',
-      'city_id' => 'nullable|exists:cities,id',
-      'country_id' => 'nullable|exists:countries,id',
     ];
   }
 }

@@ -23,15 +23,13 @@ class UpdateNewAddressRequest extends FormRequest
     {
     /**
      * Same rules as creating: only the address itself comes from the
-     * request. The owner and the contact data are taken from the
-     * authenticated user's account, server-side (see
+     * request. The owner, the contact data and the location are taken
+     * from the authenticated user's account, server-side (see
      * CreateNewAddressRequest).
      */
     return [
       'address_title' => 'required|string|max:255',
       'address' => 'required|string|max:255',
-      'city_id' => 'nullable|exists:cities,id',
-      'country_id' => 'nullable|exists:countries,id',
     ];
     }
 }
