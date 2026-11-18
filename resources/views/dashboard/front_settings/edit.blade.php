@@ -165,6 +165,26 @@
             <div class="col-lg-6">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-transparent border-bottom fw-bold">
+                        <i class="mdi mdi-truck me-2 text-primary"></i>
+                        الشحن
+                    </div>
+                    <div class="card-body d-flex flex-column gap-3">
+                        <div>
+                            <label class="form-label fw-semibold">حد الشحن المجاني (ر.س)</label>
+                            <div class="input-group">
+                                <input type="number" name="free_shipping_threshold" step="0.01" min="0"
+                                    class="form-control" value="{{ old('free_shipping_threshold', $setting->free_shipping_threshold) }}" />
+                                <span class="input-group-text">ر.س</span>
+                            </div>
+                            <small class="text-muted">إجمالي السلة الذي عنده يصبح الشحن مجانياً ويكتمل شريط التقدم في السلة.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-bottom fw-bold">
                         <i class="mdi mdi-cellphone me-2 text-primary"></i>
                         روابط التطبيق
                     </div>

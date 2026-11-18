@@ -23,6 +23,7 @@ class SettingRequest extends FormRequest
             'address'                  => 'nullable',
             'phone_number'             => ['nullable', 'numeric'],
             'value_added_tax'          => ['nullable', 'numeric'],
+            'free_shipping_threshold'  => ['nullable', 'numeric', 'min:0'],
             'tax_number'               => ['nullable', 'numeric'],
             'email'                    => 'nullable|email',
             'facebook'                 => 'nullable',

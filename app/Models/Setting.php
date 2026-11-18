@@ -29,6 +29,7 @@ class Setting extends Model
         'tiktok',
         'tax_number',
         'value_added_tax',
+        'free_shipping_threshold',
         'publishable_key',
         'secret_key',
         'sms_api_key',

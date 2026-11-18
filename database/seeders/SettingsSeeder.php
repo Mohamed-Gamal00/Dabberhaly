@@ -31,6 +31,7 @@ class SettingsSeeder extends Seeder
                 'address'         => 'الرياض، المملكة العربية السعودية',
                 'description'     => 'متجر إلكتروني متكامل',
                 'value_added_tax' => 0,
+                'free_shipping_threshold' => 500,
                 // Moyasar keys come from the environment only — no
                 // hardcoded fallback keys (a missing key must fail
                 // loudly instead of silently using shared test keys).
