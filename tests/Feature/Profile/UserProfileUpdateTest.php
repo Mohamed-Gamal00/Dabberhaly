@@ -49,4 +49,56 @@ class UserProfileUpdateTest extends TestCase
 
         $response->assertSessionHasErrors(['first_name', 'phone_number']);
     }
+
+    public function test_profile_update_rejects_phone_number_used_by_another_user(): void
+    {
+        User::factory()->create(['phone_number' => '01111111111', 'password' => 'password']);
+        $user = User::factory()->create(['phone_number' => '01000000000', 'password' => 'password']);
+
+        $response = $this->actingAs($user, 'web')->put(route('update_user_info'), [
+            'first_name' => 'Mohamed',
+            'family_name' => 'Gamal',
+            'phone_number' => '01111111111',
+        ]);
+
+        $response->assertSessionHasErrors(['phone_number']);
+        $this->assertSame('01000000000', $user->fresh()->phone_number);
+    }
+
+    public function test_profile_update_rejects_email_used_by_another_user(): void
+    {
+        User::factory()->create(['email' => 'taken@example.com', 'password' => 'password']);
+        $user = User::factory()->create(['password' => 'password']);
+
+        $response = $this->actingAs($user, 'web')->put(route('update_user_info'), [
+            'first_name' => 'Mohamed',
+            'family_name' => 'Gamal',
+            'phone_number' => '01000000000',
+            'email' => 'taken@example.com',
+        ]);
+
+        $response->assertSessionHasErrors(['email']);
+        $this->assertNotSame('taken@example.com', $user->fresh()->email);
+    }
+
+    public function test_profile_update_allows_keeping_own_phone_and_email(): void
+    {
+        $user = User::factory()->create([
+            'phone_number' => '01000000000',
+            'email' => 'mine@example.com',
+            'password' => 'password',
+        ]);
+
+        $response = $this->actingAs($user, 'web')->put(route('update_user_info'), [
+            'first_name' => 'Mohamed',
+            'family_name' => 'Gamal',
+            'phone_number' => '01000000000',
+            'email' => 'mine@example.com',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+        $this->assertSame('01000000000', $user->fresh()->phone_number);
+        $this->assertSame('mine@example.com', $user->fresh()->email);
+    }
 }
