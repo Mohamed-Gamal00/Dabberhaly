@@ -30,7 +30,6 @@ class SendNewsToUsersController extends Controller
         $userIds = (array) $request->input('users', []);
         $title   = $request->input('title');
         $body    = $request->input('body');
-        $queued  = 0;
 
         // Dispatch one event per subscriber (chunked, so a large list
         // never loads fully into memory). Nothing is sent here:
@@ -43,16 +42,12 @@ class SendNewsToUsersController extends Controller
         // is intentionally gone.
         SendNewsToUser::whereIn('id', $userIds)
             ->orderBy('id')
-            ->chunk(200, function ($users) use ($title, $body, &$queued) {
+            ->chunk(200, function ($users) use ($title, $body) {
                 foreach ($users as $user) {
                     event(new NewsletterRequested($user, $title, $body));
-                    $queued++;
                 }
             });
 
-        return redirect()->back()->with(
-            'success',
-            "تم استلام النشرة، وستُرسل في الخلفية إلى {$queued} مشترك. تأكد أن الـ queue worker شغال: php artisan queue:work"
-        );
+        return redirect()->back()->with('success', 'تم إرسال النشرة بنجاح');
     }
 }
