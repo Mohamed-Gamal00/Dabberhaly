@@ -118,12 +118,4 @@ class GuestCartController extends Controller
 
         return ApiResponse::sendResponse(200, 'تم التعديل بنجاح', []);
     }
-
-    public function totalBeforeDiscount(Request $request): float
-    {
-        return Cart::with('product')->withoutGlobalScope('cookie_id')
-            ->where('user_id', $request->user()->id)
-            ->where('status', 0)->get()
-            ->sum(fn ($item) => $item->quantity * $item->product->price);
-    }
 }

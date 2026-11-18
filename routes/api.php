@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\AllProductsController;
 use App\Http\Controllers\Api\BrandsController;
 use App\Http\Controllers\Api\CitiesController;
 use App\Http\Controllers\Api\ColorsController;
-use App\Http\Controllers\Api\CountriesController;
 use App\Http\Controllers\Api\CurrenciesController;
 use App\Http\Controllers\Api\DiscountsController;
 use App\Http\Controllers\Api\FilterProductsController;
@@ -105,10 +104,8 @@ Route::middleware(['changeLanguage'])->group(function () {
 
 
     ###########################################################################-- Get All Countries
-    // Route::get('get-countries', [CountriesController::class, 'allCountries']);
 
-    ###########################################################################-- Get All Countries
-    Route::get('get-cities', [CitiesController::class, 'allCities']);
+    ###########################################################################-- Get All Cities
 
     ####################################### Settings #############################################
     Route::get('settings', [SettingsController::class, 'settings']);

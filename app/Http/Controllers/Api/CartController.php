@@ -42,15 +42,4 @@ class CartController extends Controller
     {
         return $this->cart->UpdateCartProductCount($request, $id);
     }
-
-    public function totalBeforeDiscount(Request $request): float
-    {
-        $user_id = $request->user()->id;
-        return Cart::with('product')->withoutGlobalScope('cookie_id')
-            ->where('user_id', $user_id)
-            ->where('status', 0)->get()
-            ->sum(function ($item) {
-                return $item->quantity * $item->product->price;
-            });
-    }
 }

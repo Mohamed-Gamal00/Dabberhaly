@@ -9,8 +9,6 @@
   "register": "حساب جديد",
   "logout": "تسجيل الخروج",
   "my_account": "حسابي",
-  "cart": "السلة",
-  "language": "العربية",
 
   "search_placeholder": "ابحث عن منتج...",
   "searching": "جاري البحث...",
@@ -39,7 +37,6 @@
   "no_products_hint": "جرّب تغيير معايير البحث أو الفلترة",
   "search_in_products": "ابحث في المنتجات...",
   "results_for": "نتائج:",
-  "filter": "فلترة",
   "clear_filters": "مسح الفلاتر",
   "clear": "مسح",
   "apply": "تطبيق",
@@ -100,7 +97,6 @@
   "cart_checkout": "إتمام الشراء",
   "cart_continue": "متابعة التسوق",
 
-  "checkout_title": "إتمام الطلب",
   "shipping_method": "طريقة الشحن",
   "pickup_from_store": "الاستلام من المتجر",
   "fixed_shipping": "تكلفة ثابتة للشحن",
@@ -112,7 +108,6 @@
   "discount_code": "كود الخصم",
   "discount_applied": "تم تطبيق كود",
   "discount_value": "خصم",
-  "discount_remove": "إزالة",
   "discount_placeholder": "أدخل كود الخصم",
   "discount_apply": "تطبيق",
   "discount_login_required": "يجب",
@@ -171,7 +166,6 @@
   "contact_support": "التواصل مع الدعم",
   "problem_persists": "إذا استمرت المشكلة، يرجى",
 
-  "product_details": "تفاصيل المنتج",
   "in_stock": "متوفر",
   "not_available": "غير متوفر",
   "quantity": "الكمية",
@@ -208,10 +202,6 @@
   "profile_address_label": "عنوان",
   "profile_wishlist_label": "مفضلة",
 
-  "account_title": "حسابي",
-  "account_desc": "إدارة حسابك الشخصي وطلباتك",
-  "go_to_profile": "الذهاب للملف الشخصي",
-  "back_to_home_btn": "العودة للرئيسية",
 
   "login_welcome": "مرحباً بعودتك 👋",
   "login_subtitle": "سجّل دخولك للمتابعة",
@@ -372,10 +362,7 @@
   "quickview_details": "التفاصيل",
   "quickview_rating": "تقييم",
 
-  "newsletter_placeholder": "بريدك الإلكتروني...",
   "subscribe": "اشتراك",
-  "subscribed_success": "✓ تم الاشتراك بنجاح!",
-  "already_subscribed": "أنت مشترك بالفعل في النشرة البريدية",
 
   "save_changes": "حفظ التغييرات",
   "profile_updated": "تم تحديث البيانات بنجاح",
@@ -396,11 +383,6 @@
   "return_submitted": "تم تقديم طلب إرجاع لهذا الطلب وهو قيد المراجعة",
   "return_success": "تم تقديم طلب الإرجاع بنجاح",
 
-  "status_pending": "قيد الانتظار",
-  "status_approved": "تمت الموافقة",
-  "status_in_progress": "قيد التنفيذ",
-  "status_completed": "مكتمل",
-  "status_rejected": "مرفوض",
 
   "no_addresses": "لا توجد عناوين مسجلة بعد",
   "add_first_address": "أضف عنوانك الأول",
@@ -423,7 +405,6 @@
   "under_review": "قيد المراجعة",
   "return_submitted_review": "تم تقديم طلب إرجاع لهذا الطلب وهو قيد المراجعة من قِبل الفريق",
 
-  "agree_terms_required": "يجب الموافقة على الشروط والأحكام",
   "first_name_required": "الاسم الأول مطلوب",
   "last_name_required": "اسم العائلة مطلوب",
   "phone_required": "رقم الجوال مطلوب",

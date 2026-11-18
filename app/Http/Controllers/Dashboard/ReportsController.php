@@ -37,12 +37,6 @@ class ReportsController extends Controller
         return view('dashboard.reports.index', compact('products', 'reportTitle'));
     }
 
-    public function ProductPage()
-    {
-        return view('dashboard.reports.product-report');
-    }
-
-
     public function searchReport(Request $request)
     {
         Gate::authorize('report.create');

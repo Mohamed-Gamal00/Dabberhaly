@@ -34,11 +34,8 @@ return [
     'PAGE_UPDATED'                => 'تم تحديث الصفحة بنجاح.',
 
     // Order Status
-    'ORDER_STATUS_CREATED'        => 'تم إنشاء حالة الطلب بنجاح.',
     'ORDER_STATUS_UPDATED'        => 'تم تحديث حالة الطلب بنجاح.',
     'ORDER_STATUS_INVALID_TRANSITION' => 'لا يمكن تغيير حالة الطلب بهذه الطريقة من الحالة الحالية.',
-    'ORDER_STATUS_DELETED'        => 'تم حذف حالة الطلب بنجاح.',
-    'ORDER_STATUS_REPEAT'         => 'تم اكتشاف حالة طلب مكررة. يرجى مراجعة اختيارك.',
 
     // Orders
     'ORDER_DELETED'               => 'تم حذف الطلب بنجاح.',

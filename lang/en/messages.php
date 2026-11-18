@@ -34,11 +34,8 @@ return [
     'PAGE_UPDATED'                => 'Page updated successfully.',
 
     // Order Status
-    'ORDER_STATUS_CREATED'        => 'Order status created successfully.',
     'ORDER_STATUS_UPDATED'        => 'Order status updated successfully.',
     'ORDER_STATUS_INVALID_TRANSITION' => 'This status change is not allowed for the current order status.',
-    'ORDER_STATUS_DELETED'        => 'Order status deleted successfully.',
-    'ORDER_STATUS_REPEAT'         => 'Duplicate order status detected. Please check your selection.',
 
     // Orders
     'ORDER_DELETED'               => 'Order deleted successfully.',

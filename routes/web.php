@@ -159,14 +159,6 @@ Route::middleware('auth:web')->group(function () {
     Route::post('/user_normal_info/resendVerifyCode_to_update', [UserProfileController::class, 'resendVerifyCodeToupdate'])->name('resendVerifyCode_to_update');
 
 
-    // /* مشاهدة الطلب */
-    // Route::get('/user_orders/{number}', [UserOrdersController::class, 'showOrder'])->name('user.orders');
-    // /* الطلبات */
-    // Route::get('/user_main_orders', [UserOrdersController::class, 'mainOrders'])->name('user.main.orders');
-    // /* حذف طلب */
-    // Route::delete('/user_orders/delete', [UserOrdersController::class, 'destroy'])->name('order.delete');
-
-
     // /* المرتجعات */
     Route::get('/user_return_orders', [\App\Http\Controllers\Inertia\ReturnProductsController::class, 'index'])->name('user.return_products');
     Route::post('/user_return_orders/store', [\App\Http\Controllers\Inertia\ReturnProductsController::class, 'store'])->name('user.return_products.store');

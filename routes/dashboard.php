@@ -22,7 +22,6 @@ use App\Http\Controllers\Dashboard\MainCategoriesController;
 use App\Http\Controllers\Dashboard\OrderController;
 use App\Http\Controllers\Dashboard\PageController;
 use App\Http\Controllers\Dashboard\ProductsController;
-use App\Http\Controllers\Dashboard\ProductsFeatures;
 use App\Http\Controllers\Dashboard\ReportsController;
 use App\Http\Controllers\Dashboard\ReturnOrderController;
 use App\Http\Controllers\Dashboard\RulesController;
@@ -34,7 +33,6 @@ use App\Http\Controllers\Dashboard\ProfileController;
 use App\Http\Controllers\Dashboard\ProfileSettingsController;
 use App\Http\Controllers\Dashboard\RepresentativesOrderController;
 use App\Http\Controllers\Dashboard\StoreFatuerController;
-use App\Livewire\Categories;
 use Illuminate\Support\Facades\Route;
 
 //=============================================== Dashboard Routes
