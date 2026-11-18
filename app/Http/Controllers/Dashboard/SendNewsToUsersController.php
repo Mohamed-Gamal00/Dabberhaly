@@ -5,56 +5,54 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\Notifications\SendNewsToUserRequest;
 use App\Notifications\NewsletterNotification;
-
 use App\Models\SendNewsToUser;
-use App\Models\User;
 use App\Repositories\SendNewsToUser\SendNewsToUserRepository;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class SendNewsToUsersController extends Controller
 {
-  public $SendNewsToUser;
-  public function __construct(SendNewsToUserRepository $repo)
-  {
-    $this->SendNewsToUser = $repo;
-  }
+    public $SendNewsToUser;
 
-  public function create()
-  {
-    //Gate::authorize('news.view');
-    $users = $this->SendNewsToUser->create();
-    return view('dashboard.send_news_to_users.create', compact('users'));
-  }
-
-  public function sendNewsMail(SendNewsToUserRequest $request)
-  {
-    $userIds = (array) $request->input('users', []);
-    $users   = SendNewsToUser::whereIn('id', $userIds)->get();
-    $sent    = 0;
-    $failed  = 0;
-
-    foreach ($users as $user) {
-      try {
-        $user->notify(new NewsletterNotification(
-          $request->input('title'),
-          $request->input('body'),
-          $user
-        ));
-        $sent++;
-        // Respect Mailtrap / SMTP rate limits — 1 second between sends
-        if ($users->count() > 1) usleep(1100000);
-      } catch (\Exception $e) {
-        \Log::error('Newsletter send failed for: ' . $user->subscription_email . ' — ' . $e->getMessage());
-        $failed++;
-      }
+    public function __construct(SendNewsToUserRepository $repo)
+    {
+        $this->SendNewsToUser = $repo;
     }
 
-    $msg = "تم إرسال النشرة البريدية بنجاح إلى {$sent} مشترك.";
-    if ($failed > 0) {
-      $msg .= " (فشل الإرسال لـ {$failed} بريد)";
+    public function create()
+    {
+        //Gate::authorize('news.view');
+        $users = $this->SendNewsToUser->create();
+
+        return view('dashboard.send_news_to_users.create', compact('users'));
     }
 
-    return redirect()->back()->with('success', $msg);
-  }
+    public function sendNewsMail(SendNewsToUserRequest $request)
+    {
+        $userIds = (array) $request->input('users', []);
+        $title   = $request->input('title');
+        $body    = $request->input('body');
+        $queued  = 0;
+
+        // Queue one notification job per subscriber (chunked, so a large
+        // list never loads fully into memory). Nothing is sent here:
+        // NewsletterNotification implements ShouldQueue, so notify()
+        // only pushes a job to the `jobs` table and returns immediately.
+        // The queue worker sends the mails in the background, retries
+        // failures with backoff, and records exhausted jobs in
+        // `failed_jobs`. The old synchronous loop + usleep(1.1s) per
+        // mail — which timed out the admin request on large lists —
+        // is intentionally gone.
+        SendNewsToUser::whereIn('id', $userIds)
+            ->orderBy('id')
+            ->chunk(200, function ($users) use ($title, $body, &$queued) {
+                foreach ($users as $user) {
+                    $user->notify(new NewsletterNotification($title, $body, $user));
+                    $queued++;
+                }
+            });
+
+        return redirect()->back()->with(
+            'success',
+            "تم استلام النشرة، وستُرسل في الخلفية إلى {$queued} مشترك. تأكد أن الـ queue worker شغال: php artisan queue:work"
+        );
+    }
 }

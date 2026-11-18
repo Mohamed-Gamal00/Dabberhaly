@@ -43,6 +43,10 @@ Route::middleware('auth:web')->group(function () {
 
 // Newsletter subscription
 Route::post('/subscribe', [\App\Http\Controllers\Inertia\NewsletterController::class, 'store'])->name('newsletter.subscribe');
+// Newsletter unsubscribe (signed link from the email itself)
+Route::get('/newsletter/unsubscribe/{subscriber}', [\App\Http\Controllers\Inertia\NewsletterController::class, 'unsubscribe'])
+    ->name('newsletter.unsubscribe')
+    ->middleware('signed');
 
 // Language switcher
 Route::post('/locale/{lang}', function (string $lang) {

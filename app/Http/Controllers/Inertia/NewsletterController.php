@@ -24,4 +24,17 @@ class NewsletterController extends Controller
 
         return response()->json(['message' => __('flash.newsletter_subscribed_success')]);
     }
+
+    /**
+     * One-click unsubscribe from a newsletter email.
+     * The link in the email is a signed URL, so only the subscriber
+     * who received it can use it — no login required.
+     */
+    public function unsubscribe(SendNewsToUser $subscriber)
+    {
+        $email = $subscriber->subscription_email;
+        $subscriber->delete();
+
+        return view('newsletter.unsubscribed', compact('email'));
+    }
 }

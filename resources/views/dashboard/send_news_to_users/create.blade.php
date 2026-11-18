@@ -99,6 +99,10 @@
                         <i class="mdi mdi-send me-1"></i>
                         إرسال النشرة
                     </button>
+                    <p class="text-muted small mt-2 mb-0">
+                        يتم إرسال النشرة في الخلفية عبر الـ Queue، ولن تنتظر الصفحة إرسال كل بريد.
+                        تأكد أن الـ worker شغال: <code dir="ltr">php artisan queue:work</code>
+                    </p>
                 </form>
             </div>
         </div>
