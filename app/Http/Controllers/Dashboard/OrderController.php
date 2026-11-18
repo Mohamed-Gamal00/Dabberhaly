@@ -32,6 +32,15 @@ class OrderController extends Controller
 
     public function show(string $id)
     {
+        // A returned order no longer lives under /admin/orders: the
+        // repository only finds orders with return_order = false, so
+        // opening one (e.g. from the order-created notification, whose
+        // URL was frozen at creation time) would 404. Send the admin
+        // to that order's returns page instead.
+        if (Order::where('id', $id)->where('return_order', true)->exists()) {
+            return redirect()->route('return_orders.show', $id);
+        }
+
         $order   = $this->orderRepository->show($id);
         $statuses = OrderStatus::cases();
 
