@@ -188,7 +188,7 @@ class ProductsController extends Controller
 
     public function trash()
     {
-        // Gate::authorize('product.trash.view');
+        Gate::authorize('product.trash.view');
 
         $products = Product::onlyTrashed()->paginate();
         return view('dashboard.products.trash', compact('products'));
@@ -196,7 +196,7 @@ class ProductsController extends Controller
 
     public function restore(Request $request, $id)
     {
-        //Gate::authorize('product.restore');
+        Gate::authorize('product.restore');
         $product = Product::onlyTrashed()->findOrFail($id);
         $product->restore();
         return redirect()->back()
@@ -205,7 +205,7 @@ class ProductsController extends Controller
 
     public function forceDelete($id)
     {
-        //Gate::authorize('product.delete.forever');
+        Gate::authorize('product.delete.forever');
 
         $product = Product::onlyTrashed()->findOrFail($id);
 

@@ -39,7 +39,6 @@
 
         <x-admin.rules rules_type="products" title="المنتجات" />
         <x-admin.rules rules_type="categories" title="الأقسام" />
-        <x-admin.rules rules_type="filters" title="التصنيفات" />
         <x-admin.rules rules_type="companies" title="الشركات" />
         <x-admin.rules rules_type="designs" title="التصميم" />
         <x-admin.rules rules_type="admins" title="المدراء" />
@@ -50,12 +49,26 @@
         <x-admin.rules rules_type="settings" title="اعدادات الموقع" />
         <x-admin.rules rules_type="shipping" title="الشحن" />
         <x-admin.rules rules_type="discount_code" title="أكود الخصم" />
-        <x-admin.rules rules_type="order_status" title="حالات الطلب" />
         <x-admin.rules rules_type="product_availability" title="حالات التوفر" />
         <x-admin.rules rules_type="currencies" title="العملات" />
         <x-admin.rules rules_type="countries" title="الدول" />
         <x-admin.rules rules_type="colors" title="الالوان" />
         <x-admin.rules rules_type="reports" title="التقارير" />
+        <x-admin.rules rules_type="dashboard" title="لوحة التحكم" />
+        <x-admin.rules rules_type="payments" title="المدفوعات" />
+        <x-admin.rules rules_type="bulk_orders" title="طلبات الجملة" />
+        <x-admin.rules rules_type="representatives_orders" title="طلبات المناديب" />
+        <x-admin.rules rules_type="store_features" title="ميزات المتجر" />
+        <x-admin.rules rules_type="pages" title="صفحات الموقع" />
+        <x-admin.rules rules_type="contact_us" title="رسائل التواصل" />
+        <x-admin.rules rules_type="header_banner" title="بانر الهيدر" />
+        <x-admin.rules rules_type="banners" title="البنرات" />
+        <x-admin.rules rules_type="header_text" title="نصوص الهيدر" />
+        <x-admin.rules rules_type="advertisements" title="الشريط الإعلاني" />
+        <x-admin.rules rules_type="choices" title="الخيارات" />
+        <x-admin.rules rules_type="cities" title="المدن" />
+        <x-admin.rules rules_type="common_questions" title="الأسئلة الشائعة" />
+        <x-admin.rules rules_type="notifications" title="الإشعارات" />
 
         {{-- sub category in edit page --}}
         <div>

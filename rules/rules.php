@@ -1,17 +1,25 @@
 <?php
 
+// Admin abilities, grouped by section. The groups UI
+// (dashboard/admins/rules create/edit) renders one checkbox section
+// per top-level key via the <x-admin.rules> component, and
+// AuthServiceProvider flattens the groups to define one Gate per
+// ability — so every ability here must live inside a group, and no
+// flat duplicate section is needed.
+
 return [
+    'dashboard' => [
+        'dashboard.view' => 'مشاهدة لوحة التحكم',
+    ],
+
     'products' => [
         'product.view' => 'مشاهدة المنتجات',
         'product.edit' => 'تعديل المنتجات',
         'product.create' => 'انشاء المنتجات',
         'product.delete' => 'حذف منتجات',
-//        'product.trash' => 'المحذوفات',
-//        'product.trash.view' => 'مشاهدة المحذوفات',
-//        'product.restore' => 'اعادة المنتجات من المحذوفات',
-//        'product.delete.forever' => 'حذف المنتجات للأبد من المحذوفات',
-//        'product_setting.view' => 'مشاهدة اعدادات المنتجات',
-//        'product_setting.filters' => 'تعديل تصنيفات  المنتجات',
+        'product.trash.view' => 'مشاهدة المحذوفات',
+        'product.restore' => 'اعادة المنتجات من المحذوفات',
+        'product.delete.forever' => 'حذف المنتجات للأبد من المحذوفات',
     ],
 
     'categories' => [
@@ -19,16 +27,6 @@ return [
         'category.edit' => 'تعديل الأقسام',
         'category.create' => 'انشاء الأقسام',
         'category.delete' => 'حذف الأقسام',
-    ],
-
-    'filters' => [
-        'filter.view' => 'مشاهدة التصنيفات',
-        'filter.edit' => 'تعديل التصنيفات',
-        'filter.create' => 'انشاء التصنيفات',
-        'filter.delete' => 'حذف التصنيفات',
-        'sub_filter.create' => 'اضافة تصنيف فرعي',
-        'sub_filter.edit' => 'تعديل تصنيف فرعي',
-        'sub_filter.delete' => 'حذف تصنيف فرعي',
     ],
 
     'companies' => [
@@ -55,7 +53,6 @@ return [
 
     'clients' => [
         'client.view' => 'مشاهدة العملاء',
-        'client.create' => 'اضافة عملاء',
         'client.delete' => 'حذف عملاء',
         'client.edit' => 'تغيير الرقم السري للعملاء'
     ],
@@ -75,7 +72,6 @@ return [
 
     'return_orders' => [
         'return_order.view' => 'مشاهدة ارجاع الطلب',
-        'return_order.edit' => 'تعديل حالة ارجاع الطلب',
         'return_order.delete' => 'حذف ارجاع الطلب',
     ],
 
@@ -98,13 +94,6 @@ return [
         'discount_code.create' => 'اضافة كود الخصم',
     ],
 
-    'order_status' => [
-        'order_status.view' => 'مشاهدة حالة الطلب',
-        'order_status.edit' => 'تعديل حالة حالة الطلب',
-        'order_status.delete' => 'حذف حالة الطلب',
-        'order_status.create' => 'اضافة حالة الطلب',
-    ],
-
     'product_availability' => [
         'product_availability.view' => 'مشاهدة حالة التوفر',
         'product_availability.create' => 'اضافة حالة التوفر',
@@ -121,7 +110,7 @@ return [
 
     'countries' => [
         'country.view' => 'مشاهدة الدول',
-        'country.create' => 'اضافة الدول',
+        'country.create' => 'انشاء الدول',
         'country.edit' => 'تعديل  الدول',
         'country.delete' => 'حذف الدول',
     ],
@@ -137,112 +126,91 @@ return [
         'report.create' => 'انشاء تقرير',
     ],
 
-    ////////////////////////////////////// for use this in blade @can ... just quick solution
+    'payments' => [
+        'payment.view' => 'مشاهدة المدفوعات',
+    ],
 
-    'product.view' => 'مشاهدة المنتجات',
-    'product.edit' => 'تعديل المنتجات',
-    'product.create' => 'انشاء المنتجات',
-    'product.delete' => 'حذف منتجات',
-//    'product.trash.view' => 'مشاهدة المحذوفات',
-//    'product.restore' => 'اعادة المنتجات من المحذوفات',
-//    'product.delete.forever' => 'حذف المنتجات للأبد من المحذوفات',
-//    'product_setting.view' => 'مشاهدة اعدادات المنتجات',
-//    'product_setting.filters' => 'تعديل تصنيفات  المنتجات',
+    'bulk_orders' => [
+        'bulk_order.view' => 'مشاهدة طلبات الجملة',
+        'bulk_order.create' => 'انشاء طلب جملة',
+        'bulk_order.edit' => 'تعديل طلب جملة',
+        'bulk_order.delete' => 'حذف طلب جملة',
+    ],
 
+    'representatives_orders' => [
+        'representative_order.view' => 'مشاهدة طلبات المناديب',
+        'representative_order.create' => 'انشاء طلب مندوب',
+        'representative_order.edit' => 'تعديل طلب مندوب',
+        'representative_order.delete' => 'حذف طلب مندوب',
+    ],
 
-    'category.view' => 'مشاهدة الأقسام',
-    'category.edit' => 'تعديل الأقسام',
-    'category.create' => 'انشاء الأقسام',
-    'category.delete' => 'حذف الأقسام',
+    'store_features' => [
+        'store_feature.view' => 'مشاهدة ميزات المتجر',
+        'store_feature.create' => 'انشاء ميزة متجر',
+        'store_feature.edit' => 'تعديل ميزة متجر',
+        'store_feature.delete' => 'حذف ميزة متجر',
+    ],
 
+    'pages' => [
+        'page.view' => 'مشاهدة صفحات الموقع',
+        'page.create' => 'انشاء صفحة',
+        'page.edit' => 'تعديل صفحة',
+        'page.delete' => 'حذف صفحة',
+    ],
 
-//    'filter.view' => 'مشاهدة التصنيفات',
-//    'filter.edit' => 'تعديل التصنيفات',
-//    'filter.create' => 'انشاء التصنيفات',
-//    'filter.delete' => 'حذف التصنيفات',
-//    'sub_filter.create' => 'اضافة تصنيف فرعي',
-//    'sub_filter.view' => 'مشاهدة التصنيفات الفرعيه',
-//    'sub_filter.edit' => 'تعديل تصنيف فرعي',
-//    'sub_filter.delete' => 'حذف تصنيف فرعي',
+    'contact_us' => [
+        'contact_us.view' => 'مشاهدة رسائل التواصل',
+    ],
 
+    'header_banner' => [
+        'header_banner.view' => 'مشاهدة بانر الهيدر',
+        'header_banner.edit' => 'تعديل بانر الهيدر',
+    ],
 
-    'company.view' => 'مشاهدة الشركات',
-    'company.create' => 'انشاء الشركات',
-    'company.edit' => 'تعديل الشركات',
-    'company.delete' => 'حذف الشركات',
+    'banners' => [
+        'banner.view' => 'مشاهدة البنرات',
+        'banner.create' => 'انشاء بانر',
+        'banner.edit' => 'تعديل بانر',
+        'banner.delete' => 'حذف بانر',
+    ],
 
+    'header_text' => [
+        'header_text.view' => 'مشاهدة نصوص الهيدر',
+        'header_text.create' => 'انشاء نص هيدر',
+        'header_text.edit' => 'تعديل نص هيدر',
+        'header_text.delete' => 'حذف نص هيدر',
+    ],
 
-    'design.view' => 'مشاهدة البنرات',
-    'design.create' => 'انشاء البنرات',
-    'design.edit' => 'تعديل البنرات',
-    'design.delete' => 'حذف البنرات',
+    'advertisements' => [
+        'advertisement.view' => 'مشاهدة الشريط الإعلاني',
+        'advertisement.create' => 'انشاء اعلان',
+        'advertisement.edit' => 'تعديل اعلان',
+        'advertisement.delete' => 'حذف اعلان',
+    ],
 
+    'choices' => [
+        'choice.view' => 'مشاهدة الخيارات',
+        'choice.create' => 'انشاء خيار',
+        'choice.edit' => 'تعديل خيار',
+        'choice.delete' => 'حذف خيار',
+    ],
 
-    'admin.view' => 'مشاهدة المدراء',
-    'admin.edit' => 'تعديل بيانات المدراء',
-    'admin.create' => 'اضافة مدراء',
-    'admin.delete' => 'حذف المدراء',
-    'admin.change_password' => 'تغيير الرقم السري للمدراء',
+    'cities' => [
+        'city.view' => 'مشاهدة المدن',
+        'city.create' => 'انشاء مدينة',
+        'city.edit' => 'تعديل مدينة',
+        'city.delete' => 'حذف مدينة',
+    ],
 
+    'common_questions' => [
+        'common_question.view' => 'مشاهدة الأسئلة الشائعة',
+        'common_question.create' => 'انشاء سؤال شائع',
+        'common_question.edit' => 'تعديل سؤال شائع',
+        'common_question.delete' => 'حذف سؤال شائع',
+    ],
 
-    'admin.group.view' => 'مشاهدة مجموعات',
-    'admin.group.create' => 'اضافة مجموعات',
-    'admin.group.edit' => 'تعديل مجموعات',
-    'admin.group.delete' => 'حذف مجموعات',
-
-    'client.view' => 'مشاهدة العملاء',
-    'client.create' => 'اضافة عملاء',
-    'client.delete' => 'حذف عملاء',
-    'client.edit' => 'تغيير الرقم السري للعملاء',
-
-    'order.view' => 'مشاهدة طلب',
-    'order.edit' => 'تعديل حالة طلب',
-    'order.delete' => 'حذف طلب',
-
-    'return_order.view' => 'مشاهدة ارجاع الطلب',
-    'return_order.edit' => 'تعديل  ارجاع الطلب',
-    'return_order.delete' => 'حذف ارجاع الطلب',
-
-    'news.view' => 'النشرة البريدية',
-
-    'settings.edit' => 'اعدادات الموقع',
-
-    'shipping.edit' => 'اعدادات الشحن',
-
-    'discount_code.view' => 'مشاهدة كود الخصم',
-    'discount_code.edit' => 'تعديل  كود الخصم',
-    'discount_code.delete' => 'حذف كود الخصم',
-    'discount_code.create' => 'اضافة كود الخصم',
-
-
-    'order_status.view' => 'مشاهدة حالة الطلب',
-    'order_status.edit' => 'تعديل  حالة الطلب',
-    'order_status.delete' => 'حذف حالة الطلب',
-    'order_status.create' => 'اضافة حالة الطلب',
-
-
-    'product_availability.view' => 'مشاهدة حالة التوفر',
-    'product_availability.edit' => 'تعديل  حالة التوفر',
-    'product_availability.delete' => 'حذف حالة التوفر',
-    'product_availability.create' => 'اضافة حالة التوفر',
-
-    'currency.view' => 'مشاهدة العملات',
-    'currency.create' => 'اضافة العملات',
-    'currency.edit' => 'تعديل  العملات',
-    'currency.delete' => 'حذف العملات',
-
-    'country.view' => 'مشاهدة الدول',
-    'country.create' => 'اضافة الدول',
-    'country.edit' => 'تعديل  الدول',
-    'country.delete' => 'حذف الدول',
-
-    'color.view' => 'مشاهدة الالوان',
-    'color.create' => 'انشاء الالوان',
-    'color.edit' => 'تعديل الالوان',
-    'color.delete' => 'حذف الالوان',
-
-
-    'report.create' => 'انشاء تقرير',
-
+    'notifications' => [
+        'notification.view' => 'مشاهدة الإشعارات',
+    ],
 
 ];

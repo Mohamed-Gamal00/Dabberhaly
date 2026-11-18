@@ -24,6 +24,7 @@ class NewHeaderBannerController extends Controller
 
     public function index()
     {
+        Gate::authorize('banner.view');
         $home_banners = $this->designRepo->getHomeBanners();
         //        dd($home_banners);
         return view('dashboard.banners.index', compact('home_banners',));
@@ -34,6 +35,7 @@ class NewHeaderBannerController extends Controller
      */
     public function create()
     {
+        Gate::authorize('banner.create');
         return view('dashboard.banners.create');
     }
 
@@ -44,6 +46,7 @@ class NewHeaderBannerController extends Controller
 
     public function store(BannerRequest $request)
     {
+        Gate::authorize('banner.create');
 
         // Validate request and initialize data
         $data = $request->validated();
@@ -68,6 +71,7 @@ class NewHeaderBannerController extends Controller
      */
     public function show(string $id)
     {
+        Gate::authorize('banner.view');
         //
     }
 
@@ -76,6 +80,7 @@ class NewHeaderBannerController extends Controller
      */
     public function edit(string $id)
     {
+        Gate::authorize('banner.edit');
         $design = $this->designRepo->getById($id);
         //        dd($design);
         return view('dashboard.banners.edit', compact('design'));
@@ -83,6 +88,7 @@ class NewHeaderBannerController extends Controller
 
     public function update(BannerRequest $request, string $id)
     {
+        Gate::authorize('banner.edit');
 
         $design = $this->designRepo->getById($id);
         $data = $request->all();
@@ -120,6 +126,7 @@ class NewHeaderBannerController extends Controller
      */
     public function destroy(string $id)
     {
+        Gate::authorize('banner.delete');
 
         $design = $this->designRepo->getById($id);
 

@@ -8,6 +8,7 @@ use App\Models\Country;
 use App\Repositories\City\CityRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class CityController extends Controller
 {
@@ -23,6 +24,7 @@ class CityController extends Controller
    */
   public function index()
   {
+    Gate::authorize('city.view');
     $cities = $this->cityRepository->getMainCity();
     return view('dashboard.cities.index', compact('cities'));
   }
@@ -32,6 +34,7 @@ class CityController extends Controller
    */
   public function create()
   {
+    Gate::authorize('city.create');
     $countries = $this->cityRepository->getCountries();
     $cities = $this->cityRepository->getNotUsedCities();
     return view('dashboard.cities.create', compact('countries', 'cities'));
@@ -42,6 +45,7 @@ class CityController extends Controller
    */
   public function store(Request $request)
   {
+    Gate::authorize('city.create');
     // Validate the request data
     $validated = $request->validate([
       'country_id' => 'required|exists:countries,id',
@@ -63,6 +67,7 @@ class CityController extends Controller
    */
   public function show(string $id)
   {
+    Gate::authorize('city.view');
     //
   }
 
@@ -71,6 +76,7 @@ class CityController extends Controller
    */
   public function edit($id)
   {
+    Gate::authorize('city.edit');
     $city = $this->cityRepository->getById($id);
     $countries = $this->cityRepository->getCountries();
     return view('dashboard.cities.edit', compact('city', 'countries'));
@@ -81,6 +87,7 @@ class CityController extends Controller
    */
   public function update(Request $request, $id)
   {
+    Gate::authorize('city.edit');
     $city = City::findOrFail($id);
 
     // Validate the request data
@@ -104,6 +111,7 @@ class CityController extends Controller
    */
   public function destroy(string $id)
   {
+    Gate::authorize('city.delete');
     $this->cityRepository->delete($id);
 
     return redirect()->route('cities.index')->with('success', __('messages.CITY_DELETED'));

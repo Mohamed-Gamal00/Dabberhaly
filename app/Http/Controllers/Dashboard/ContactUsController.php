@@ -7,6 +7,7 @@ use App\Models\ContactUs;
 use App\Repositories\ContactUs\ContactRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ContactUsController extends Controller
 {
@@ -19,6 +20,7 @@ class ContactUsController extends Controller
   }
   public function index()
   {
+    Gate::authorize('contact_us.view');
     $messages = $this->contactRepository->getAll();
     $user = Auth::guard('admin')->user();
     $notifications = $user->notifications()->where('type', "App\Notifications\ContactMessageAdminNotification")->get();
@@ -27,6 +29,7 @@ class ContactUsController extends Controller
 
   public function show($id)
   {
+    Gate::authorize('contact_us.view');
 
     $message = $this->contactRepository->show($id);
     return view('dashboard.contact_us.show', compact('message'));

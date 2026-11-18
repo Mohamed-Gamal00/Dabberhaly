@@ -7,6 +7,7 @@ use App\Http\Requests\Dashboard\Page\StaticPage;
 use App\Models\Page;
 use App\Repositories\Static_Pages\StaticPageRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class PageController extends Controller
 {
@@ -22,6 +23,7 @@ class PageController extends Controller
   // Add index method to list the pages
   public function index()
   {
+    Gate::authorize('page.view');
     $pages = $this->staticPageRepository->getMainPages();
     return view('dashboard.static_pages.index', compact('pages'));
   }
@@ -31,6 +33,7 @@ class PageController extends Controller
    */
   public function create()
   {
+    Gate::authorize('page.create');
     //
   }
 
@@ -39,6 +42,7 @@ class PageController extends Controller
    */
   public function store(Request $request)
   {
+    Gate::authorize('page.create');
     //
   }
 
@@ -47,6 +51,7 @@ class PageController extends Controller
    */
   public function show(string $id)
   {
+    Gate::authorize('page.view');
     //
   }
 
@@ -55,6 +60,7 @@ class PageController extends Controller
    */
   public function edit($id)
   {
+    Gate::authorize('page.edit');
     $page = Page::findOrFail($id);
     return view('dashboard.static_pages.edit', compact('page'));
   }
@@ -80,6 +86,7 @@ class PageController extends Controller
   // }
   public function update(StaticPage $request, $id)
   {
+    Gate::authorize('page.edit');
     $data = $request->validated();
 
     $wasChanged = $this->staticPageRepository->update($data, $id);
@@ -95,6 +102,7 @@ class PageController extends Controller
    */
   public function destroy(string $id)
   {
+    Gate::authorize('page.delete');
     //
   }
 }

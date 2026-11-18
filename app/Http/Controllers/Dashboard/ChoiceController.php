@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Choice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class ChoiceController extends Controller
 {
@@ -14,6 +15,7 @@ class ChoiceController extends Controller
    */
   public function index()
   {
+    Gate::authorize('choice.view');
     $choices = Choice::latest()->paginate();
     return view('dashboard.choices.index', compact('choices'));
   }
@@ -23,6 +25,7 @@ class ChoiceController extends Controller
    */
   public function create()
   {
+    Gate::authorize('choice.create');
     $mainChoices = Choice::latest()->paginate();
     return view('dashboard.choices.create', compact('mainChoices'));
   }
@@ -32,6 +35,7 @@ class ChoiceController extends Controller
    */
   public function store(Request $request)
   {
+    Gate::authorize('choice.create');
 
     $data = $request->validate([
       'name' => 'required|string|max:255',
@@ -60,6 +64,7 @@ class ChoiceController extends Controller
    */
   public function show(string $id)
   {
+    Gate::authorize('choice.view');
     //
   }
 
@@ -68,6 +73,7 @@ class ChoiceController extends Controller
    */
   public function edit(string $id)
   {
+    Gate::authorize('choice.edit');
     $choice = Choice::findOrFail($id);
     $mainChoices = Choice::where('id', '!=', $id)->get();;
     return view('dashboard.choices.edit', compact('choice', 'mainChoices'));
@@ -78,6 +84,7 @@ class ChoiceController extends Controller
    */
   public function update(Request $request, string $id)
   {
+    Gate::authorize('choice.edit');
     $category = Choice::findOrFail($id);
 
     $data = $request->validate([
@@ -105,6 +112,7 @@ class ChoiceController extends Controller
    */
   public function destroy(string $id)
   {
+    Gate::authorize('choice.delete');
     $category = Choice::findOrFail($id);
     $category->delete();
     return back()

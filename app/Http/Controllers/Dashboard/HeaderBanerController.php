@@ -7,6 +7,7 @@ use App\Models\HeaderBanner;
 use Illuminate\Http\Request;
 use App\Helper\ImageCustomization;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 
 class HeaderBanerController extends Controller
 {
@@ -14,6 +15,7 @@ class HeaderBanerController extends Controller
 
   public function index()
   {
+    Gate::authorize('header_banner.view');
     $headerImages = HeaderBanner::select('id', 'header_image', 'image_link')->get();
     // dd($headerImages);
     return view('dashboard.banners.header_in_front', compact('headerImages'));
@@ -21,6 +23,7 @@ class HeaderBanerController extends Controller
 
   public function frontHeaderStoreAndUpdate(Request $request)
   {
+    Gate::authorize('header_banner.edit');
     $data = $request->validate([
       'header' => ['nullable', 'array'],
       'header.*.image' => ['nullable', 'image'],
@@ -59,6 +62,7 @@ class HeaderBanerController extends Controller
 
   public function frontHeaderRemoveImage(Request $request)
   {
+    Gate::authorize('header_banner.edit');
     $request->validate([
       'image_id' => 'required|exists:header_banners,id'
     ]);
