@@ -90,10 +90,10 @@ class CheckoutController extends Controller
 
         // ===== Validation =====
 
-        // Terms always required
-        $request->validate(['terms' => 'required|accepted'], [
-            'terms.required' => 'يجب الموافقة على الشروط والأحكام',
-        ]);
+        // No mandatory terms checkbox: placing the order implies consent
+        // (the button is followed by a note linking to the terms and the
+        // privacy policy), so a blocking checkbox only adds friction
+        // at the moment of purchase.
 
         // Authenticated user with existing address
         if ($user && !$isNew) {
