@@ -154,7 +154,7 @@ import { useLocale } from '../composables/useLocale';
 const email        = ref('');
 const subscribing  = ref(false);
 const subscribeMsg = ref('');
-const siteName     = computed(() => usePage().props.seo?.site_name || 'متجري');
+const siteName     = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
 const { t } = useLocale();
 
 async function subscribe() {
@@ -166,7 +166,7 @@ async function subscribe() {
         subscribeMsg.value = data.message;
         email.value = '';
     } catch (e) {
-        subscribeMsg.value = e.response?.data?.message || 'حدث خطأ، حاول مرة أخرى';
+        subscribeMsg.value = e.response?.data?.message || t('error_occurred');
     } finally {
         subscribing.value = false;
     }

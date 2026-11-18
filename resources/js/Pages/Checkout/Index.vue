@@ -1,5 +1,5 @@
 <template>
-    <div class="co-page" dir="rtl">
+    <div class="co-page" :dir="dir">
         <v-container class="py-6 py-md-8">
 
             <!-- ===== Page header + steps ===== -->
@@ -132,11 +132,11 @@
                                     </div>
                                     <div class="co-field co-field--full">
                                         <label class="co-label">{{ t('country') }}</label>
-                                        <v-select v-model="addrForm.country_id" :items="countries" item-title="name_ar" item-value="id" :placeholder="t('select_country')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" :error-messages="errors['addr.shipping.country_id'] || errors['addr.billing.country_id']" @update:model-value="addrForm.city_id = null" />
+                                        <v-select v-model="addrForm.country_id" :items="countries" :item-title="isEn ? 'name_en' : 'name_ar'" item-value="id" :placeholder="t('select_country')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" :error-messages="errors['addr.shipping.country_id'] || errors['addr.billing.country_id']" @update:model-value="addrForm.city_id = null" />
                                     </div>
                                     <div class="co-field co-field--full">
                                         <label class="co-label">{{ t('city') }}</label>
-                                        <v-select v-model="addrForm.city_id" :items="filteredCities" item-title="name_ar" item-value="id" :placeholder="t('select_city')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" :error-messages="errors['addr.shipping.city_id'] || errors['addr.billing.city_id']" />
+                                        <v-select v-model="addrForm.city_id" :items="filteredCities" :item-title="isEn ? 'name_en' : 'name_ar'" item-value="id" :placeholder="t('select_city')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" :error-messages="errors['addr.shipping.city_id'] || errors['addr.billing.city_id']" />
                                     </div>
                                     <div class="co-field co-field--full">
                                         <label class="co-label">{{ t('address') }}</label>
@@ -171,7 +171,7 @@
                                     <div class="co-opt-title">{{ t('fixed_shipping') }}</div>
                                     <div class="co-opt-desc">{{ t('shipping_cost') }}</div>
                                 </div>
-                                <span class="co-opt-price">{{ shipping.normal_shipping_price }} ر.س</span>
+                                <span class="co-opt-price">{{ shipping.normal_shipping_price }} {{ t('currency_sar') }}</span>
                             </label>
                             <label v-if="shipping?.add_wight_price" class="co-opt" :class="{ active: shippingOption === 'shipping_based_on_weight' }">
                                 <input type="radio" v-model="shippingOption" value="shipping_based_on_weight" class="co-opt-radio" />
@@ -188,7 +188,7 @@
                                     <div class="co-opt-title">{{ t('city_shipping') }}</div>
                                     <div class="co-opt-desc">{{ t('city_shipping_desc') }}</div>
                                 </div>
-                                <span class="co-opt-price">{{ cityShippingPrice ? cityShippingPrice + ' ر.س' : '—' }}</span>
+                                <span class="co-opt-price">{{ cityShippingPrice ? cityShippingPrice + ' ' + t('currency_sar') : '—' }}</span>
                             </label>
                         </div>
                     </div>
@@ -244,11 +244,11 @@
                                 <div v-for="item in cartItems" :key="item.id" class="co-item">
                                     <img :src="item.image" class="co-item-img" alt="product" />
                                     <div class="co-item-info">
-                                        <div class="co-item-name">{{ item.name }}</div>
-                                        <div class="co-item-meta">{{ item.quantity }} × {{ Math.ceil(Number(item.discount_price) || Number(item.price)) }} ر.س</div>
+                                        <div class="co-item-name">{{ pick(item, 'name') }}</div>
+                                        <div class="co-item-meta">{{ item.quantity }} × {{ Math.ceil(Number(item.discount_price) || Number(item.price)) }} {{ t('currency_sar') }}</div>
                                     </div>
                                     <div class="co-item-total">
-                                        {{ Math.ceil((Number(item.discount_price) || Number(item.price)) * Number(item.quantity)) }} ر.س
+                                        {{ Math.ceil((Number(item.discount_price) || Number(item.price)) * Number(item.quantity)) }} {{ t('currency_sar') }}
                                     </div>
                                 </div>
                             </div>
@@ -260,7 +260,7 @@
                                 <div class="co-card-title mb-3" style="font-size:13px">{{ t('discount_code') }}</div>
                                 <div v-if="appliedDiscount" class="co-discount-applied">
                                     <v-icon size="18" color="success" class="me-1">mdi-check-circle</v-icon>
-                                    <span>{{ t('discount_applied') }} <strong>{{ appliedDiscount.code }}</strong> — {{ appliedDiscount.type === 'percentage' ? appliedDiscount.value + '%' : appliedDiscount.value + ' ر.س' }}</span>
+                                    <span>{{ t('discount_applied') }} <strong>{{ appliedDiscount.code }}</strong> — {{ appliedDiscount.type === 'percentage' ? appliedDiscount.value + '%' : appliedDiscount.value + ' ' + t('currency_sar') }}</span>
                                     <button class="co-discount-remove" @click="removeDiscount">
                                         <v-icon size="14">mdi-close</v-icon>
                                     </button>
@@ -286,16 +286,16 @@
 
                             <!-- Totals -->
                             <div class="co-sum-row"><span>{{ t('cart_items_count') }}</span><span>{{ totalItemsCount }} {{ t('pieces') }}</span></div>
-                            <div class="co-sum-row"><span>{{ t('order_subtotal') }}</span><span>{{ Math.ceil(cartTotal + discountSaving) }} ر.س</span></div>
+                            <div class="co-sum-row"><span>{{ t('order_subtotal') }}</span><span>{{ Math.ceil(cartTotal + discountSaving) }} {{ t('currency_sar') }}</span></div>
                             <div v-if="appliedDiscount" class="co-sum-row co-sum-discount">
                                 <span>
                                     <v-icon size="14" color="success" class="me-1">mdi-tag-outline</v-icon>
                                     {{ t('discount_applied') }} ({{ appliedDiscount.code }})
                                 </span>
-                                <span>- {{ discountSaving }} ر.س</span>
+                                <span>- {{ discountSaving }} {{ t('currency_sar') }}</span>
                             </div>
-                            <div class="co-sum-row"><span>{{ t('shipping_cost') }}</span><span>{{ shippingCost ? Math.ceil(shippingCost) + ' ر.س' : t('free_shipping') }}</span></div>
-                            <div class="co-sum-row co-sum-total"><span>{{ t('total') }}</span><span>{{ grandTotal }} ر.س</span></div>
+                            <div class="co-sum-row"><span>{{ t('shipping_cost') }}</span><span>{{ shippingCost ? Math.ceil(shippingCost) + ' ' + t('currency_sar') : t('free_shipping') }}</span></div>
+                            <div class="co-sum-row co-sum-total"><span>{{ t('total') }}</span><span>{{ grandTotal }} {{ t('currency_sar') }}</span></div>
 
                             <div v-if="errors.general" class="text-red text-caption mt-3 text-center">{{ errors.general }}</div>
 
@@ -319,7 +319,7 @@
         <div class="co-mobile-bar d-md-none">
             <div class="co-mobile-total">
                 <span>{{ t('total') }}</span>
-                <strong>{{ grandTotal }} ر.س</strong>
+                <strong>{{ grandTotal }} {{ t('currency_sar') }}</strong>
             </div>
             <v-btn color="primary" height="46" rounded="lg" class="co-mobile-btn" :loading="submitting" @click="submit">{{ t('place_order') }}</v-btn>
         </div>
@@ -331,7 +331,7 @@ import { ref, computed } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useLocale } from '../../composables/useLocale';
-const { t } = useLocale();
+const { t, pick, isEn, dir } = useLocale();
 
 const { props } = usePage();
 const user          = computed(() => props.auth?.user);

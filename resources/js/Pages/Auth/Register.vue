@@ -150,7 +150,7 @@
                             <v-select
                                 v-model="form.country_id"
                                 :items="countries"
-                                item-title="name_ar"
+                                item-title="name"
                                 item-value="id"
                                 :placeholder="t('select_country')"
                                 variant="outlined"
@@ -171,7 +171,7 @@
                             <v-select
                                 v-model="form.city_id"
                                 :items="filteredCities"
-                                item-title="name_ar"
+                                item-title="name"
                                 item-value="id"
                                 :placeholder="t('select_city')"
                                 variant="outlined"
@@ -270,7 +270,7 @@ import { useLocale } from '../../composables/useLocale';
 
 defineOptions({ layout: null });
 
-const siteName = computed(() => usePage().props.seo?.site_name || 'متجري');
+const siteName = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
 const { t } = useLocale();
 
 const props  = defineProps({ countries: Array, cities: Array });

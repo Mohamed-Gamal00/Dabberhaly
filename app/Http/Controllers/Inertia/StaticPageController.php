@@ -16,8 +16,11 @@ class StaticPageController extends Controller
 
         // Content is rendered with v-html: purify on read too, so rows
         // saved before purification was added cannot execute scripts.
+        // English title/content are served when the locale is English
+        // and filled in, otherwise the Arabic values are used.
         if ($page) {
-            $page->content = HtmlSanitizer::purify($page->content);
+            $page->title = $page->localizedTitle();
+            $page->content = HtmlSanitizer::purify($page->localizedContent());
         }
 
         return Inertia::render('StaticPages/Page', ['page' => $page, 'view' => $view]);

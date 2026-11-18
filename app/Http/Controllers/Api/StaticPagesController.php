@@ -12,27 +12,43 @@ use Illuminate\Http\Request;
 
 class StaticPagesController extends Controller
 {
+    /**
+     * Serve the admin-written English title/content when the locale is
+     * English and they are filled in; otherwise fall back to the Arabic
+     * values with the previous machine-translation behaviour.
+     */
+    private function localizePage(?Page $page): ?Page
+    {
+        if (!$page) {
+            return null;
+        }
+
+        $isEnglish = app()->getLocale() === 'en';
+
+        $page->title = $isEnglish && !empty($page->title_en)
+            ? $page->title_en
+            : translateWithHTMLTags($page->title);
+
+        $page->content = $isEnglish && !empty($page->content_en)
+            ? HtmlSanitizer::purify($page->content_en)
+            : HtmlSanitizer::purify(translateWithHTMLTags($page->content));
+
+        return $page;
+    }
+
     public function static_pages()
     {
-        $page = Page::select('title', 'content')->where('id', '3')->first();
+        $page = $this->localizePage(
+            Page::select('title', 'content', 'title_en', 'content_en')->where('id', '3')->first()
+        );
 
-        if ($page) {
-            $page->content = HtmlSanitizer::purify(translateWithHTMLTags($page->content));
-            $page->title = translateWithHTMLTags($page->title);
-        }
+        $shipping_policy = $this->localizePage(
+            Page::select('title', 'content', 'title_en', 'content_en')->where('id', '2')->first()
+        );
 
-        $shipping_policy = Page::select('title', 'content')->where('id', '2')->first();
-        if ($shipping_policy) {
-            $shipping_policy->content = HtmlSanitizer::purify(translateWithHTMLTags($shipping_policy->content));
-            $shipping_policy->title = translateWithHTMLTags($shipping_policy->title);
-        }
-
-        $Terms_and_Conditions = Page::select('title', 'content')->where('id', '1')->first();
-        if ($Terms_and_Conditions) {
-            $Terms_and_Conditions->content = HtmlSanitizer::purify(translateWithHTMLTags($Terms_and_Conditions->content));
-            $Terms_and_Conditions->title = translateWithHTMLTags($Terms_and_Conditions->title);
-
-        }
+        $Terms_and_Conditions = $this->localizePage(
+            Page::select('title', 'content', 'title_en', 'content_en')->where('id', '1')->first()
+        );
 
         $data = [$page, $shipping_policy, $Terms_and_Conditions];
         if ($page) {

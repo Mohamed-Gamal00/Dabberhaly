@@ -30,9 +30,18 @@
                                     value="{{ $page->title }}" required>
                             </div>
                             <div class="form-group my-3">
+                                <label for="title_en">العنوان بالإنجليزية</label>
+                                <input type="text" name="title_en" class="form-control" id="title_en"
+                                    value="{{ old('title_en', $page->title_en) }}" dir="ltr" style="text-align:left">
+                            </div>
+                            <div class="form-group my-3">
                                 <label for="content">المحتوي</label>
                                 {{-- <textarea name="content" class="form-control text-editor" id="content" required>{{ $page->content }}</textarea> --}}
                                 <textarea id="elm1" name="content">{!! $page->content !!}</textarea>
+                            </div>
+                            <div class="form-group my-3">
+                                <label for="content_en">المحتوي بالإنجليزية</label>
+                                <textarea id="elm2" name="content_en">{!! old('content_en', $page->content_en) !!}</textarea>
                             </div>
                             <button type="submit" class="btn btn-primary">تحديث</button>
                         </form>

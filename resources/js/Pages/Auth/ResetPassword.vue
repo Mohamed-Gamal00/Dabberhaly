@@ -106,7 +106,7 @@ import { useLocale } from '../../composables/useLocale';
 defineOptions({ layout: null });
 
 const { t } = useLocale();
-const siteName = computed(() => usePage().props.seo?.site_name || 'متجري');
+const siteName = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
 const form  = useForm({ code: '', password: '', password_confirmation: '' });
 const showPass  = ref(false);
 const showPass2 = ref(false);

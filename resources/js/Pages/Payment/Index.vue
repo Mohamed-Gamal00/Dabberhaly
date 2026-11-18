@@ -1,5 +1,5 @@
 <template>
-    <div class="pay-page" dir="rtl">
+    <div class="pay-page" :dir="dir">
         <div class="pay-container">
 
             <!-- Header -->
@@ -20,7 +20,7 @@
                 <div class="pay-summary-row">
                     <span class="pay-summary-label">{{ t('total_amount') }}</span>
                     <span class="pay-summary-val pay-amount">
-                        {{ totalAmount.toFixed(2) }} ر.س
+                        {{ totalAmount.toFixed(2) }} {{ t('currency_sar') }}
                     </span>
                 </div>
             </div>
@@ -59,7 +59,7 @@
 import { computed, onMounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useLocale } from '../../composables/useLocale';
-const { t } = useLocale();
+const { t, dir } = useLocale();
 
 defineOptions({ layout: null });
 
@@ -105,7 +105,7 @@ onMounted(async () => {
         element:            '#moyasar-form',
         amount:             amountInHalalas.value,
         currency:           'SAR',
-        description:        `طلب رقم #${order.value.number}`,
+        description:        `${t('order_number')} #${order.value.number}`,
         publishable_api_key: publishableKey.value,
         callback_url:       callbackUrl.value,
         supported_networks: ['visa', 'mastercard', 'mada'],

@@ -24,6 +24,8 @@ class StaticPage extends FormRequest
     $rules = [
       'title' => 'required|string|max:255',
       'content' => 'required|string',
+      'title_en' => 'nullable|string|max:255',
+      'content_en' => 'nullable|string',
     ];
 
     return $rules;

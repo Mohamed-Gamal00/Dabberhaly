@@ -59,7 +59,7 @@
                     <div>
                         <span class="text-grey" style="font-size:12px">{{ t('total') }}</span>
                         <span class="font-weight-bold text-primary ms-2" style="font-size:15px">
-                            {{ order.total_price }} ر.س
+                            {{ order.total_price }} {{ t('currency_sar') }}
                         </span>
                     </div>
                     <v-btn size="small" variant="text" color="primary" style="text-transform:none; font-size:12px">
@@ -114,12 +114,12 @@
                         </div>
                         <div class="info-cell">
                             <div class="info-label">{{ t('shipping_price') }}</div>
-                            <div class="info-value">{{ selected.shipping_price }} ر.س</div>
+                            <div class="info-value">{{ selected.shipping_price }} {{ t('currency_sar') }}</div>
                         </div>
                         <div class="info-cell">
                             <div class="info-label">{{ t('total') }}</div>
                             <div class="info-value font-weight-bold text-primary" style="font-size:15px">
-                                {{ selected.total_price }} ر.س
+                                {{ selected.total_price }} {{ t('currency_sar') }}
                             </div>
                         </div>
                     </div>
@@ -140,7 +140,7 @@
                                 <div style="font-size:12px; color:#9ca3af">{{ t('quantity') }}: {{ item.quantity }}</div>
                             </div>
                             <div class="font-weight-bold" style="font-size:13px; color:#76543D">
-                                {{ item.price }} ر.س
+                                {{ item.price }} {{ t('currency_sar') }}
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useLocale } from '../../../composables/useLocale';
 
-const { t } = useLocale();
+const { t, locale } = useLocale();
 defineProps({ user: { type: Object, required: true } });
 
 const loading      = ref(false);
@@ -194,7 +194,7 @@ async function fetchReturns() {
 }
 
 const formatDate = (d) => d
-    ? new Date(d).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(d).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
     : '-';
 
 onMounted(fetchReturns);

@@ -440,5 +440,21 @@
   "address_required": "العنوان مطلوب",
   "country_required": "الدولة مطلوبة",
   "city_required": "المدينة مطلوبة",
-  "email_required": "البريد الإلكتروني مطلوب"
+  "email_required": "البريد الإلكتروني مطلوب",
+  "orders_status_pending": "قيد الانتظار",
+  "orders_status_confirmed": "تم التأكيد",
+  "orders_status_processing": "قيد التجهيز",
+  "orders_status_shipped": "تم الشحن",
+  "orders_status_delivered": "تم التسليم",
+  "orders_status_cancelled": "ملغي",
+  "currency_sar": "ر.س",
+  "account_subtitle": "إدارة حسابك الشخصي وطلباتك",
+  "account_go_to_profile": "الذهاب للملف الشخصي",
+  "account_back_home": "العودة للرئيسية",
+  "common_store_name": "متجري",
+  "header_change_language": "تغيير اللغة",
+  "home_deals": "عروض",
+  "common_back_to_top": "العودة للأعلى",
+  "category_meta_description": "تصفح {count} منتجات في قسم {name}",
+  "guest": "أكمل طلبك بدون تسجيل الدخول"
 }

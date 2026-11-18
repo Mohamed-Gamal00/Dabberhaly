@@ -1,6 +1,6 @@
 <template>
     <Transition name="btt">
-        <button v-if="visible" class="btt-btn" @click="scrollTop" aria-label="العودة للأعلى">
+        <button v-if="visible" class="btt-btn" @click="scrollTop" :aria-label="t('common_back_to_top')">
             <v-icon size="20">mdi-chevron-up</v-icon>
         </button>
     </Transition>
@@ -8,7 +8,9 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useLocale } from '../../composables/useLocale';
 
+const { t } = useLocale();
 const visible = ref(false);
 
 function onScroll() { visible.value = window.scrollY > 400; }

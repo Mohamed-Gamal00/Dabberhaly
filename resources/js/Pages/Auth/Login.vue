@@ -69,7 +69,7 @@ import { useLocale } from '../../composables/useLocale';
 
 defineOptions({ layout: null });
 
-const siteName = computed(() => usePage().props.seo?.site_name || 'متجري');
+const siteName = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
 const { t } = useLocale();
 
 const form = useForm({ email: '', password: '' });

@@ -380,7 +380,7 @@
 
   "top_categories_title": "Main Categories",
   "section_flash_deals": "Flash Deals",
-  "section_top_mobiles": "الاكسسوارات",
+  "section_top_mobiles": "Top Mobiles",
   "Household_supplies": "Household supplies",
 
   "quickview_in_stock": "In Stock",
@@ -440,5 +440,21 @@
   "address_required": "Address is required",
   "country_required": "Country is required",
   "city_required": "City is required",
-  "email_required": "Email is required"
+  "email_required": "Email is required",
+  "orders_status_pending": "Pending",
+  "orders_status_confirmed": "Confirmed",
+  "orders_status_processing": "Processing",
+  "orders_status_shipped": "Shipped",
+  "orders_status_delivered": "Delivered",
+  "orders_status_cancelled": "Cancelled",
+  "currency_sar": "SAR",
+  "account_subtitle": "Manage your personal account and orders",
+  "account_go_to_profile": "Go to My Profile",
+  "account_back_home": "Back to Home",
+  "common_store_name": "My Store",
+  "header_change_language": "Change Language",
+  "home_deals": "Deals",
+  "common_back_to_top": "Back to top",
+  "category_meta_description": "Browse {count} products in the {name} category",
+  "guest": "Complete your order without logging in"
 }

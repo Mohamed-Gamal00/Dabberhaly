@@ -4,7 +4,7 @@
     <!-- Left badge -->
     <div class="marquee-badge">
       <span class="badge-icon">🔥</span>
-      <span class="badge-text">{{ locale === 'ar' ? 'عروض' : 'Deals' }}</span>
+      <span class="badge-text">{{ t('home_deals') }}</span>
     </div>
 
     <!-- Scrolling viewport -->
@@ -42,7 +42,9 @@
 <script setup>
 import { computed, ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import { useLocale } from '../../composables/useLocale';
 
+const { t } = useLocale();
 const advertisements = computed(() => usePage().props.advertisements ?? []);
 const locale         = computed(() => usePage().props.locale ?? 'ar');
 
