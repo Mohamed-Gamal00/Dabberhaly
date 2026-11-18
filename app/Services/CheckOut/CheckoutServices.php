@@ -385,7 +385,18 @@ class CheckoutServices
         Notification::send($admins, new OrderCreatedAdminNotification($order));
     }
 
-    public function checkPaymentMethod($request, $order)
+    /**
+     * Where the customer lands after the order is created.
+     *
+     * Card payment always goes to the Moyasar payment page. For cash on
+     * delivery on the website: a logged-in customer goes to their
+     * profile (orders tab) with a success flash so they see the order
+     * right away, and a guest goes to the order success page. The
+     * mobile API keeps its old behaviour (redirect to home) — the app
+     * owns its own navigation, so $user is only passed by the web
+     * checkout controller.
+     */
+    public function checkPaymentMethod($request, $order, $user = null)
     {
         if ($request->payment_method == 'card_payment') {
             // توجيه لصفحة الدفع بالبطاقة
@@ -394,7 +405,25 @@ class CheckoutServices
             ], 201);
         }
 
-        // الدفع عند الاستلام — توجيه للصفحة الرئيسية
+        // الدفع عند الاستلام
+        $successMessage = __('flash.order_placed_success', ['number' => $order->number]);
+
+        if (! $request->is('api/*') && $user) {
+            session()->flash('success', $successMessage);
+
+            return response()->json([
+                'redirect' => route('user.profile', ['tab' => 'orders']),
+                'message'  => $successMessage,
+            ], 201);
+        }
+
+        if (! $request->is('api/*')) {
+            return response()->json([
+                'redirect' => route('checkout.success', ['order_number' => $order->number]),
+                'message'  => $successMessage,
+            ], 201);
+        }
+
         return response()->json([
             'redirect' => route('home'),
             'message'  => 'تم إتمام الطلب بنجاح',

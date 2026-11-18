@@ -38,6 +38,20 @@
         </div>
 
         <v-container class="mt-n4">
+            <!-- Success flash (e.g. order placed → profile) -->
+            <v-alert
+                v-if="flash.success"
+                type="success"
+                variant="tonal"
+                rounded="lg"
+                closable
+                icon="mdi-check-circle"
+                class="mb-4"
+                style="font-size:14px"
+            >
+                {{ flash.success }}
+            </v-alert>
+
             <v-row>
                 <!-- Sidebar -->
                 <v-col cols="12" md="3">
@@ -123,6 +137,7 @@ const { t } = useLocale();
 
 const page = usePage();
 const user = computed(() => page.props.user);
+const flash = computed(() => page.props.flash || {});
 const tab  = ref('account');
 
 const tabs = computed(() => [
