@@ -27,9 +27,13 @@ class UserRequest extends FormRequest
     return [
       'first_name' => 'required|string|max:255',
       'family_name' => 'nullable|string|max:255',
-      'phone_number' => 'required|between:6,16',
-      'email' => [
+      'phone_number' => [
         'required',
+        'between:6,16',
+        Rule::unique(User::class)->ignore($user->id),
+      ],
+      'email' => [
+        'sometimes',
         'string',
         'email',
         'max:255',

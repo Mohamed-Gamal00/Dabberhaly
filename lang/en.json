@@ -131,6 +131,7 @@
   "choose_shipping_address": "Choose Shipping Address",
   "main_address": "Main",
   "add_new_address": "Add New Address",
+  "address_from_account": "Name and phone come from your account",
   "address_details": "Details",
   "first_name": "First Name",
   "last_name": "Last Name",

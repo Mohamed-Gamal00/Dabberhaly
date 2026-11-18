@@ -21,15 +21,15 @@ class UpdateNewAddressRequest extends FormRequest
      */
     public function rules(): array
     {
+    /**
+     * Same rules as creating: only the address itself comes from the
+     * request. The owner, the contact data and the location are taken
+     * from the authenticated user's account, server-side (see
+     * CreateNewAddressRequest).
+     */
     return [
       'address_title' => 'required|string|max:255',
       'address' => 'required|string|max:255',
-      'first_name' => 'required|string|max:255',
-      'family_name' => 'nullable|string|max:255',
-      'phone_number' => 'required|between:6,16',
-      'user_id' => 'required|exists:users,id',
-      'city_id' => 'required|exists:cities,id',
-      'country_id' => 'required|exists:countries,id',
     ];
     }
 }

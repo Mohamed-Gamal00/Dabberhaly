@@ -71,7 +71,7 @@
                         <v-btn icon size="small" variant="text" color="grey" @click="openEdit(addr)">
                             <v-icon size="18">mdi-pencil-outline</v-icon>
                         </v-btn>
-                        <v-btn icon size="small" variant="text" color="error" @click="remove(addr.id)">
+                        <v-btn v-if="!addr.main_address" icon size="small" variant="text" color="error" @click="remove(addr.id)">
                             <v-icon size="18">mdi-delete-outline</v-icon>
                         </v-btn>
                     </div>
@@ -110,6 +110,7 @@
                                 <v-text-field
                                     v-model="form.address_title"
                                     :placeholder="t('address_name_placeholder')"
+                                    :error-messages="errors.address_title"
                                     variant="outlined"
                                     density="comfortable"
                                     rounded="lg"
@@ -118,10 +119,14 @@
                                     class="mt-1 mb-3"
                                 />
                             </v-col>
+                            <v-col cols="12">
+                                <p class="text-grey-darken-1 mb-3" style="font-size:12px">{{ t('address_from_account') }}</p>
+                            </v-col>
                             <v-col cols="6">
                                 <label class="field-label">{{ t('first_name') }}</label>
                                 <v-text-field
                                     v-model="form.first_name"
+                                    readonly
                                     variant="outlined"
                                     density="comfortable"
                                     rounded="lg"
@@ -134,6 +139,7 @@
                                 <label class="field-label">{{ t('last_name') }}</label>
                                 <v-text-field
                                     v-model="form.family_name"
+                                    readonly
                                     variant="outlined"
                                     density="comfortable"
                                     rounded="lg"
@@ -146,6 +152,7 @@
                                 <label class="field-label">{{ t('phone') }}</label>
                                 <v-text-field
                                     v-model="form.phone_number"
+                                    readonly
                                     variant="outlined"
                                     density="comfortable"
                                     rounded="lg"
@@ -160,6 +167,7 @@
                                 <label class="field-label">{{ t('address_detail') }}</label>
                                 <v-textarea
                                     v-model="form.address"
+                                    :error-messages="errors.address"
                                     variant="outlined"
                                     density="comfortable"
                                     rounded="lg"
@@ -207,13 +215,15 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { useLocale } from '../../../composables/useLocale';
 
 const { t } = useLocale();
 const props = defineProps({ user: { type: Object, required: true } });
 
 const addresses = computed(() => props.user?.addresses ?? []);
+// Validation errors from the server (kept visible while the dialog is open).
+const errors = computed(() => usePage().props.errors ?? {});
 
 const dialog        = ref(false);
 const editing       = ref(null);
@@ -222,7 +232,14 @@ const confirmDelete = ref(false);
 const deleting      = ref(false);
 const deleteId      = ref(null);
 
-const emptyForm = () => ({ address_title: '', first_name: '', family_name: '', phone_number: '', address: '' });
+// Name and phone always come from the account, pre-filled and read-only.
+const emptyForm = () => ({
+    address_title: '',
+    first_name: props.user?.first_name ?? '',
+    family_name: props.user?.family_name ?? '',
+    phone_number: props.user?.phone_number ?? '',
+    address: '',
+});
 const form = ref(emptyForm());
 
 function openAdd() {
@@ -244,14 +261,15 @@ function close() {
 
 function save() {
     saving.value = true;
+    // Keep the dialog open on validation errors so they are visible.
+    const options = {
+        onSuccess: () => { saving.value = false; close(); },
+        onError: () => { saving.value = false; },
+    };
     if (editing.value) {
-        router.put(route('user.addresses.update', editing.value.id), form.value, {
-            onFinish: () => { saving.value = false; close(); },
-        });
+        router.put(route('user.addresses.update', editing.value.id), form.value, options);
     } else {
-        router.post(route('user.addresses.store'), form.value, {
-            onFinish: () => { saving.value = false; close(); },
-        });
+        router.post(route('user.addresses.store'), form.value, options);
     }
 }
 

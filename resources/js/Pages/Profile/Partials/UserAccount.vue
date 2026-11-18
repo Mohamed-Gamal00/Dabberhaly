@@ -38,6 +38,7 @@
                     class="mt-1 mb-4"
                     prepend-inner-icon="mdi-phone-outline"
                     dir="ltr"
+                    :error-messages="form.errors.phone_number"
                 />
             </v-col>
             <v-col cols="12" md="6">
