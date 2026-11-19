@@ -15,6 +15,15 @@ function translateWithHTMLTags($html, $targetLang = null)
 
     $targetLang = $targetLang ?? App::getLocale();
 
+    // All callers translate Arabic-origin content (pages, FAQ,
+    // product descriptions, SMS messages). Translating Arabic to
+    // Arabic is a no-op — and the client would still make a live
+    // Google request for it (its source is 'auto', so it never
+    // short-circuits on its own), so return the original instead.
+    if ($targetLang === 'ar') {
+        return $html;
+    }
+
     $translate = new GoogleTranslate($targetLang);
 
     if (strip_tags($html) !== $html) {

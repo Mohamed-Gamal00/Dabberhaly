@@ -167,7 +167,7 @@
                                     <label for="example-text-input" class="col-sm-2 col-form-label fw-bold">اسم القسم الفرعي بالانجليزي</label>
                                     <div class="col-sm-10">
                                         <input class="form-control" name="name_en" type="text" id="example-text-input"
-                                            value="{{ old('name', $category->name_en) }}">
+                                            value="{{ old('name_en', $category->name_en) }}">
                                         @error('name_en')
                                             <span class="error">{{ $message }}</span>
                                         @enderror

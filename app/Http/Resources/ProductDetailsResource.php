@@ -22,8 +22,8 @@ class ProductDetailsResource extends JsonResource
             'id' => $this->id,
             'name' => $this->getCurrentNameLangAttribute(),
             'category' => [
-                'id' => $this->parent->id,
-                'name' => $this->parent->getCurrentNameLangAttribute(),
+                'id' => $this->parent?->id,
+                'name' => $this->parent?->getCurrentNameLangAttribute(),
             ],
             'choices' => $this->choices->map(function ($choice) {
                 return [

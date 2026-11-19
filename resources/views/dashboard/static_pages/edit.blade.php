@@ -20,14 +20,10 @@
                         <form action="{{ route('pages.update', $page->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
-                            <div class="form-group">
-                                {{-- <label for="title">العنوان</label> --}}
-                                {{-- <x-form.input type="text" name="title" value="{{ $page->title }}" required id="example-text-input" /> --}}
-
-                                {{-- <input type="text" readonly name="title" class="form-control" id="title"
-                                    value="{{ $page->title }}" required> --}}
-                                <input type="hidden" readonly name="title" class="form-control" id="title"
-                                    value="{{ $page->title }}" required>
+                            <div class="form-group my-3">
+                                <label for="title">العنوان</label>
+                                <input type="text" name="title" class="form-control" id="title"
+                                    value="{{ old('title', $page->title) }}" required>
                             </div>
                             <div class="form-group my-3">
                                 <label for="title_en">العنوان بالإنجليزية</label>
@@ -37,7 +33,7 @@
                             <div class="form-group my-3">
                                 <label for="content">المحتوي</label>
                                 {{-- <textarea name="content" class="form-control text-editor" id="content" required>{{ $page->content }}</textarea> --}}
-                                <textarea id="elm1" name="content">{!! $page->content !!}</textarea>
+                                <textarea id="elm1" name="content">{!! old('content', $page->content) !!}</textarea>
                             </div>
                             <div class="form-group my-3">
                                 <label for="content_en">المحتوي بالإنجليزية</label>

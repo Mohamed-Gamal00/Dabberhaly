@@ -192,21 +192,7 @@ class BilingualFaqProductCategoryTest extends TestCase
 
     public function test_api_product_details_returns_english_description_when_locale_is_en(): void
     {
-        // ProductDetailsResource dereferences the parent category, so
-        // the product needs one (pre-existing behaviour, not new), and
-        // prices go through Currency::getCurrencyApi(), which needs a
-        // default currency row.
-        \App\Models\Currency::create([
-            'name' => 'Saudi Riyal',
-            'name_ar' => 'ريال سعودي',
-            'code' => 'SAR',
-            'symbol' => 'ر.س',
-            'price_in_default_currency' => 1,
-            'default_currency' => true,
-            'status' => 'used',
-        ]);
-        $category = $this->makeCategory();
-        $product = $this->makeProduct(['category_id' => $category->id]);
+        $product = $this->makeProduct();
 
         $response = $this->withHeaders(['Accept-Language' => 'en'])
             ->getJson('/api/v1/product-details/' . $product->id);
