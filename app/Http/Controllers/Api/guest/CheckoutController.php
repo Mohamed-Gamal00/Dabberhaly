@@ -16,7 +16,7 @@ use App\Models\Product;
 use App\Models\SendNewsToUser;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\UserAddress;
-use App\Models\UserDiscountCode;
+use App\Models\AppliedDiscountCode;
 use App\Services\CheckOut\CheckoutServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -290,7 +290,7 @@ class CheckoutController extends Controller
     public function total($guestId): float
     {
         $hasActiveDiscount = $guestId
-            ? UserDiscountCode::where('cookie_id', $guestId)->exists()
+            ? AppliedDiscountCode::where('cookie_id', $guestId)->exists()
             : false;
 
         return Cart::with('product')->withoutGlobalScope('cookie_id')
@@ -303,7 +303,7 @@ class CheckoutController extends Controller
     protected function chargedUnitPrice($cartItem, $guestId): float
     {
         $hasActiveDiscount = $guestId
-            ? UserDiscountCode::where('cookie_id', $guestId)->exists()
+            ? AppliedDiscountCode::where('cookie_id', $guestId)->exists()
             : false;
 
         return CheckoutServices::chargedUnitPrice($cartItem, $hasActiveDiscount);

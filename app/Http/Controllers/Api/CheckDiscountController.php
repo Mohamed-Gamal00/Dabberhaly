@@ -6,7 +6,7 @@ use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\CheckDiscountCode;
 use App\Models\Cart;
-use App\Models\UserDiscountCode;
+use App\Models\AppliedDiscountCode;
 use App\Services\Discount\CheckDiscountService;
 
 class CheckDiscountController extends Controller
@@ -24,9 +24,9 @@ class CheckDiscountController extends Controller
             return ApiResponse::sendResponse(400, 'لقد انتهت صلاحية رمز الخصم هذا أو لم يعد صالحًا.');
         }
 
-        $userUsedDiscountCode = $this->checkDiscountCode->checkIfUserUseDiscountCode($discountCode);
-        if ($userUsedDiscountCode) {
-            return $userUsedDiscountCode;
+        $discountAlreadyApplied = $this->checkDiscountCode->checkIfDiscountCodeAlreadyApplied($discountCode);
+        if ($discountAlreadyApplied) {
+            return $discountAlreadyApplied;
         }
 
         // بشوف لو كود الخصم مش متحدد لمنتجات معينة هيبقي خصم علي كل المنتجات
@@ -43,7 +43,7 @@ class CheckDiscountController extends Controller
         }
 
         // Consume the code only now that it actually applied.
-        UserDiscountCode::create([
+        AppliedDiscountCode::create([
             'cookie_id' => Cart::getCookieIdApi(),
             'discount_id' => $discountCode->id,
         ]);

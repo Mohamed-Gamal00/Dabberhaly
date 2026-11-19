@@ -5,7 +5,7 @@ namespace App\Services\Discount;
 use App\Helper\ApiResponse;
 use App\Models\Cart;
 use App\Models\DiscountCode;
-use App\Models\UserDiscountCode;
+use App\Models\AppliedDiscountCode;
 
 class CheckDiscountService
 {
@@ -22,14 +22,14 @@ class CheckDiscountService
      * usage row is created only when the discount actually applies to
      * a non-empty cart (see CheckDiscountController).
      */
-    public function checkIfUserUseDiscountCode($discountCode)
+    public function checkIfDiscountCodeAlreadyApplied($discountCode)
     {
-        $userDiscountCodeExists = UserDiscountCode::where([
+        $appliedDiscountExists = AppliedDiscountCode::where([
             'cookie_id' => Cart::getCookieIdApi(),
             'discount_id' => $discountCode->id
         ])->exists();
 
-        if ($userDiscountCodeExists) {
+        if ($appliedDiscountExists) {
             return ApiResponse::sendResponse(400, __('flash.discount_already_used'));
         }
 

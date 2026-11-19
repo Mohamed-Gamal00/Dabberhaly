@@ -15,7 +15,7 @@ use App\Models\SendNewsToUser;
 use App\Models\Setting;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\UserAddress;
-use App\Models\UserDiscountCode;
+use App\Models\AppliedDiscountCode;
 use App\Notifications\OrderCreatedAdminNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -107,7 +107,7 @@ class CheckoutServices
             return false;
         }
 
-        return UserDiscountCode::whereIn('cookie_id', $cookieIds)->exists();
+        return AppliedDiscountCode::whereIn('cookie_id', $cookieIds)->exists();
     }
 
     /** Unit price before any coupon: product offer price if set. */
@@ -204,7 +204,7 @@ class CheckoutServices
             throw new \Exception('كود الخصم غير متاح', 400);
         }
 
-        UserDiscountCode::create([
+        AppliedDiscountCode::create([
             'cookie_id' => Cart::getCookieId(),
             'discount_id' => $code->id,
         ]);

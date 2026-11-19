@@ -6,7 +6,7 @@ use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\DiscountCode;
-use App\Models\UserDiscountCode;
+use App\Models\AppliedDiscountCode;
 use App\Repositories\Cart\CartRepository;
 use App\Services\Discount\CheckDiscountService;
 use Illuminate\Http\Request;
@@ -33,16 +33,15 @@ class GuestCheckDiscountController extends Controller
             ], 400);
         }
 
-        // Check if the discount code has already been used by this user
-        // find it in  cookie_discount_ids table
-        $userDiscountCode = UserDiscountCode::where([
+        // Check if the discount code has already been applied to this cart
+        $appliedDiscountCode = AppliedDiscountCode::where([
             'cookie_id' => Cart::getCookieIdApi(),
             'discount_id' => $discountCode->id
         ])->first();
 
-//        return $userDiscountCode;
+//        return $appliedDiscountCode;
 
-        if ($userDiscountCode) {
+        if ($appliedDiscountCode) {
             return response()->json([
                 'message' => 'You have already used this discount code.'
             ], 400);
@@ -64,7 +63,7 @@ class GuestCheckDiscountController extends Controller
         }
 
         // Create a record for the user using the discount code
-        UserDiscountCode::create([
+        AppliedDiscountCode::create([
             'cookie_id' => Cart::getCookieIdApi(), // منتجات السلة دي
             'discount_id' => $discountCode->id // هيطبق عليها الخصم ده
         ]);

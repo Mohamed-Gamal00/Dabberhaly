@@ -6,7 +6,6 @@ use App\Models\Cart;
 use App\Models\DiscountCode;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\UserDiscountCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -36,7 +35,7 @@ class DiscountConsumptionTest extends TestCase
             ->assertOk();
 
         $this->assertEquals(3, $code->fresh()->number_of_used);
-        $this->assertDatabaseMissing('cookie_discount_ids', ['discount_id' => $code->id]);
+        $this->assertDatabaseMissing('applied_discount_codes', ['discount_id' => $code->id]);
     }
 
     public function test_api_apply_with_items_consumes_one_use(): void
@@ -58,7 +57,7 @@ class DiscountConsumptionTest extends TestCase
             ->assertOk();
 
         $this->assertEquals(2, $code->fresh()->number_of_used);
-        $this->assertDatabaseHas('cookie_discount_ids', ['discount_id' => $code->id]);
+        $this->assertDatabaseHas('applied_discount_codes', ['discount_id' => $code->id]);
     }
 
     public function test_web_apply_does_not_consume_until_order(): void
@@ -80,6 +79,6 @@ class DiscountConsumptionTest extends TestCase
             ->assertOk();
 
         $this->assertEquals(3, $code->fresh()->number_of_used);
-        $this->assertDatabaseMissing('cookie_discount_ids', ['discount_id' => $code->id]);
+        $this->assertDatabaseMissing('applied_discount_codes', ['discount_id' => $code->id]);
     }
 }

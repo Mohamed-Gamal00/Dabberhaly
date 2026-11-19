@@ -8,7 +8,7 @@ use App\Models\Cart;
 use App\Models\DiscountCode;
 use App\Models\Order;
 use App\Models\ShippingTypesAndPrice;
-use App\Models\UserDiscountCode;
+use App\Models\AppliedDiscountCode;
 use App\Repositories\Cart\CartRepository;
 use App\Services\CheckOut\CheckoutServices;
 use App\Services\Discount\CheckDiscountService;
@@ -47,7 +47,7 @@ class CheckoutController extends Controller
         $cities     = DB::table('cities')->whereIn('country_id', $countryIds)->where('status', 'used')->get();
         $shipping   = ShippingTypesAndPrice::find(1);
 
-        $discount      = DB::table('cookie_discount_ids')->where('cookie_id', Cart::getCookieId())->first();
+        $discount      = DB::table('applied_discount_codes')->where('cookie_id', Cart::getCookieId())->first();
         $discountPrice = $discount ? DiscountCode::where('id', $discount->discount_id)->value('price') : null;
 
         $cartItems = $items->map(fn($item) => [
@@ -285,7 +285,7 @@ class CheckoutController extends Controller
         }
 
         $cookieId    = Cart::getCookieId();
-        $alreadyUsed = UserDiscountCode::where('cookie_id', $cookieId)
+        $alreadyUsed = AppliedDiscountCode::where('cookie_id', $cookieId)
             ->where('discount_id', $code->id)
             ->exists();
 
