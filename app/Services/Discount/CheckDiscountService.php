@@ -5,7 +5,7 @@ namespace App\Services\Discount;
 use App\Helper\ApiResponse;
 use App\Models\Cart;
 use App\Models\DiscountCode;
-use App\Models\UserDiscountCode;
+use App\Models\AppliedDiscountCode;
 
 class CheckDiscountService
 {
@@ -22,18 +22,65 @@ class CheckDiscountService
      * usage row is created only when the discount actually applies to
      * a non-empty cart (see CheckDiscountController).
      */
-    public function checkIfUserUseDiscountCode($discountCode)
+    public function checkIfDiscountCodeAlreadyApplied($discountCode)
     {
-        $userDiscountCodeExists = UserDiscountCode::where([
+        $appliedDiscountExists = AppliedDiscountCode::where([
             'cookie_id' => Cart::getCookieIdApi(),
             'discount_id' => $discountCode->id
         ])->exists();
 
-        if ($userDiscountCodeExists) {
+        if ($appliedDiscountExists) {
             return ApiResponse::sendResponse(400, __('flash.discount_already_used'));
         }
 
         return null;
+    }
+
+    /**
+     * Apply a discount code to cart items (shared by the web, API-user
+     * and API-guest apply flows so all three behave the same).
+     *
+     * Percentage: per unit, off the offer price when set.
+     * Fixed amount: ONCE per order — the amount is spread across the
+     * eligible lines (each line capped at its own total), never the
+     * full amount off every matching product.
+     */
+    public static function applyDiscountToItems($cartItems, DiscountCode $discountCode, bool $isGlobalDiscount): void
+    {
+        $eligible = $cartItems->filter(
+            fn ($item) => $isGlobalDiscount || $discountCode->products->contains($item->product_id)
+        );
+
+        if ($eligible->isEmpty()) {
+            return;
+        }
+
+        if ($discountCode->discount_type === 'percentage') {
+            foreach ($eligible as $item) {
+                $base = $item->product->discount_price ?? $item->product->price;
+                $item->discounted_price = max(0, $base - ($base * $discountCode->price) / 100);
+                $item->save();
+            }
+
+            return;
+        }
+
+        $remaining = (float) $discountCode->price;
+
+        foreach ($eligible as $item) {
+            if ($remaining <= 0) {
+                break;
+            }
+
+            $base = $item->product->discount_price ?? $item->product->price;
+            // This line absorbs at most its own total; the per-unit
+            // discount is the absorbed amount spread over its quantity
+            // so the line total drops by exactly that amount.
+            $absorbed = min($remaining, $base * $item->quantity);
+            $item->discounted_price = max(0, round($base - $absorbed / $item->quantity, 2));
+            $item->save();
+            $remaining -= $absorbed;
+        }
     }
 
     /**
@@ -51,21 +98,7 @@ class CheckDiscountService
             return null;
         }
 
-        foreach ($cartItems as $item) {
-            // موجودة في السلة $discountCode->products لو المنتجات اللي عليها خصم
-            if ($isGlobalDiscount || $discountCode->products->contains($item->product_id)) {
-                // Apply discount based on discount type نوع الخصم اذا كان نسبة او ثابت
-                if ($discountCode->discount_type == 'percentage') {
-                    $discountAmount = (($item->product->discount_price ?? $item->product->price) * $discountCode->price) / 100;
-                } else {
-                    $discountAmount = $discountCode->price;
-                }
-                // نسبة الخصم علي المنتج الواحد
-                $originalPrice = $item->product->discount_price ?? $item->product->price;
-                $item->discounted_price = max(0, $originalPrice - $discountAmount);
-                $item->save();
-            }
-        }
+        self::applyDiscountToItems($cartItems, $discountCode, $isGlobalDiscount);
 
         return [
             'discount_code' => $discountCode->code,

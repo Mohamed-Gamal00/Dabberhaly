@@ -27,6 +27,11 @@ class UserCheckoutRequest extends FormRequest
 
             'user_address' => $isAddingNewAddress ? 'nullable' : 'required', // لو اليوزر مسجل وهيضيف عنوان جديد
             'terms' => 'nullable|boolean',
+            // Only the payment methods the store actually supports:
+            // an unknown value must never silently become cash on
+            // delivery (the checkout treats anything but card_payment
+            // as COD).
+            'payment_method' => 'required|in:cash_on_delivery,cash,card_payment',
             'first_name' => $isAddingNewAddress ? 'required' : 'nullable',
             'last_name' => $isAddingNewAddress ? 'required' : 'nullable',
             'phone_number' => $isAddingNewAddress ? 'required' : 'nullable',
@@ -45,6 +50,8 @@ class UserCheckoutRequest extends FormRequest
     {
         return [
             'user_address.required' => 'Please select or add a new address',
+            'payment_method.required' => 'Payment method is required',
+            'payment_method.in' => 'Payment method is not supported',
             'first_name.required' => 'First name is required for the new address',
             'last_name.required' => 'Last name is required for the new address',
             'phone_number.required' => 'Phone number is required for the new address',

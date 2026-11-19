@@ -26,7 +26,7 @@ class ProductRequest extends FormRequest
             'name_en' => ['nullable', 'string', 'max:255'],
             'discount_price' => ['nullable', 'numeric', 'lt:price'],
             'price' => ['required', 'numeric'],
-            'image' => ['nullable', 'image'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'status' => ['required', 'in:active,archived'],
             // 'category_id' => ['required', 'exists:main_categories,id'],
             'parent_id' => ['required', 'exists:main_categories,id'],
@@ -43,7 +43,7 @@ class ProductRequest extends FormRequest
 
 
             'header' => ['nullable', 'array'],
-            'header.*.image' => ['nullable', 'image'],
+            'header.*.image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ];
     }
 }

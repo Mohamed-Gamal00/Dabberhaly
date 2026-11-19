@@ -28,6 +28,8 @@ class SendNewsToUsersController extends Controller
 
     public function sendNewsMail(SendNewsToUserRequest $request)
     {
+        Gate::authorize('news.view');
+
         $userIds = (array) $request->input('users', []);
         $title   = $request->input('title');
         $body    = $request->input('body');
@@ -49,6 +51,9 @@ class SendNewsToUsersController extends Controller
                 }
             });
 
-        return redirect()->back()->with('success', 'تم إرسال النشرة بنجاح');
+        // The old message claimed the newsletter had already been sent,
+        // but dispatching only queues the mails — nothing has been sent
+        // yet at this point. Say honestly that the request was received.
+        return redirect()->back()->with('success', 'تم استلام طلب إرسال النشرة وسيتم إرسالها للمشتركين');
     }
 }

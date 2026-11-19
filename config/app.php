@@ -194,7 +194,18 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        App\Providers\TelescopeServiceProvider::class,
+        // Telescope is a dev-only package (require-dev). Register its
+        // provider only when the package is actually installed, otherwise
+        // `composer install --no-dev` breaks the whole application boot.
+        // NOTE: this must be a plain filesystem check. A class_exists()
+        // check on the app's own TelescopeServiceProvider fatals (it
+        // extends the missing TelescopeApplicationServiceProvider), and
+        // even class_exists() on a package class emits a warning that
+        // Laravel converts to an exception when the Composer classmap
+        // still points at the removed files.
+        ...(is_dir(base_path('vendor/laravel/telescope'))
+            ? [App\Providers\TelescopeServiceProvider::class]
+            : []),
 
     ],
 

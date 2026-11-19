@@ -1,5 +1,6 @@
 <template>
     <div class="cu-page">
+        <SeoHead :title="t('contact_title')" :description="t('contact_subtitle')" />
         <div class="cu-hero">
             <h1>{{ t('contact_title') }}</h1>
             <p>{{ t('contact_subtitle') }}</p>
@@ -67,6 +68,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 const { t } = useLocale();
 

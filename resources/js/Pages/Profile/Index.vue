@@ -1,5 +1,6 @@
 <template>
     <div class="profile-page">
+        <SeoHead noindex />
         <!-- Hero banner -->
         <div class="profile-hero">
             <div class="profile-hero-overlay" />
@@ -20,7 +21,7 @@
                         <p class="text-white" style="opacity:0.8; font-size:14px">{{ user?.email }}</p>
                         <div class="d-flex mt-2" style="gap:16px">
                             <div class="stat-chip">
-                                <span class="stat-num">{{ user?.orders?.length || 0 }}</span>
+                                <span class="stat-num">{{ page.props.ordersCount || 0 }}</span>
                                 <span class="stat-label">{{ t('profile_order_label') }}</span>
                             </div>
                             <div class="stat-chip">
@@ -127,6 +128,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import UserAccount   from './Partials/UserAccount.vue';
 import UserWishlist  from './Partials/UserWishlist.vue';
 import UserOrders    from './Partials/UserOrders.vue';
@@ -142,10 +144,10 @@ const tab  = ref('account');
 
 const tabs = computed(() => [
     { value: 'account',   label: t('profile_account'),   icon: 'mdi-account-outline',    color: 'primary' },
-    { value: 'orders',    label: t('profile_orders'),    icon: 'mdi-package-variant',     color: 'blue',   badge: user.value?.orders?.filter(o => !o.return_order)?.length || null },
+    { value: 'orders',    label: t('profile_orders'),    icon: 'mdi-package-variant',     color: 'blue',   badge: (page.props.ordersCount - page.props.returnsCount) || null },
     { value: 'wishlist',  label: t('profile_wishlist'),  icon: 'mdi-heart-outline',       color: 'red',    badge: user.value?.wishlist_products?.length || null },
     { value: 'addresses', label: t('profile_addresses'), icon: 'mdi-map-marker-outline',  color: 'green',  badge: user.value?.addresses?.length || null },
-    { value: 'returns',   label: t('profile_returns'),   icon: 'mdi-arrow-u-left-top',    color: 'orange', badge: user.value?.orders?.filter(o => o.return_order)?.length || null },
+    { value: 'returns',   label: t('profile_returns'),   icon: 'mdi-arrow-u-left-top',    color: 'orange', badge: page.props.returnsCount || null },
 ]);
 
 const activeTab = computed(() => tabs.value.find(t => t.value === tab.value));

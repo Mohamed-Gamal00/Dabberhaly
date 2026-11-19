@@ -38,32 +38,42 @@ trait Helper
 
 
     /* favourit products */
+
+    /**
+     * Request-scoped cache of wishlist product ids, kept on the current
+     * request (so it dies with the request and can never leak into
+     * another request or test). Without this, every product in a list
+     * re-loaded the whole wishlist (one full query per product).
+     */
     public function checkIfProductExists(Request $request, $productId = null)
     {
-//        $userId = $request->header('userId');
-
-        $userId = $request->user()->id ?? $request->header('user-id');
+        $userId = $request->user()?->id ?? $request->header('user-id');
         $guestId = $request->header('guest-id');
 
         if ($userId) {
-            $user = User::findOrFail($userId);
-            $product = $user->wishlistProducts->where('id', $productId)->first();
-            if ($product) {
-                return true;
-            }
-            return false;
+            $ids = $this->wishlistProductIds($request, 'user:' . $userId, fn () =>
+                User::find($userId)?->wishlistProducts()->pluck('wishlist_products_user.product_id')->all() ?? []);
+            return in_array($productId, $ids);
         }
-
 
         if ($guestId) {
-            $guest = Guest::find($guestId);
-            $product = $guest->wishlistProducts->where('id', $productId)->first();
-            if ($product) {
-                return true;
-            }
-            return false;
-
+            $ids = $this->wishlistProductIds($request, 'guest:' . $guestId, fn () =>
+                Guest::find($guestId)?->wishlistProducts()->pluck('wishlist_products_guest.product_id')->all() ?? []);
+            return in_array($productId, $ids);
         }
+
         return false;
+    }
+
+    private function wishlistProductIds(Request $request, string $ownerKey, callable $load): array
+    {
+        $cache = $request->attributes->get('wishlist_ids_cache', []);
+
+        if (!array_key_exists($ownerKey, $cache)) {
+            $cache[$ownerKey] = $load();
+            $request->attributes->set('wishlist_ids_cache', $cache);
+        }
+
+        return $cache[$ownerKey];
     }
 }

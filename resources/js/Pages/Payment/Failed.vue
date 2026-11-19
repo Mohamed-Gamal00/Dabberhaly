@@ -1,5 +1,6 @@
 <template>
-    <div class="result-page" dir="rtl">
+    <div class="result-page" :dir="dir">
+        <SeoHead noindex />
         <div class="result-container">
 
             <!-- Error icon -->
@@ -40,12 +41,13 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 defineOptions({ layout: null });
 const { props } = usePage();
 const order   = computed(() => props.order);
 const message = computed(() => props.message);
-const { t } = useLocale();
+const { t, dir } = useLocale();
 </script>
 
 <style scoped>
@@ -56,7 +58,6 @@ const { t } = useLocale();
     align-items: center;
     justify-content: center;
     padding: 24px 16px;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
 .result-container {
@@ -123,7 +124,7 @@ const { t } = useLocale();
     box-shadow: 0 2px 16px rgba(0,0,0,0.06);
     border: 1px solid #e5e7eb;
     margin-bottom: 24px;
-    text-align: right;
+    text-align: start;
 }
 
 .result-row {

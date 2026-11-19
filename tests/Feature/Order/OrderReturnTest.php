@@ -128,7 +128,7 @@ class OrderReturnTest extends TestCase
         $otherGuest = Guest::create(['cookie_id' => 'guest-cookie-2']);
         $order = $this->makeOrder(['guest_id' => $otherGuest->id]);
 
-        $response = $this->withHeaders(['guest-id' => (string) $guest->id])
+        $response = $this->withHeaders(['guest-id' => 'guest-cookie-1'])
             ->postJson('/api/v1/guest-return-orders/store', ['return_order_id' => $order->id]);
 
         $response->assertStatus(404);
@@ -142,7 +142,7 @@ class OrderReturnTest extends TestCase
         $guest = Guest::create(['cookie_id' => 'guest-cookie-1']);
         $order = $this->makeOrder(['guest_id' => $guest->id]);
 
-        $response = $this->withHeaders(['guest-id' => (string) $guest->id])
+        $response = $this->withHeaders(['guest-id' => 'guest-cookie-1'])
             ->postJson('/api/v1/guest-return-orders/store', ['return_order_id' => $order->id]);
 
         $response->assertOk();
@@ -154,11 +154,11 @@ class OrderReturnTest extends TestCase
 
     public function test_return_listener_notifies_super_admins_only(): void
     {
-        $superAdmin = Admin::create([
+        $superAdmin = Admin::forceCreate([
             'name' => 'Super', 'email' => 'super@example.com',
             'password' => 'password', 'super_admin' => true,
         ]);
-        $regularAdmin = Admin::create([
+        $regularAdmin = Admin::forceCreate([
             'name' => 'Regular', 'email' => 'regular@example.com',
             'password' => 'password', 'super_admin' => false,
         ]);

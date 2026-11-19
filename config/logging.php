@@ -53,7 +53,9 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            // Daily files with rotation — a single ever-growing log file
+            // fills the disk in production.
+            'channels' => ['daily'],
             'ignore_exceptions' => false,
         ],
 

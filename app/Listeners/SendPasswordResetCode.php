@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\UserForgotPassword;
-use App\Models\User_verfication;
 use App\Notifications\PasswordResetCodeNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,16 +22,12 @@ class SendPasswordResetCode implements ShouldQueue
     {
         $user = $event->user;
 
-        $code = str_pad((string) mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
-
-        User_verfication::updateOrCreate(
-            ['user_id' => $user->id, 'is_reset_password' => true],
-            [
-                'code'                         => $code,
-                'is_verified'                  => false,
-                'verification_code_expires_at' => now()->addMinutes(10),
-            ]
-        );
+        // The code was already created synchronously when the request was
+        // received; this listener only SENDS it. Fall back to creating one
+        // here only for events dispatched without a code (e.g. older code
+        // paths), so the mail still goes out.
+        $code = $event->code ?? app(\App\Services\VerificationServices::class)
+            ->createPasswordResetCode($user->id);
 
         $user->notify(new PasswordResetCodeNotification($code));
     }

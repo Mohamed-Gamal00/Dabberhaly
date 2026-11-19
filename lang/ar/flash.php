@@ -37,6 +37,7 @@ return [
     'invalid_discount_code' => 'الكود غير صالح أو انتهت صلاحيته.',
     'discount_not_applicable' => 'هذا الكود لا ينطبق على أي منتج في سلتك.',
     'discount_applied_success' => 'تم تطبيق كود الخصم بنجاح.',
+    'discount_removed' => 'تمت إزالة كود الخصم.',
     'currency_updated_success' => 'تم تحديث العملة الافتراضية بنجاح.',
     'newsletter_already_subscribed' => 'أنت مشترك بالفعل في النشرة البريدية.',
     'newsletter_subscribed_success' => '✓ تم الاشتراك بنجاح!',

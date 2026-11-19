@@ -13,16 +13,16 @@
           v-for="(banner, index) in banners"
           :key="index"
         >
-          <a :href="banner.link || '#'" :target="banner.link ? '_blank' : '_self'">
+          <component :is="banner.link ? 'a' : 'div'" :href="banner.link || undefined" :target="banner.link && isExternal(banner.link) ? '_blank' : undefined" :rel="banner.link && isExternal(banner.link) ? 'noopener' : undefined" class="banner-link">
             <v-img :src="banner.image" alt="Banner Image" cover />
-          </a>
+          </component>
         </v-carousel-item>
       </v-carousel>
 
       <!-- Single banner — no carousel overhead -->
-      <a v-else :href="banners[0].link || '#'" :target="banners[0].link ? '_blank' : '_self'">
+      <component v-else :is="banners[0].link ? 'a' : 'div'" :href="banners[0].link || undefined" :target="banners[0].link && isExternal(banners[0].link) ? '_blank' : undefined" :rel="banners[0].link && isExternal(banners[0].link) ? 'noopener' : undefined" class="banner-link">
         <v-img :src="banners[0].image" alt="Banner Image" cover />
-      </a>
+      </component>
     </template>
 
     <!-- Fallback to static image when no banners in DB -->
@@ -39,4 +39,14 @@ defineProps({
     default: () => [],
   },
 });
+
+// A banner without a link renders as a plain <div>, never a dead href="#".
+// Internal links stay in the same tab; only external links open a new tab.
+function isExternal(link) {
+  return /^https?:\/\//i.test(link || '');
+}
 </script>
+
+<style scoped>
+.banner-link { display: block; }
+</style>

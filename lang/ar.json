@@ -12,6 +12,9 @@
 
   "search_placeholder": "ابحث عن منتج...",
   "searching": "جاري البحث...",
+  "loading": "جاري التحميل...",
+  "prev": "السابق",
+  "next": "التالي",
   "search_no_results": "لا توجد نتائج لـ",
   "search_view_all": "عرض كل نتائج",
 
@@ -42,6 +45,7 @@
   "apply": "تطبيق",
   "from": "من",
   "to": "إلى",
+  "sort_by": "ترتيب حسب",
   "sort_latest": "الأحدث",
   "sort_price_asc": "السعر: الأقل أولاً",
   "sort_price_desc": "السعر: الأعلى أولاً",
@@ -100,6 +104,7 @@
   "cart_total": "الإجمالي",
   "cart_checkout": "إتمام الشراء",
   "cart_continue": "متابعة التسوق",
+  "cart_load_error": "تعذّر تحميل السلة، تحقق من اتصالك وحاول مجددًا.",
 
   "shipping_method": "طريقة الشحن",
   "pickup_from_store": "الاستلام من المتجر",
@@ -139,6 +144,7 @@
   "step_payment": "الدفع",
   "order_summary": "ملخص الطلب",
   "order_subtotal": "المجموع الفرعي",
+  "tax": "الضريبة (القيمة المضافة)",
   "shipping_cost": "الشحن",
   "free_shipping": "مجاني",
   "consent_prefix": "بالضغط على تأكيد الطلب أنت توافق على",
@@ -172,6 +178,7 @@
 
   "payment_page_title": "إتمام الدفع",
   "payment_secure": "بيئة دفع آمنة ومشفرة",
+  "payment_load_error": "تعذّر تحميل نموذج الدفع، تحقق من اتصالك بالإنترنت وحاول مجددًا.",
   "order_number": "رقم الطلب",
   "total_amount": "المبلغ الإجمالي",
   "back_to_home": "العودة للرئيسية",

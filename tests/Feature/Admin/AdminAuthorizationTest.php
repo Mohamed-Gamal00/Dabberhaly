@@ -54,8 +54,10 @@ class AdminAuthorizationTest extends TestCase
             'name' => 'Super Admin',
             'email' => 'super@example.com',
             'password' => 'password',
-            'super_admin' => true,
         ]);
+        // super_admin is not mass-assignable; set it directly.
+        $admin->super_admin = true;
+        $admin->save();
 
         $this->actingAs($admin, 'admin')
             ->get('/admin/orders')
@@ -100,8 +102,10 @@ class AdminAuthorizationTest extends TestCase
             'name' => 'Super Admin',
             'email' => 'super@example.com',
             'password' => 'password',
-            'super_admin' => true,
         ]);
+        // super_admin is not mass-assignable; set it directly.
+        $admin->super_admin = true;
+        $admin->save();
 
         $this->actingAs($admin, 'admin')
             ->get('/admin/payments')
@@ -149,8 +153,10 @@ class AdminAuthorizationTest extends TestCase
             'name' => 'Super Admin',
             'email' => 'super@example.com',
             'password' => 'password',
-            'super_admin' => true,
         ]);
+        // super_admin is not mass-assignable; set it directly.
+        $admin->super_admin = true;
+        $admin->save();
 
         $this->actingAs($admin, 'admin')
             ->get(route('rules.create'))

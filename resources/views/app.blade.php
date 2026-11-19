@@ -9,19 +9,15 @@
         $s = cache()->remember('site_settings', 3600, fn() => Setting::first());
     @endphp
 
-    {{-- ── Robots ── --}}
-    <meta name="robots" content="{{ $s?->robots_index ?? 'index,follow' }}">
+    {{-- ── Robots + Canonical ──
+         Owned by SeoHead.vue (via @inertiaHead) so there is exactly one
+         of each per page. The old blade tags emitted a second canonical
+         and, when canonical_url was set in settings, forced the same URL
+         onto every page. --}}
 
     {{-- ── Google Site Verification ── --}}
     @if($s?->google_site_verification)
         <meta name="google-site-verification" content="{{ $s->google_site_verification }}">
-    @endif
-
-    {{-- ── Canonical ── --}}
-    @if($s?->canonical_url)
-        <link rel="canonical" href="{{ $s->canonical_url }}">
-    @else
-        <link rel="canonical" href="{{ url()->current() }}">
     @endif
 
     {{-- ── Favicon ── --}}
@@ -51,7 +47,7 @@
 
     @routes
     @vite('resources/js/app.js')
-    @vite('resources/css/app.css')
+    {{-- app.css is already imported by resources/js/app.js, so no separate @vite entry for it: a separate entry is not in the Vite manifest and breaks the production build with a 500. --}}
     @inertiaHead
 </head>
 <body>

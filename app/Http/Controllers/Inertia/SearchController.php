@@ -26,6 +26,7 @@ class SearchController extends Controller
                 $q2->where('name', 'LIKE', "%{$q}%")
                    ->orWhere('name_en', 'LIKE', "%{$q}%")
                    ->orWhere('description', 'LIKE', "%{$q}%")
+                   ->orWhere('description_en', 'LIKE', "%{$q}%")
             );
         }
 

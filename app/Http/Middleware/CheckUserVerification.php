@@ -32,9 +32,7 @@ class CheckUserVerification
             // Generate the verification code and SMS
             $verificationData = $this->sms_service->setVerificationCode($user->id);
             $message = $this->sms_service->getSMSVerifyMessageByAppName($verificationData->code);
-            // $smsSent = $this->moraSms->send_sms($user->phone_number, $message);
-
-            $smsSent = true;
+            $smsSent = $this->moraGateway->sendSms($user->phone_number, $message);
 
             if ($smsSent) {
                 return response()->json([

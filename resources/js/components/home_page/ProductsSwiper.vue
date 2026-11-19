@@ -12,11 +12,11 @@
 
         <!-- Navigation buttons -->
         <div class="d-flex justify-start mb-4">
-            <v-btn icon variant="outlined" class="nav-btn mx-2" @click="goPrev">
-                <v-icon>mdi-chevron-right</v-icon>
+            <v-btn icon variant="outlined" class="nav-btn mx-2" @click="goPrev" :aria-label="t('prev')">
+                <v-icon>{{ isAr ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
             </v-btn>
-            <v-btn icon variant="outlined" class="nav-btn mx-2" @click="goNext">
-                <v-icon>mdi-chevron-left</v-icon>
+            <v-btn icon variant="outlined" class="nav-btn mx-2" @click="goNext" :aria-label="t('next')">
+                <v-icon>{{ isAr ? 'mdi-chevron-left' : 'mdi-chevron-right' }}</v-icon>
             </v-btn>
         </div>
 
@@ -65,7 +65,7 @@ const props = defineProps({
     }
 });
 const Emitter = inject("Emitter");
-const { t } = useLocale();
+const { t, isAr } = useLocale();
 function openQuickView(product) { Emitter.emit("openQuickView", product); }
 const modules = [Pagination, Navigation, Autoplay];
 const swiperInstance = ref(null);

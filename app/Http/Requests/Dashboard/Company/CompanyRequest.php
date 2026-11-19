@@ -24,7 +24,7 @@ class CompanyRequest extends FormRequest
     $rules = [
       'name' => 'required|max:255',
       'name_en' => 'nullable|max:255',
-      'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,svg', 'max:2048'],
+      'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:2048'],
     ];
 
     return $rules;

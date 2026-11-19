@@ -16,7 +16,7 @@ class BilingualFaqProductCategoryTest extends TestCase
 
     private function makeAdmin(): Admin
     {
-        return Admin::create([
+        return Admin::forceCreate([
             'name' => 'Admin',
             'email' => 'admin@example.com',
             'password' => 'password',

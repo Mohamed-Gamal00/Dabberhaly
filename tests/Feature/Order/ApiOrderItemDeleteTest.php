@@ -95,7 +95,7 @@ class ApiOrderItemDeleteTest extends TestCase
         $order = $this->makeOrder(['guest_id' => $guestA->id]);
         $productId = $order->orderItems->first()->product_id;
 
-        $this->withHeaders(['guest-id' => (string) $guestB->id])
+        $this->withHeaders(['guest-id' => 'guest-b-cookie'])
             ->postJson('/api/v1/guest-order/delete', [
                 'product_id' => $productId,
                 'order_number' => $order->number,
@@ -111,7 +111,7 @@ class ApiOrderItemDeleteTest extends TestCase
         $order = $this->makeOrder(['guest_id' => $guest->id]);
         $productId = $order->orderItems->first()->product_id;
 
-        $this->withHeaders(['guest-id' => (string) $guest->id])
+        $this->withHeaders(['guest-id' => 'guest-a-cookie'])
             ->postJson('/api/v1/guest-order/delete', [
                 'product_id' => $productId,
                 'order_number' => $order->number,

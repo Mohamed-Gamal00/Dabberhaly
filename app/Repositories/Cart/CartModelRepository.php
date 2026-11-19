@@ -111,7 +111,9 @@ class CartModelRepository implements CartRepository
     public function totalBeforeDiscount(): float
     {
         return $this->get()->sum(function ($item) {
-            $price = $item->product->discount_price ?? $item->product->price;
+            // A soft-deleted product leaves product null — it contributes 0,
+            // it must not break the total (mapItems() already uses ?->).
+            $price = $item->product?->discount_price ?? $item->product?->price ?? 0;
             return $item->quantity * $price;
         });
     }
@@ -123,11 +125,13 @@ class CartModelRepository implements CartRepository
     public function total(): float
     {
         return $this->get()->sum(function ($item) {
-            if ($item->product->discount_price) {
+            // Soft-deleted product: product is null — the line contributes
+            // only its stored discounted_price snapshot, if any.
+            if ($item->product?->discount_price) {
                 return $item->quantity * ($item->discounted_price ?? $item->product->discount_price);
             }
 
-            return $item->quantity * ($item->discounted_price ?? $item->product->price);
+            return $item->quantity * ($item->discounted_price ?? $item->product?->price ?? 0);
         });
     }
 }

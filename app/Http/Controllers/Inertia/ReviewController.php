@@ -41,21 +41,31 @@ class ReviewController extends Controller
 
     public function index($productId)
     {
-        $reviews = Comment::where('product_id', $productId)
-            ->with('user:id,first_name,family_name')
+        $query = Comment::where('product_id', $productId);
+
+        // Averages/counts are over ALL reviews, not just this page.
+        $avg = $query->clone()->avg('rate');
+        $count = $query->clone()->count();
+
+        $reviews = $query->with('user:id,first_name,family_name')
             ->latest()
-            ->get()
-            ->map(fn($r) => [
-                'id'         => $r->id,
-                'rate'       => $r->rate,
-                'comment'    => $r->comment,
-                'created_at' => $r->created_at->diffForHumans(),
-                'user_name'  => ($r->user->first_name ?? '') . ' ' . ($r->user->family_name ?? ''),
-            ]);
+            ->paginate(10);
 
-        $avg = $reviews->avg('rate');
-        $count = $reviews->count();
+        $reviews->getCollection()->transform(fn($r) => [
+            'id'         => $r->id,
+            'rate'       => $r->rate,
+            'comment'    => $r->comment,
+            'created_at' => $r->created_at->diffForHumans(),
+            'user_name'  => ($r->user->first_name ?? '') . ' ' . ($r->user->family_name ?? ''),
+        ]);
 
-        return response()->json(compact('reviews', 'avg', 'count'));
+        return response()->json([
+            'reviews' => $reviews->items(),
+            'avg' => $avg,
+            'count' => $count,
+            'current_page' => $reviews->currentPage(),
+            'last_page' => $reviews->lastPage(),
+            'has_more' => $reviews->hasMorePages(),
+        ]);
     }
 }

@@ -39,7 +39,7 @@ class FreeShippingThresholdTest extends TestCase
             'free_shipping_threshold' => 500,
         ]);
 
-        $admin = Admin::create([
+        $admin = Admin::forceCreate([
             'name' => 'Super Admin',
             'email' => 'admin@example.com',
             'password' => 'password',

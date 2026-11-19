@@ -5,6 +5,7 @@ namespace App\Repositories\Order;
 use App\Enums\OrderStatus;
 use App\Helper\Helper;
 use App\Models\Order;
+use App\Models\Product;
 use App\Repositories\Order\OrderInterface;
 
 class OrderRepository implements OrderInterface
@@ -38,21 +39,35 @@ class OrderRepository implements OrderInterface
     {
         $order = $this->order->findOrFail($id);
 
+        // The dashboard sends the status as a string ('delivered'); it may
+        // also arrive as an OrderStatus enum. Normalize it first so the
+        // delivered check below works either way.
         $status = $request->status instanceof OrderStatus
-            ? $request->status->value
-            : $request->status;
+            ? $request->status
+            : OrderStatus::tryFrom((string) $request->status);
 
-        $data = [
-            'status' => $status,
-        ];
+        $data = ['status' => $status ?? $request->status];
 
-        // Once the order is delivered, the payment is considered collected,
-        // so the order is marked as paid as well.
-        if ($status === OrderStatus::Delivered->value) {
+        // A delivered order is paid ONLY when the customer pays cash on
+        // delivery: a card order that was never paid must never be
+        // marked paid just because it was delivered.
+        if ($status === OrderStatus::Delivered && $order->isCashPayment()) {
             $data['payment_status'] = 'paid';
         }
 
+        $wasCancelled = $order->status === OrderStatus::Cancelled;
+
         $order->update($data);
+
+        // Cancelling returns the items to stock. payment_status is left
+        // untouched on purpose: refunds are manual, via the Moyasar
+        // dashboard.
+        if ($status === OrderStatus::Cancelled && ! $wasCancelled) {
+            foreach ($order->orderItems as $orderItem) {
+                Product::where('id', $orderItem->product_id)
+                    ->increment('quantity', $orderItem->quantity);
+            }
+        }
 
         return $order;
     }

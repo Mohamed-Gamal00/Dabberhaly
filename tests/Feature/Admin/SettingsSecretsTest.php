@@ -17,8 +17,10 @@ class SettingsSecretsTest extends TestCase
             'name' => 'Super Admin',
             'email' => 'super@example.com',
             'password' => 'password',
-            'super_admin' => true,
         ]);
+        // super_admin is not mass-assignable; set it directly.
+        $admin->super_admin = true;
+        $admin->save();
 
         $setting = Setting::create([
             'website_name' => 'Dabberhaly',
@@ -44,8 +46,10 @@ class SettingsSecretsTest extends TestCase
             'name' => 'Super Admin',
             'email' => 'super@example.com',
             'password' => 'password',
-            'super_admin' => true,
         ]);
+        // super_admin is not mass-assignable; set it directly.
+        $admin->super_admin = true;
+        $admin->save();
 
         $setting = Setting::create([
             'website_name' => 'Dabberhaly',

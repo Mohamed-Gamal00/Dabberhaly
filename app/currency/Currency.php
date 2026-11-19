@@ -30,12 +30,29 @@ class Currency
         return $price * $currentCurrency . $code;
     }
 
+    /**
+     * Request-scoped cache of the currency rows getCurrencyApi() needs,
+     * kept on the current request (so it dies with the request and can
+     * never leak into another request or test). It used to run 2 queries
+     * per call — 3 calls per product in the product resources — so a
+     * 10-product list ran 60+ currency queries.
+     */
     public static function getCurrencyApi($price, $currentCurrency = 1, $showCurrency = true)
     {
         $currencyId = request()->header('currencyId');
-        $headerCurrency = DB::table('currencies')->where('id', $currencyId)->first();
+        $bag = request()->attributes;
+        $cache = $bag->get('currency_api_cache', []);
 
-        $defaultCurrency = DB::table('currencies')->where('default_currency', true)->first();
+        if (!array_key_exists($currencyId ?? '', $cache)) {
+            $cache[$currencyId ?? ''] = [
+                'header'  => DB::table('currencies')->where('id', $currencyId)->first(),
+                'default' => DB::table('currencies')->where('default_currency', true)->first(),
+            ];
+            $bag->set('currency_api_cache', $cache);
+        }
+
+        $headerCurrency = $cache[$currencyId ?? '']['header'];
+        $defaultCurrency = $cache[$currencyId ?? '']['default'];
         $code = '';
 
 

@@ -29,13 +29,13 @@ class CategoryController extends Controller
     {
         $category = \App\Models\MainCategory::where('slug', $slug)->firstOrFail();
         $user = Auth::guard('web')->user();
-        $products = $category->products()->with(['images', 'parent'])->withIsInWishlist($user)->latest()->get();
+        $products = $category->products()->with(['images', 'parent'])->withIsInWishlist($user)->latest()->paginate(12);
 
         // Serve the English category description when the locale is
         // English and it is filled in, otherwise the Arabic one; the
         // same for every product shown here (QuickView reads it).
         $category->description = $category->localizedDescription();
-        $products->each(fn ($p) => $p->description = $p->localizedDescription());
+        $products->getCollection()->each(fn ($p) => $p->description = $p->localizedDescription());
 
         return \Inertia\Inertia::render('Categories/Show', [
             'category' => [

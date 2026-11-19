@@ -18,13 +18,13 @@ class FilterProductsResource extends JsonResource
             'product_id' => $this->id,
             'product_name' => $this->name,
             'category' => [
-                'id' => $this->parent->id,
-                'name' => $this->parent->name,
+                'id' => $this->parent?->id,
+                'name' => $this->parent?->name,
             ],
             'current_price' => $this->price,
             'price_before_discount' => $this->discount_price,
             'image' => $this->image_url,
-            'product_status' => $this->availability->name,
+            'product_status' => $this->availability?->name,
         ];
     }
 }

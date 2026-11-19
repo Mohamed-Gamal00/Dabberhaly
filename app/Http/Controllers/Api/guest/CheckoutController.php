@@ -14,11 +14,13 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\SendNewsToUser;
-use App\Models\Setting;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\UserAddress;
+use App\Models\AppliedDiscountCode;
+use App\Services\CheckOut\CheckoutServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Throwable;
 
@@ -26,11 +28,18 @@ class CheckoutController extends Controller
 {
     public function guestCheckout(Request $request, Order $order)
     {
-        $settings = Setting::first();
-        $valueAddedTax = $settings->value_added_tax ?? null;
-
         $guestId = $request->headers->get('guest-id');
-//        return $guestId;
+
+        // Unknown payment methods must not silently become cash on
+        // delivery: only the values the store actually supports.
+        if ($request->filled('payment_method')
+            && ! in_array($request->payment_method, ['cash_on_delivery', 'cash', 'card_payment'], true)) {
+            return response()->json([
+                'message' => 'طريقة الدفع غير صحيحة',
+                'errors' => ['payment_method' => ['طريقة الدفع غير صحيحة']],
+            ], 422);
+        }
+
         $isAddingNewAddress = !$request->has('user_address');
         if ($guestId) {
             $request->validate([
@@ -60,6 +69,15 @@ class CheckoutController extends Controller
 
         /*طرق الشحن*/
         $shipping = ShippingTypesAndPrice::find(1);
+
+        // No shipping row configured — a clean error, not a 500 on null.
+        if (! $shipping) {
+            return response()->json([
+                'message' => 'طريقة الشحن غير مُعدّة في المتجر بعد. يرجى التواصل مع الدعم.',
+                'errors' => ['shipping' => ['طريقة الشحن غير مُعدّة في المتجر بعد.']],
+            ], 422);
+        }
+
         $selectedShippingOptions = 0;
         $shipping_price = 0;
         if ($request->has('pickup_from_store')) {
@@ -139,17 +157,36 @@ class CheckoutController extends Controller
         DB::beginTransaction();
         try {
 
-            $guest = Guest::where('cookie_id', $guestId)->first();
+            // The guest identity is the cookie_id from the header: make
+            // sure a Guest row exists for it, so the order can always
+            // be listed/tracked afterwards with the same header.
+            $guest = $guestId
+                ? Guest::firstOrCreate(['cookie_id' => $guestId])
+                : null;
+
+            // Totals: discounted subtotal + shipping + VAT (VAT base =
+            // the discounted items subtotal; 0 when no rate is set).
+            // Free shipping waives the fee once the subtotal before
+            // any coupon reaches the configured threshold.
+            $subtotal = $this->total($guestId);
+            $shippingPrice = $request->pickup_from_store == '1'
+                ? 0
+                : $shipping_price;
+            if ($shippingPrice > 0 && CheckoutServices::freeShippingApplies($this->totalBeforeDiscount($guestId))) {
+                $shippingPrice = 0;
+            }
+            $taxAmount = CheckoutServices::taxFor($subtotal);
 
             $order = Order::createWithUniqueNumber([
                 'guest_id' => $guest?->id,
                 'payment_method' => $request->payment_method, // cash on deleviry
                 'status' => OrderStatus::Pending,
                 'note' => $request->note,
-                'shipping_price' => request()->pickup_from_store == '1' ? null : $shipping_price,
+                'shipping_price' => request()->pickup_from_store == '1' ? null : $shippingPrice,
+                'tax_amount' => $taxAmount,
                 'totalBeforeDiscount' => $this->totalBeforeDiscount($guestId),
-                'total_price' => $this->total($guestId) + ($this->total($guestId) * ($valueAddedTax / 100)),
-                'cookie_id' => $guestId ? null : Cart::getCookieId() // TODO:: what is this used for ?
+                'total_price' => $subtotal + $shippingPrice + $taxAmount,
+                'cookie_id' => $guestId ?: Cart::getCookieId()
             ]);
 
 //            return $order;
@@ -166,12 +203,15 @@ class CheckoutController extends Controller
 
                 // Unit price — the admin view shows price as the unit
                 // price and price * quantity as the line total, so the
-                // line total must NOT be stored here.
+                // line total must NOT be stored here. The coupon
+                // discounted_price counts only when a discount code was
+                // actually applied for this guest; otherwise a stale
+                // leftover from an abandoned checkout must be ignored.
                 $item = OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $cart_items->product_id,
                     'product_name' => $cart_items->product->name, // product is the relation
-                    'price' => $cart_items->discounted_price ?? $cart_items->product->price, // product is the relation
+                    'price' => $this->chargedUnitPrice($cart_items, $guestId), // product is the relation
                     'quantity' => $cart_items->quantity,
                 ]);
 
@@ -229,7 +269,8 @@ class CheckoutController extends Controller
 
         } catch (Throwable $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Order creation failed', 'error' => $e->getMessage()], 500);
+            Log::error('Guest checkout failed', ['exception' => $e]);
+            return response()->json(['message' => 'Order creation failed'], 500);
         }
         return response()->json(['message' => 'Order created successfully', 'order' => $order], 201);
 
@@ -241,16 +282,30 @@ class CheckoutController extends Controller
     {
         return Cart::with('product')->withoutGlobalScope('cookie_id')
             ->where('cookie_id', $guestId)->where('status', 0)->get()->sum(function ($item) {
-                return $item->quantity * $item->product->price;
+                return $item->quantity * CheckoutServices::baseUnitPrice($item->product);
             });
     }
 
     /* السعر بعد الخصم لو فيه خصم*/
     public function total($guestId): float
     {
+        $hasActiveDiscount = $guestId
+            ? AppliedDiscountCode::where('cookie_id', $guestId)->exists()
+            : false;
+
         return Cart::with('product')->withoutGlobalScope('cookie_id')
-            ->where('cookie_id', $guestId)->where('status', 0)->get()->sum(function ($item) {
-                return $item->quantity * ($item->discounted_price ?? $item->product->price);
+            ->where('cookie_id', $guestId)->where('status', 0)->get()->sum(function ($item) use ($hasActiveDiscount) {
+                return $item->quantity * CheckoutServices::chargedUnitPrice($item, $hasActiveDiscount);
             });
+    }
+
+    /** Unit price actually charged for one guest cart row. */
+    protected function chargedUnitPrice($cartItem, $guestId): float
+    {
+        $hasActiveDiscount = $guestId
+            ? AppliedDiscountCode::where('cookie_id', $guestId)->exists()
+            : false;
+
+        return CheckoutServices::chargedUnitPrice($cartItem, $hasActiveDiscount);
     }
 }

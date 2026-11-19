@@ -1,5 +1,6 @@
 <template>
     <div style="background:#f7f0e5; min-height:100vh; padding-bottom:48px">
+        <SeoHead :title="t('brands_title')" />
 
         <div style="background:linear-gradient(135deg,#76543D,#8d6b51); padding:40px 16px 50px">
             <h1 class="text-white font-weight-bold text-center" style="font-size:28px">{{ t('brands_title') }}</h1>
@@ -18,7 +19,7 @@
                 >
                     <div class="brand-card">
                         <div class="brand-logo">
-                            <img v-if="brand.image_url && !brand.image_url.includes('no-image')" :src="brand.image_url" :alt="pick(brand, 'name')" />
+                            <img v-if="brand.image_url && !brand.image_url.includes('no-image')" :src="brand.image_url" :alt="pick(brand, 'name')" @error="onImgError" />
                             <span v-else class="brand-initials">{{ brand.name_en?.charAt(0) || brand.name?.charAt(0) }}</span>
                         </div>
                         <div class="brand-name">{{ pick(brand, 'name') }}</div>
@@ -29,7 +30,7 @@
 
             <div v-else style="text-align:center; padding:64px 0">
                 <v-icon size="64" color="grey-lighten-1">mdi-store-outline</v-icon>
-                <p style="margin-top:12px; color:#9ca3af">{{ t('no_brands') }}</p>
+                <p style="margin-top:12px; color:#77736B">{{ t('no_brands') }}</p>
             </div>
         </div>
     </div>
@@ -37,11 +38,17 @@
 
 <script setup>
 import { useLocale } from '../../composables/useLocale';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 
 defineProps({ brands: Array });
 
 const { t, pick } = useLocale();
-</script>
+
+// If a brand logo fails to load, fall back to the initials (same as a
+// missing image) instead of a broken icon.
+function onImgError(e) {
+    e.target.remove();
+}</script>
 
 <style scoped>
 .brand-card {
@@ -56,15 +63,15 @@ const { t, pick } = useLocale();
 
 .brand-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(57,73,171,0.12);
-    border-color: #3949ab;
+    box-shadow: 0 8px 24px rgba(118, 84, 61, 0.12);
+    border-color: #76543D;
 }
 
 .brand-logo {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: #e8eaf6;
+    background: #EFE7D8;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -74,14 +81,14 @@ const { t, pick } = useLocale();
     transition: border-color 0.2s;
 }
 
-.brand-card:hover .brand-logo { border-color: #3949ab; }
+.brand-card:hover .brand-logo { border-color: #76543D; }
 
 .brand-logo img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
 
 .brand-initials {
     font-size: 28px;
     font-weight: 800;
-    color: #1a237e;
+    color: #76543D;
 }
 
 .brand-name {
@@ -92,7 +99,7 @@ const { t, pick } = useLocale();
 }
 
 .brand-count {
-    font-size: 11px;
-    color: #9ca3af;
+    font-size: 12px;
+    color: #77736B;
 }
 </style>

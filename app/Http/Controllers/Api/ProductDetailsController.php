@@ -19,7 +19,7 @@ class ProductDetailsController extends Controller
         if (request()->hasHeader('user-id') && request()->hasHeader('guest-id')) {
             return ApiResponse::sendResponse(200, 'you must determind if you guest or user');
         }
-        $product = Product::find($id);
+        $product = Product::with(['choices.children', 'images', 'parent', 'availability'])->find($id);
 
         if ($product) {
             return ApiResponse::sendResponse(200, 'Product Details Retrieved Successfully', ProductDetailsResource::make($product));
@@ -36,7 +36,7 @@ class ProductDetailsController extends Controller
             return ApiResponse::sendResponse(200, 'you must determind if you guest or user');
         }
 
-        $product = Product::find($id);
+        $product = Product::with('features')->find($id);
 
         if (!$product) {
             return ApiResponse::sendResponse(200, 'Product Doesn\'t  Exists', []);
@@ -63,7 +63,7 @@ class ProductDetailsController extends Controller
             return ApiResponse::sendResponse(200, 'Product Doesn\'t  Exists', []);
         }
 
-        $relatedProducts = Product::where('category_id', $product->category_id)->take(10)->get();
+        $relatedProducts = Product::with('parent', 'availability')->where('category_id', $product->category_id)->take(10)->get();
 
         if (count($relatedProducts) > 0) {
             return ApiResponse::sendResponse(200, 'Related Products Retrieved Successfully', ViewProductsResource::collection($relatedProducts));

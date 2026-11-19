@@ -22,19 +22,34 @@ class moraSms
 //        dd('stop send now');
         $setting = Setting::first();
 
+        if (! $setting || empty($setting->sms_api_key) || empty($setting->sms_user_name)) {
+            info('Mora API not configured: missing SMS credentials in settings.');
+            return false;
+        }
+
         try {
             // API credentials
             $apiKey = $setting->sms_api_key; // Mora API key
             $username = $setting->sms_user_name; // Your username
             $sender = $setting->sms_sender; // Sender name (owner name)
             $phone_number = $phone; // phone of user who will receive sms
-            $sms_content = urlencode($message); //message
 
-            // Construct the Mora API URL
-            $url = "https://www.mora-sa.com/api/v1/sendsms?api_key=$apiKey&username=$username&message=$sms_content&numbers=$phone_number&sender=$sender&unicode=e&return=json";
-
-            // Send the GET request to the Mora API
-            $response = $this->client->get($url);
+            // The Mora API accepts POST with form fields (see its docs:
+            // curl -X POST .../sendsms -d "api_key=...&username=...").
+            // The key is sent in the request BODY, never in a GET query
+            // string, so it cannot leak into access logs or exception
+            // messages that echo the URL.
+            $response = $this->client->post('https://www.mora-sa.com/api/v1/sendsms', [
+                'form_params' => [
+                    'api_key' => $apiKey,
+                    'username' => $username,
+                    'message' => $message,
+                    'numbers' => $phone_number,
+                    'sender' => $sender,
+                    'unicode' => 'e',
+                    'return' => 'json',
+                ],
+            ]);
 
             // Get the response body
             $content = $response->getBody()->getContents();
@@ -49,8 +64,10 @@ class moraSms
             }
 
         } catch (Exception $e) {
-            // Log the exception message if the API call fails
-            info("Mora API failed to send SMS to $phone: " . $e->getMessage());
+            // Log only the exception class — never the message, which for
+            // Guzzle errors can embed the request URL (and with it any
+            // credentials sent in it) into storage/logs/laravel.log.
+            info('Mora API failed to send SMS to ' . $phone . ': ' . class_basename($e));
             return false;
         }
     }

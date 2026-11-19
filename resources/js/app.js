@@ -70,6 +70,13 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 createInertiaApp({
+    // Show the top progress bar on page navigation (Inertia 2).
+    progress: {
+        delay: 250,
+        color: '#76543D',
+        includeCSS: true,
+        showSpinner: false,
+    },
     resolve: (name) => {
         const pages = import.meta.glob("./Pages/**/*.vue", { eager: true });
         let page = pages[`./Pages/${name}.vue`];

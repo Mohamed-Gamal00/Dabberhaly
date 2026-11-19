@@ -12,6 +12,9 @@
 
   "search_placeholder": "Search for a product...",
   "searching": "Searching...",
+  "loading": "Loading...",
+  "prev": "Previous",
+  "next": "Next",
   "search_no_results": "No results for",
   "search_view_all": "View all results for",
 
@@ -42,6 +45,7 @@
   "apply": "Apply",
   "from": "From",
   "to": "To",
+  "sort_by": "Sort by",
   "sort_latest": "Latest",
   "sort_price_asc": "Price: Low to High",
   "sort_price_desc": "Price: High to Low",
@@ -100,6 +104,7 @@
   "cart_total": "Total",
   "cart_checkout": "Checkout",
   "cart_continue": "Continue Shopping",
+  "cart_load_error": "Couldn't load your cart. Check your connection and try again.",
 
   "shipping_method": "Shipping Method",
   "pickup_from_store": "Pickup from Store",
@@ -139,6 +144,7 @@
   "step_payment": "Payment",
   "order_summary": "Order Summary",
   "order_subtotal": "Subtotal",
+  "tax": "Tax (VAT)",
   "shipping_cost": "Shipping",
   "free_shipping": "Free",
   "consent_prefix": "By placing this order you agree to the",
@@ -172,6 +178,7 @@
 
   "payment_page_title": "Complete Payment",
   "payment_secure": "Secure & encrypted payment",
+  "payment_load_error": "Couldn't load the payment form. Check your internet connection and try again.",
   "order_number": "Order Number",
   "total_amount": "Total Amount",
   "back_to_home": "Back to Home",

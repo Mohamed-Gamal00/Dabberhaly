@@ -15,7 +15,7 @@ class OrderStatusTransitionTest extends TestCase
 
     private function admin(): Admin
     {
-        return Admin::create([
+        return Admin::forceCreate([
             'name' => 'Super Admin',
             'email' => 'super@example.com',
             'password' => 'password',

@@ -74,7 +74,7 @@
 
                             <div class="cmp-col-img">
                                 <div class="cmp-img-box">
-                                    <img :src="p.image_url" :alt="p.name" />
+                                    <img :src="p.image_url" :alt="p.name" @error="onImgError" />
                                     <span v-if="discountPct(p)" class="cmp-img-badge">-{{ discountPct(p) }}%</span>
                                 </div>
                             </div>
@@ -102,9 +102,9 @@
                             </div>
 
                             <div class="cmp-col-price">
-                                <div class="cmp-price-new">${{ Math.ceil(p.discount_price || p.price) }}</div>
+                                <div class="cmp-price-new">{{ Math.ceil(p.discount_price || p.price) }} {{ t('currency_sar') }}</div>
                                 <div v-if="p.discount_price && p.discount_price < p.price" class="cmp-price-old">
-                                    ${{ p.price }}
+                                    {{ p.price }} {{ t('currency_sar') }}
                                 </div>
                             </div>
 
@@ -158,7 +158,7 @@
                         <!-- Card top: image + name + category + colors -->
                         <div class="cmp-card-top">
                             <div class="cmp-card-img-wrap">
-                                <img :src="p.image_url" :alt="p.name" class="cmp-card-img" />
+                                <img :src="p.image_url" :alt="p.name" class="cmp-card-img" @error="onImgError" />
                                 <span v-if="discountPct(p)" class="cmp-card-discount-badge">-{{ discountPct(p) }}%</span>
                             </div>
                             <div class="cmp-card-info">
@@ -204,8 +204,8 @@
                         <!-- Price + actions -->
                         <div class="cmp-card-footer">
                             <div class="cmp-card-price">
-                                <span class="cmp-price-new">${{ Math.ceil(p.discount_price || p.price) }}</span>
-                                <span v-if="p.discount_price && p.discount_price < p.price" class="cmp-price-old">${{ p.price }}</span>
+                                <span class="cmp-price-new">{{ Math.ceil(p.discount_price || p.price) }} {{ t('currency_sar') }}</span>
+                                <span v-if="p.discount_price && p.discount_price < p.price" class="cmp-price-old">{{ p.price }} {{ t('currency_sar') }}</span>
                             </div>
                             <div class="cmp-card-actions">
                                 <button class="cmp-card-btn cmp-card-btn-cart" :disabled="p.quantity < 1" @click="addToCart(p)">
@@ -238,6 +238,15 @@ const { t } = useLocale();
 const { props } = usePage();
 const products = computed(() => props.products || []);
 const Emitter = inject('Emitter');
+
+// Local placeholder (Vanilla Latte) shown when a product image fails to load.
+const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="#F7F0E5"/><g fill="none" stroke="#76543D" stroke-width="6"><path d="M55 75 L100 55 L145 75 L145 130 L100 150 L55 130 Z"/><path d="M55 75 L100 95 L145 75 M100 95 L100 150"/></g></svg>`
+);
+
+function onImgError(e) {
+    if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
+}
 
 function discountPct(p) {
     if (!p.discount_price || p.discount_price >= p.price) return 0;
@@ -394,7 +403,7 @@ async function addToCart(p) {
     background: rgba(118, 84, 61, 0.1); padding: 3px 8px; border-radius: 20px; white-space: nowrap;
 }
 
-.val-empty { color: #d1d5db; font-size: 16px; }
+.val-empty { color: #6b7280; font-size: 16px; }
 
 .cmp-img-box {
     position: relative; width: 70px; height: 70px;
@@ -409,13 +418,13 @@ async function addToCart(p) {
     padding: 1px 4px; border-radius: 8px;
 }
 
-.cmp-col-data { text-align: center; font-size: 13px; color: #e5e7eb; }
+.cmp-col-data { text-align: center; font-size: 13px; color: #302F2B; }
 .val-good { color: #16a34a; font-weight: 700; }
 .val-bad  { color: #ef4444; font-weight: 700; }
 
 .cmp-col-price { text-align: center; }
 .cmp-price-new { font-size: 16px; font-weight: 800; color: #76543D; }
-.cmp-price-old { font-size: 11px; color: #9ca3af; text-decoration: line-through; }
+.cmp-price-old { font-size: 11px; color: #77736B; text-decoration: line-through; }
 
 .cmp-col-action { display: flex; gap: 6px; align-items: center; justify-content: center; }
 

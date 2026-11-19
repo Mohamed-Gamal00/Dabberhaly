@@ -27,7 +27,7 @@ class MainCategoryRequest extends FormRequest
       'description' => ['nullable', 'string'],
       'description_en' => ['nullable', 'string'],
       'choice_id' => ['nullable', 'exists:choices,id'],
-      'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,svg', 'max:2048'],
+      'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:2048'],
 
     ];
   }

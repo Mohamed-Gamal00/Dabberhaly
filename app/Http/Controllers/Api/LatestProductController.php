@@ -13,7 +13,7 @@ class LatestProductController extends Controller
 {
     public function latestProducts()
     {
-        $latestProducts = Product::latest()->take(5)->get();
+        $latestProducts = Product::with(['parent', 'availability'])->latest()->take(5)->get();
 
         if (request()->hasHeader('user-id') && request()->hasHeader('guest-id')) {
             return ApiResponse::sendResponse(200, 'you must determind if you guest or user');
@@ -27,7 +27,7 @@ class LatestProductController extends Controller
 
     public function allLatestProducts()
     {
-        $latestProducts = Product::latest()->paginate(10);
+        $latestProducts = Product::with(['parent', 'availability'])->latest()->paginate(10);
 
 
         if (count($latestProducts) > 0) {

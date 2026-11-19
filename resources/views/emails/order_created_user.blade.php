@@ -300,15 +300,33 @@
         </table>
 
         <!-- Totals -->
+        @php
+            // So the numbers add up: subtotal − discount + shipping + tax = total.
+            $emailTax = (float) ($order->tax_amount ?? 0);
+            $emailSubtotal = (float) ($order->totalBeforeDiscount ?? $order->total_price);
+            $emailDiscount = max(0, $emailSubtotal - ((float) $order->total_price - (float) ($order->shipping_price ?? 0) - $emailTax));
+        @endphp
         <div class="totals">
             <div class="totals-row">
                 <span>المجموع</span>
                 <span>{{ number_format($order->totalBeforeDiscount ?? $order->total_price, 2) }} ر.س</span>
             </div>
+            @if($emailDiscount > 0)
+            <div class="totals-row">
+                <span>الخصم</span>
+                <span>− {{ number_format($emailDiscount, 2) }} ر.س</span>
+            </div>
+            @endif
             <div class="totals-row">
                 <span>تكلفة الشحن</span>
                 <span>{{ number_format($order->shipping_price ?? 0, 2) }} ر.س</span>
             </div>
+            @if($emailTax > 0)
+            <div class="totals-row">
+                <span>الضريبة (القيمة المضافة)</span>
+                <span>{{ number_format($emailTax, 2) }} ر.س</span>
+            </div>
+            @endif
             <div class="totals-row total">
                 <span>الإجمالي الكلي</span>
                 <span>{{ number_format($order->total_price, 2) }} ر.س</span>

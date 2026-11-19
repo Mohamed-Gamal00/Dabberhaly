@@ -14,6 +14,7 @@ use App\Services\UserService;
 use App\Services\VerificationServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 
 class UserAuthController extends Controller
@@ -56,6 +57,15 @@ class UserAuthController extends Controller
         if (!$user) {
             return ApiResponse::sendResponse(404, "User not found");
         }
+
+        // Brute-force guard: at most 10 verification attempts per user
+        // per minute, on top of the wrong-code counter below.
+        $throttleKey = 'api-otp-verify:' . $user->id;
+        if (RateLimiter::tooManyAttempts($throttleKey, 10)) {
+            return ApiResponse::sendResponse(429, 'Too many attempts. Please try again later.');
+        }
+        RateLimiter::hit($throttleKey, 60);
+
         /*check expired code*/
         if ($this->userService->isVerificationCodeExpired($user)) {
             return ApiResponse::sendResponse(403, "انتهت صلاحية رمز التحقق. يرجى طلب واحد جديدة.");
@@ -64,6 +74,8 @@ class UserAuthController extends Controller
         $isValidCode = $this->sms_service->checkOTPCodePassword($user->id, $verificationData['code']);
 
         if ($isValidCode) {
+            $this->sms_service->clearOtpAttempts($user->id);
+            RateLimiter::clear($throttleKey);
             $this->userService->markUserVerified($user, $request->code);
             $token = $user->createToken('-AuthToken')->plainTextToken;
             $data = [
@@ -72,12 +84,23 @@ class UserAuthController extends Controller
 
             return ApiResponse::sendResponse(200, 'Verification successful', $data);
         } else {
+            $attempts = $this->sms_service->recordFailedOtpAttempt($user->id);
+            if ($attempts >= VerificationServices::MAX_OTP_ATTEMPTS) {
+                return ApiResponse::sendResponse(403, 'Too many wrong attempts. The verification code has been invalidated, please request a new one.');
+            }
             return ApiResponse::sendResponse(403, 'Invalid verification code');
         }
     }
 
     public function login(LoginRequest $request)
     {
+        // Brute-force guard: 5 failed logins per phone number + IP, then
+        // locked out for a minute (same limit as the web LoginRequest).
+        $throttleKey = 'api-login:' . $request->phone_number . '|' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            return ApiResponse::sendResponse(429, 'Too many login attempts. Please try again later.');
+        }
+
         $user = User::where('phone_number', $request->phone_number)->first();
         if ($user && Hash::check($request->password, $user->password)) {
             // Accounts registered through the API must verify their OTP
@@ -99,8 +122,11 @@ class UserAuthController extends Controller
                 'token' => $token,
             ];
 
+            RateLimiter::clear($throttleKey);
+
             return ApiResponse::sendResponse(200, 'Login Successfully', $data);
         }
+        RateLimiter::hit($throttleKey, 60);
         return ApiResponse::sendResponse(401, 'Login Failed', []);
     }
 
@@ -135,15 +161,28 @@ class UserAuthController extends Controller
 
         $user = User::where('id', $request->user_id)->first();
 
+        // Brute-force guard: at most 10 reset attempts per user per minute.
+        $throttleKey = 'api-otp-reset:' . $user->id;
+        if (RateLimiter::tooManyAttempts($throttleKey, 10)) {
+            return ApiResponse::sendResponse(429, 'Too many attempts. Please try again later.');
+        }
+        RateLimiter::hit($throttleKey, 60);
+
         if ($this->userService->isVerificationCodeExpired($user, true)) {
             return ApiResponse::sendResponse(403, "انتهت صلاحية رمز التحقق. يرجى طلب واحد جديدة.");
         }
 
         $isValidCode = $this->sms_service->checkOTPCodePassword($user->id, $request->code_verify, true);
         if ($isValidCode) {
+            $this->sms_service->clearOtpAttempts($user->id, true);
+            RateLimiter::clear($throttleKey);
             $user->update(['password' => $request->password]);
             return ApiResponse::sendResponse(200, 'Password reset successfully.');
         } else {
+            $attempts = $this->sms_service->recordFailedOtpAttempt($user->id, true);
+            if ($attempts >= VerificationServices::MAX_OTP_ATTEMPTS) {
+                return ApiResponse::sendResponse(403, 'Too many wrong attempts. The verification code has been invalidated, please request a new one.');
+            }
             return ApiResponse::sendResponse(403, 'Invalid verification code');
         }
     }
@@ -163,6 +202,14 @@ class UserAuthController extends Controller
         if (!$user) {
             return 'user id not found';
         }
+
+        // Resending a code is itself an OTP action: at most 5 resends per
+        // user per minute, so the endpoint cannot be used to spam SMS.
+        $throttleKey = 'api-otp-resend:' . $user->id;
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            return ApiResponse::sendResponse(429, 'Too many attempts. Please try again later.');
+        }
+        RateLimiter::hit($throttleKey, 60);
 
         $data = ['user_id' => $user->id];
         return $this->telephoneVerification->SendVerificationCode($user, $data);

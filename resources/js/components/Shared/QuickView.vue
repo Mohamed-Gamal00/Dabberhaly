@@ -21,7 +21,7 @@
                     <v-skeleton-loader v-if="loading" type="image" height="100%" />
                     <template v-else>
                         <div class="qv-main-image">
-                            <img :src="activeImage || product.image_url" alt="product" />
+                            <img :src="activeImage || product.image_url" alt="product" @error="onImgError" />
                             <!-- Discount badge -->
                             <div v-if="product.discount_price && product.discount_price < product.price" class="qv-badge">
                                 -{{ discountPercent }}%
@@ -36,7 +36,7 @@
                                 :class="{ 'qv-thumb--active': activeImage === img.image_url }"
                                 @click="activeImage = img.image_url"
                             >
-                                <img :src="img.image_url" alt="thumb" />
+                                <img :src="img.image_url" alt="thumb" @error="onImgError" />
                             </div>
                         </div>
                     </template>
@@ -55,20 +55,17 @@
                         <!-- Name -->
                         <h2 class="qv-name">{{ pick(product, 'name') }}</h2>
 
-                        <!-- Rating -->
-                        <div class="d-flex align-center mb-3" style="gap:8px">
-                            <v-rating :model-value="4.5" half-increments readonly color="amber" density="compact" size="small" />
-                            <span class="text-grey" style="font-size:12px">(24 {{ t('quickview_rating') }})</span>
-                        </div>
+                        <!-- Rating: only real data is shown. The quick view has no
+                             review data, so no fake rating is rendered here. -->
 
                         <!-- Price -->
                         <div class="qv-price-row">
                             <template v-if="product.discount_price && product.discount_price < product.price">
-                                <span class="qv-price-new">${{ Math.ceil(product.discount_price) }}</span>
-                                <span class="qv-price-old">${{ product.price }}</span>
+                                <span class="qv-price-new">{{ Math.ceil(product.discount_price) }} {{ t('currency_sar') }}</span>
+                                <span class="qv-price-old">{{ product.price }} {{ t('currency_sar') }}</span>
                             </template>
                             <template v-else>
-                                <span class="qv-price-new">${{ Math.ceil(product.price) }}</span>
+                                <span class="qv-price-new">{{ Math.ceil(product.price) }} {{ t('currency_sar') }}</span>
                             </template>
                         </div>
 
@@ -98,7 +95,7 @@
                                 <button @click="quantity++"><v-icon size="16">mdi-plus</v-icon></button>
                             </div>
                             <span class="text-grey" style="font-size:12px">
-                                {{ t('quickview_total') }}: <strong>${{ subtotal }}</strong>
+                                {{ t('quickview_total') }}: <strong>{{ subtotal }} {{ t('currency_sar') }}</strong>
                             </span>
                         </div>
 
@@ -110,9 +107,13 @@
                                 prepend-icon="mdi-cart-plus" @click="addToCart">
                                 {{ t('quickview_add_to_cart') }}
                             </v-btn>
-                            <v-btn variant="outlined" color="primary" rounded="lg" height="46"
+                            <v-btn v-if="product.slug" variant="outlined" color="primary" rounded="lg" height="46"
                                 style="text-transform:none; font-size:13px"
-                                :href="product.slug ? `/products/${product.slug}` : '#'">
+                                :href="`/products/${product.slug}`">
+                                {{ t('quickview_details') }}
+                            </v-btn>
+                            <v-btn v-else variant="outlined" color="primary" rounded="lg" height="46"
+                                style="text-transform:none; font-size:13px" disabled>
                                 {{ t('quickview_details') }}
                             </v-btn>
                         </div>
@@ -160,6 +161,15 @@ const effectivePrice = computed(() =>
 );
 
 const subtotal = computed(() => Math.ceil((effectivePrice.value || 0) * quantity.value));
+
+// Local placeholder (Vanilla Latte) shown when a product image fails to load.
+const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="#F7F0E5"/><g fill="none" stroke="#76543D" stroke-width="10"><path d="M110 150 L200 110 L290 150 L290 260 L200 300 L110 260 Z"/><path d="M110 150 L200 190 L290 150 M200 190 L200 300"/></g></svg>`
+);
+
+function onImgError(e) {
+    if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
+}
 
 async function addToCart() {
     btnLoading.value = true;

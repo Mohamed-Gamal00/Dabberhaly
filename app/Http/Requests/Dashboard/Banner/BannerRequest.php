@@ -22,13 +22,13 @@ class BannerRequest extends FormRequest
     public function rules(): array
     {
         if ($this->isMethod('post')) { // For store method
-            $rules['header_image'] = ['required', 'image'];
-            $rules['header_image_en'] = ['required', 'image'];
+            $rules['header_image'] = ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'];
+            $rules['header_image_en'] = ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'];
         }
 
         if ($this->isMethod('put') || $this->isMethod('patch')) { // For update method
-            $rules['header_image'] = ['nullable', 'image'];
-            $rules['header_image_en'] = ['nullable', 'image'];
+            $rules['header_image'] = ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'];
+            $rules['header_image_en'] = ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'];
         }
 
         return $rules;

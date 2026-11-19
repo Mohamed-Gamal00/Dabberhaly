@@ -14,7 +14,7 @@
                     style="display:block; width:160px; text-decoration:none; flex-shrink:0">
                     <div class="cat-card">
                         <div class="cat-img-wrap">
-                            <img v-if="cat.image_url" :src="cat.image_url" :alt="pick(cat,'name')" />
+                            <img v-if="cat.image_url" :src="cat.image_url" :alt="pick(cat,'name')" @error="onImgError" />
                             <v-icon v-else size="40" color="primary">mdi-shape-outline</v-icon>
                         </div>
                         <div style="font-size:13px; font-weight:600; color:#111827; text-align:center; margin-top:10px; line-height:1.3">
@@ -25,7 +25,7 @@
             </div>
             <div v-else style="text-align:center; padding:64px 0">
                 <v-icon size="64" color="grey-lighten-1">mdi-shape-outline</v-icon>
-                <p style="margin-top:12px; color:#9ca3af">{{ t('no_categories') }}</p>
+                <p style="margin-top:12px; color:#77736B">{{ t('no_categories') }}</p>
             </div>
         </div>
     </div>
@@ -37,6 +37,12 @@ import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 const { t, pick } = useLocale();
 defineProps({ categories: Array });
+
+// A broken category image hides itself (the card keeps its name) instead
+// of showing a broken-image icon.
+function onImgError(e) {
+    e.target.remove();
+}
 </script>
 
 <style scoped>
@@ -52,8 +58,8 @@ defineProps({ categories: Array });
 
 .cat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(57,73,171,0.12);
-    border-color: #3949ab;
+    box-shadow: 0 8px 24px rgba(118, 84, 61, 0.12);
+    border-color: #76543D;
 }
 
 .cat-img-wrap {
@@ -61,7 +67,7 @@ defineProps({ categories: Array });
     height: 80px;
     border-radius: 50%;
     overflow: hidden;
-    background: #e8eaf6;
+    background: #EFE7D8;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -70,7 +76,7 @@ defineProps({ categories: Array });
     transition: border-color 0.2s;
 }
 
-.cat-card:hover .cat-img-wrap { border-color: #3949ab; }
+.cat-card:hover .cat-img-wrap { border-color: #76543D; }
 
 .cat-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
 </style>

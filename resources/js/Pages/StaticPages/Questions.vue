@@ -1,5 +1,6 @@
 <template>
     <div class="faq-page">
+        <SeoHead :title="t('faq_title')" :description="t('faq_subtitle')" />
 
         <!-- Hero -->
         <div class="faq-hero">
@@ -14,7 +15,7 @@
                 </p>
                 <div class="faq-search">
                     <v-icon size="18" color="grey">mdi-magnify</v-icon>
-                    <input v-model="search" :placeholder="t('faq_search')" class="faq-search-input" />
+                    <input v-model="search" :placeholder="t('faq_search')" :aria-label="t('faq_search')" class="faq-search-input" />
                 </div>
             </div>
         </div>
@@ -90,6 +91,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 const { t } = useLocale();
 const props = defineProps({ questions: Array });
@@ -200,7 +202,7 @@ const filteredQuestions = computed(() => {
     direction: rtl;
 }
 
-.faq-search-input::placeholder { color: #9ca3af; }
+.faq-search-input::placeholder { color: #77736B; }
 
 /* Tabs */
 .faq-tabs-wrap {
@@ -335,7 +337,7 @@ const filteredQuestions = computed(() => {
 .faq-cta-icon {
     width: 52px;
     height: 52px;
-    background: #e8eaf6;
+    background: #EFE7D8;
     border-radius: 12px;
     display: flex;
     align-items: center;
