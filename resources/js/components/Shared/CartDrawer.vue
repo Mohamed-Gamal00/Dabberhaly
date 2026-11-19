@@ -49,8 +49,8 @@
                         <button class="cd-inline-retry" @click="fetchCart">{{ t('retry') }}</button>
                     </div>
 
-                    <!-- Free shipping progress -->
-                    <div class="cd-shipping">
+                    <!-- Free shipping progress (hidden when disabled: threshold 0 or unset) -->
+                    <div v-if="freeShippingEnabled" class="cd-shipping">
                         <div class="cd-shipping-head">
                             <v-icon size="18" color="#76543D">mdi-truck-outline</v-icon>
                             <span v-if="total < freeShippingThreshold" class="cd-shipping-text">
@@ -153,9 +153,12 @@ const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
 function onImgError(e) {
     if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
 }
-// From the store settings (GET /cart); 500 is the fallback until
-// the first fetch returns the configured value.
-const freeShippingThreshold = ref(500);
+// From the store settings (GET /cart). Null until the first fetch
+// returns the configured value; null or 0 means free shipping is
+// disabled, so the progress block stays hidden.
+const freeShippingThreshold = ref(null);
+
+const freeShippingEnabled = computed(() => Number(freeShippingThreshold.value) > 0);
 
 const total = computed(() =>
     cartItems.value.reduce((sum, item) => {
@@ -174,12 +177,18 @@ const totalSavings = computed(() =>
 );
 
 const shippingProgress = computed(() =>
-    parseInt((total.value / freeShippingThreshold.value) * 100)
+    freeShippingEnabled.value
+        ? parseInt((total.value / freeShippingThreshold.value) * 100)
+        : 0
 );
 
 function applyThreshold(data) {
-    if (data?.free_shipping_threshold !== undefined && data.free_shipping_threshold !== null) {
-        freeShippingThreshold.value = Number(data.free_shipping_threshold);
+    // The key is always present in cart responses; null (or 0) means
+    // the admin disabled free shipping — record that, don't keep a
+    // stale threshold from an earlier fetch.
+    if (data && 'free_shipping_threshold' in data) {
+        const value = data.free_shipping_threshold;
+        freeShippingThreshold.value = value === null ? null : Number(value);
     }
 }
 

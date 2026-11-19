@@ -176,7 +176,7 @@
                                     class="form-control" value="{{ old('free_shipping_threshold', $setting->free_shipping_threshold) }}" />
                                 <span class="input-group-text">ر.س</span>
                             </div>
-                            <small class="text-muted">إجمالي السلة الذي عنده يصبح الشحن مجانياً ويكتمل شريط التقدم في السلة.</small>
+                            <small class="text-muted">إجمالي السلة الذي عنده يصبح الشحن مجانياً ويكتمل شريط التقدم في السلة. اكتب 0 لإيقاف الشحن المجاني تماماً.</small>
                         </div>
                     </div>
                 </div>
