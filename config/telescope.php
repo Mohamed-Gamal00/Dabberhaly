@@ -16,7 +16,11 @@ return [
     |
     */
 
-    'enabled' => env('TELESCOPE_ENABLED', false),
+    // On by default in local development (so /telescope just works),
+    // off everywhere else unless explicitly enabled. When disabled,
+    // Telescope does not even register its routes, so /telescope 404s
+    // instead of showing the dashboard.
+    'enabled' => env('TELESCOPE_ENABLED', env('APP_ENV') === 'local'),
 
     /*
     |--------------------------------------------------------------------------
