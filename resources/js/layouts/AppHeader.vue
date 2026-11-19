@@ -58,7 +58,7 @@
                 class="ms-1 d-none d-md-flex"
                 style="text-transform:none; font-size:12px; font-weight:700; min-width:0; padding:0 8px; color:#76543D"
                 @click="switchLocale(locale === 'ar' ? 'en' : 'ar')"
-                title="تغيير اللغة"
+                :title="t('header_change_language')"
             >
                 {{ locale === 'ar' ? 'EN' : 'ع' }}
             </v-btn>
@@ -202,8 +202,8 @@ const cartCount = ref(0);
 const { props } = usePage();
 const categories = computed(() => usePage().props.categories ?? []);
 const user = computed(() => usePage().props.auth?.user);
-const siteName = computed(() => usePage().props.seo?.site_name || 'متجري');
 const { locale, switchLocale, t, pick } = useLocale();
+const siteName = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
 
 const menu = computed(() => [
     { title: t('home'),       href: '/',          icon: 'mdi-home-outline' },

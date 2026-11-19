@@ -117,13 +117,20 @@ const filteredQuestions = computed(() => {
     let list = props.questions || [];
 
     if (activeCategory.value !== 'all') {
+        // The keyword lists are Arabic, so category filtering always
+        // matches against the Arabic originals (title_ar/description_ar)
+        // even when the displayed text is the English version.
         const keywords = categoryKeywords[activeCategory.value] || [];
         list = list.filter(q =>
-            keywords.some(kw => q.title.includes(kw) || q.description?.includes(kw))
+            keywords.some(kw =>
+                (q.title_ar ?? q.title).includes(kw) ||
+                (q.description_ar ?? q.description)?.includes(kw)
+            )
         );
     }
 
     if (search.value.trim()) {
+        // Free-text search matches what is on screen (localized text).
         const s = search.value.trim().toLowerCase();
         list = list.filter(q =>
             q.title.toLowerCase().includes(s) || q.description?.toLowerCase().includes(s)

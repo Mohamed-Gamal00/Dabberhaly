@@ -62,7 +62,7 @@
                     <div>
                         <span class="text-grey" style="font-size:12px">{{ t('total') }}</span>
                         <span class="font-weight-bold text-primary ms-2" style="font-size:15px">
-                            {{ order.total_price }} ر.س
+                            {{ order.total_price }} {{ t('currency_sar') }}
                         </span>
                     </div>
                     <v-btn size="small" variant="text" color="primary" style="text-transform:none; font-size:12px">
@@ -117,12 +117,12 @@
                         </div>
                         <div class="info-cell">
                             <div class="info-label">{{ t('shipping_price') }}</div>
-                            <div class="info-value">{{ selected.shipping_price }} ر.س</div>
+                            <div class="info-value">{{ selected.shipping_price }} {{ t('currency_sar') }}</div>
                         </div>
                         <div class="info-cell">
                             <div class="info-label">{{ t('total') }}</div>
                             <div class="info-value font-weight-bold text-primary" style="font-size:15px">
-                                {{ selected.total_price }} ر.س
+                                {{ selected.total_price }} {{ t('currency_sar') }}
                             </div>
                         </div>
                     </div>
@@ -143,7 +143,7 @@
                                 <div style="font-size:12px; color:#9ca3af">{{ t('quantity') }}: {{ item.quantity }}</div>
                             </div>
                             <div class="font-weight-bold" style="font-size:13px; color:#76543D">
-                                {{ item.price }} ر.س
+                                {{ item.price }} {{ t('currency_sar') }}
                             </div>
                         </div>
                     </div>
@@ -196,7 +196,7 @@ import { computed, ref } from 'vue';
 import axios from 'axios';
 import { useLocale } from '../../../composables/useLocale';
 
-const { t } = useLocale();
+const { t, locale } = useLocale();
 const props = defineProps({ user: { type: Object, required: true } });
 
 const orders = computed(() => (props.user.orders || []).filter(o => !o.return_order));
@@ -232,12 +232,12 @@ async function requestReturn(orderId) {
 
 const statusText  = (order) => {
     const labels = {
-        pending:    'قيد الانتظار',
-        confirmed:  'تم التأكيد',
-        processing: 'قيد التجهيز',
-        shipped:    'تم الشحن',
-        delivered:  'تم التسليم',
-        cancelled:  'ملغي',
+        pending:    t('orders_status_pending'),
+        confirmed:  t('orders_status_confirmed'),
+        processing: t('orders_status_processing'),
+        shipped:    t('orders_status_shipped'),
+        delivered:  t('orders_status_delivered'),
+        cancelled:  t('orders_status_cancelled'),
     };
     return labels[order.status] ?? order.status;
 };
@@ -257,7 +257,7 @@ const statusColor = (order) => {
 // Return only allowed while order is still pending
 const canReturn = (order) => !order.return_order && order.status === 'pending';
 
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
+const formatDate = (d) => d ? new Date(d).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
 $(document).ready(function () {
-  if ($("#elm1").length) {
+  if ($("#elm1").length || $("#elm2").length) {
     tinymce.init({
-      selector: "textarea#elm1",
+      selector: "textarea#elm1, textarea#elm2",
       height: 300,
       plugins: [
         "advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker",

@@ -1,5 +1,5 @@
 <template>
-    <div class="os-page" dir="rtl">
+    <div class="os-page" :dir="dir">
         <v-container class="py-10">
             <div class="os-card">
 
@@ -27,7 +27,7 @@
                     </div>
                     <div class="os-row os-row--total">
                         <span class="os-label">{{ t('total') }}</span>
-                        <span class="os-val os-amount">{{ ((order.total_price || 0) + (order.shipping_price || 0)).toFixed(2) }} ر.س</span>
+                        <span class="os-val os-amount">{{ ((order.total_price || 0) + (order.shipping_price || 0)).toFixed(2) }} {{ t('currency_sar') }}</span>
                     </div>
                 </div>
 
@@ -57,7 +57,7 @@ import { usePage } from '@inertiajs/vue3';
 import { useLocale } from '../../composables/useLocale';
 const { props } = usePage();
 const order = computed(() => props.order);
-const { t } = useLocale();
+const { t, dir } = useLocale();
 </script>
 
 <style scoped>

@@ -1,8 +1,8 @@
 <template>
     <div style="background:#f7f0e5; min-height:100vh; padding-bottom:48px">
         <SeoHead
-            :title="category.name"
-            :description="category.description || `تصفح ${products.length} منتج في قسم ${category.name}`"
+            :title="pick(category, 'name')"
+            :description="category.description || categoryMetaDescription"
             :image="category.image_url"
         />
 
@@ -43,12 +43,19 @@
 </template>
 
 <script setup>
-import { inject } from 'vue';
+import { inject, computed } from 'vue';
 import ProductCard from '../../components/Shared/ProductCard.vue';
 import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 const { t, pick } = useLocale();
 const props = defineProps({ category: Object, products: Array });
+
+// t() has no interpolation, so fill the {count}/{name} placeholders manually.
+const categoryMetaDescription = computed(() =>
+    t('category_meta_description')
+        .replace('{count}', String(props.products?.length ?? 0))
+        .replace('{name}', pick(props.category, 'name'))
+);
 
 const Emitter = inject('Emitter');
 function openQuickView(product) {

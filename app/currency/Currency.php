@@ -44,10 +44,10 @@ class Currency
             $code = $headerCurrency->code;
         } else {
             $currentCurrency = 1;
-            $code = $defaultCurrency->code;
+            $code = $defaultCurrency?->code ?? '';
         }
 
-        if (request()->header('currencyId') == $defaultCurrency->id) {
+        if ($defaultCurrency && request()->header('currencyId') == $defaultCurrency->id) {
             $currentCurrency = 1;
             $code = $defaultCurrency->code;
         }

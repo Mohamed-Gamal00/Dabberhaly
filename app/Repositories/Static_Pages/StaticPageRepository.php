@@ -35,6 +35,10 @@ class StaticPageRepository implements StaticPageInterface
       $data['content'] = HtmlSanitizer::purify($data['content']);
     }
 
+    if (isset($data['content_en'])) {
+      $data['content_en'] = HtmlSanitizer::purify($data['content_en']);
+    }
+
     $page->update($data);
     return $page->wasChanged();
   }

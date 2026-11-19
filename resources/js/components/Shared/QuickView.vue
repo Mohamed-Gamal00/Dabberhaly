@@ -170,11 +170,11 @@ async function addToCart() {
         });
         Emitter.emit('cart-item-added', data.items);
         flyToCart(document.querySelector('.v-dialog .qv-main-img'));
-        snackbarMessage.value = 'تم إضافة المنتج للسلة';
+        snackbarMessage.value = t('product_added_to_cart');
         snackbarColor.value = 'success';
         dialog.value = false;
     } catch (e) {
-        snackbarMessage.value = e.response?.data?.message || 'حدث خطأ';
+        snackbarMessage.value = e.response?.data?.message || t('error_occurred');
         snackbarColor.value = 'error';
     } finally {
         btnLoading.value = false;

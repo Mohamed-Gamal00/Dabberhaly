@@ -33,7 +33,7 @@ class CompareController extends Controller
                 'image_url'      => $p->image_url,
                 'is_in_wishlist' => (bool) $p->is_in_wishlist,
                 'quantity'       => $p->quantity,
-                'description'    => $p->description,
+                'description'    => $p->localizedDescription(),
                 'weight'         => $p->weight,
                 'parent'         => $p->parent ? ['name' => $p->parent->name] : null,
                 'features'       => $p->features->map(fn($f) => [

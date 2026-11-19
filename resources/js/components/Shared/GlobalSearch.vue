@@ -30,7 +30,7 @@
                 </div>
 
                 <template v-else-if="results.length">
-                    <div class="gs-section">المنتجات</div>
+                    <div class="gs-section">{{ t('products') }}</div>
                     <a
                         v-for="item in results"
                         :key="item.id"

@@ -48,6 +48,7 @@ class CheckoutController extends Controller
             'id'             => $item->id,
             'product_id'     => $item->product_id,
             'name'           => $item->product?->name,
+            'name_en'        => $item->product?->name_en,
             'image'          => $item->product?->image_url,
             'price'          => (float) $item->product?->price,
             'discount_price' => $item->product?->discount_price ? (float) $item->product->discount_price : null,
