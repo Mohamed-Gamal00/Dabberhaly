@@ -33,7 +33,20 @@ class StaticPageController extends Controller
 
     public function questions()
     {
-        $questions = CommonQuestion::all();
+        // Serve the English title/description when the locale is
+        // English and they are filled in, otherwise the Arabic ones.
+        // The Arabic originals ride along as title_ar/description_ar:
+        // the category keyword lists in Questions.vue are Arabic, so
+        // category filtering always matches against the Arabic text,
+        // while the free-text search matches what is on screen.
+        $questions = CommonQuestion::all()->map(fn ($q) => [
+            'id' => $q->id,
+            'title' => $q->localizedTitle(),
+            'description' => $q->localizedDescription(),
+            'title_ar' => $q->title,
+            'description_ar' => $q->description,
+        ]);
+
         return Inertia::render('StaticPages/Questions', ['questions' => $questions]);
     }
 }

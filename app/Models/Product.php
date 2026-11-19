@@ -18,6 +18,7 @@ class Product extends Model
         'name',
         'name_en',
         'description',
+        'description_en',
         'image',
         'price',
         'discount_price',
@@ -95,6 +96,17 @@ class Product extends Model
             return $this->name;
         }
         return $this->name_en;
+    }
+
+    /**
+     * English description when the current locale is English and an
+     * English description was filled in, otherwise the Arabic one.
+     */
+    public function localizedDescription(): ?string
+    {
+        return app()->getLocale() === 'en' && !empty($this->description_en)
+            ? $this->description_en
+            : $this->description;
     }
 
     public function parent(): BelongsTo

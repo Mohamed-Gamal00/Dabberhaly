@@ -28,19 +28,11 @@
                             <div class="trust-badge"><v-icon size="14">mdi-refresh</v-icon><span>{{ t('footer_free_returns') }}</span></div>
                         </div>
 
-                        <!-- Social -->
-                        <div class="social-links">
-                            <a href="#" class="social-btn" aria-label="Facebook">
-                                <v-icon size="18">mdi-facebook</v-icon>
-                            </a>
-                            <a href="#" class="social-btn" aria-label="Twitter">
-                                <v-icon size="18">mdi-twitter</v-icon>
-                            </a>
-                            <a href="#" class="social-btn" aria-label="Instagram">
-                                <v-icon size="18">mdi-instagram</v-icon>
-                            </a>
-                            <a href="#" class="social-btn" aria-label="Snapchat">
-                                <v-icon size="18">mdi-snapchat</v-icon>
+                        <!-- Social (links from store settings; hidden when unset) -->
+                        <div v-if="socialLinks.length" class="social-links">
+                            <a v-for="link in socialLinks" :key="link.label" :href="link.url" class="social-btn"
+                                :aria-label="link.label" target="_blank" rel="noopener">
+                                <v-icon size="18">{{ link.icon }}</v-icon>
                             </a>
                         </div>
                     </div>
@@ -79,15 +71,15 @@
                             <li><Link href="/contact-us">{{ t('contact_us') }}</Link></li>
                         </ul>
 
-                        <!-- Contact info -->
+                        <!-- Contact info (from store settings; rows without a value are hidden) -->
                         <div class="contact-info mt-4">
-                            <div class="contact-item">
+                            <div v-if="siteContact.phone" class="contact-item">
                                 <v-icon size="14" color="rgba(255,255,255,0.6)">mdi-phone-outline</v-icon>
-                                <span dir="ltr">+966 50 000 0000</span>
+                                <a :href="'tel:' + String(siteContact.phone).replace(/\s/g, '')" dir="ltr">{{ siteContact.phone }}</a>
                             </div>
-                            <div class="contact-item">
+                            <div v-if="siteContact.email" class="contact-item">
                                 <v-icon size="14" color="rgba(255,255,255,0.6)">mdi-email-outline</v-icon>
-                                <span>info@store.com</span>
+                                <a :href="'mailto:' + siteContact.email">{{ siteContact.email }}</a>
                             </div>
                         </div>
                     </div>
@@ -156,6 +148,21 @@ const subscribing  = ref(false);
 const subscribeMsg = ref('');
 const siteName     = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
 const { t } = useLocale();
+
+// Contact details + social links from the store settings, shared by the
+// Inertia middleware on every page (no hardcoded values). Rows/links
+// without a value are hidden.
+const siteContact = computed(() => usePage().props.siteContact ?? {});
+const socialLinks = computed(() => {
+    const social = siteContact.value.social ?? {};
+    return [
+        { label: 'Facebook',  icon: 'mdi-facebook',  url: social.facebook },
+        { label: 'Twitter',   icon: 'mdi-twitter',   url: social.twitter },
+        { label: 'Instagram', icon: 'mdi-instagram', url: social.instagram },
+        { label: 'Snapchat',  icon: 'mdi-snapchat',  url: social.snapchat },
+        { label: 'TikTok',    icon: 'mdi-music-note', url: social.tiktok },
+    ].filter(link => link.url);
+});
 
 async function subscribe() {
     if (!email.value.trim()) return;
@@ -332,6 +339,13 @@ async function subscribe() {
     font-size: 12px;
     color: rgba(255,255,255,0.65);
 }
+
+.contact-item a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.contact-item a:hover { color: white; }
 
 /* Newsletter */
 .footer-newsletter {}

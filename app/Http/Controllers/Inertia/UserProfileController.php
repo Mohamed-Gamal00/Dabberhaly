@@ -46,6 +46,12 @@ class UserProfileController extends Controller
                     ->withIsInWishlist($user);
             },
         ]);
+
+        // Wishlist products are serialized whole (QuickView reads
+        // description): serve the English one when the locale is
+        // English and it is filled in.
+        $user->wishlistProducts->each(fn ($p) => $p->description = $p->localizedDescription());
+
         return Inertia::render('Profile/Index', compact('user'));
     }
 

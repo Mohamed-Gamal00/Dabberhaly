@@ -40,7 +40,12 @@ class ProductDetailsResource extends JsonResource
             'price_before_discount' => preg_replace('/[A-Z]+/', '', strval(Currency::getCurrencyApi($this->price))),
             'price_after_discount' => preg_replace('/[A-Z]+/', '', strval(Currency::getCurrencyApi($this->discount_price))),
             'currency' => preg_replace('/[0-9.]+/', '', strval(Currency::getCurrencyApi($this->discount_price))),
-            'description' => translateWithHTMLTags($this->description),
+            // Admin-written English description when the locale is
+            // English and it is filled in; otherwise the previous
+            // machine-translation behaviour on the Arabic description.
+            'description' => app()->getLocale() === 'en' && !empty($this->description_en)
+                ? $this->description_en
+                : translateWithHTMLTags($this->description),
             'image' => $this->image_url,
             'more_images' => $this->images->take(3)->pluck('image_url')->toArray(),
             'is_favourite' => $this->checkIfProductExists($request, $this->id),

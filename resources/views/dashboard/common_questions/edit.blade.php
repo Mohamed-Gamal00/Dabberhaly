@@ -50,6 +50,24 @@
                         @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            السؤال بالإنجليزية
+                        </label>
+                        <input type="text" name="title_en" class="form-control @error('title_en') is-invalid @enderror"
+                            value="{{ old('title_en', $commonQuestion->title_en) }}" dir="ltr" />
+                        @error('title_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            الإجابة بالإنجليزية
+                        </label>
+                        <textarea name="description_en" rows="5"
+                            class="form-control @error('description_en') is-invalid @enderror" dir="ltr">{{ old('description_en', $commonQuestion->description_en) }}</textarea>
+                        @error('description_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary px-4">
                             <i class="mdi mdi-content-save me-1"></i>

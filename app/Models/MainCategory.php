@@ -14,9 +14,21 @@ class MainCategory extends Model
     'name',
     'name_en',
     'description',
+    'description_en',
     'image',
     'slug'
   ];
+
+  /**
+   * English description when the current locale is English and an
+   * English description was filled in, otherwise the Arabic one.
+   */
+  public function localizedDescription(): ?string
+  {
+    return app()->getLocale() === 'en' && !empty($this->description_en)
+      ? $this->description_en
+      : $this->description;
+  }
 
   public function category()
   {

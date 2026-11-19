@@ -59,6 +59,12 @@
                         <textarea name="description" rows="4" class="form-control"
                             placeholder="وصف تفصيلي للمنتج...">{{ old('description') }}</textarea>
                     </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">الوصف بالإنجليزية</label>
+                        <textarea name="description_en" rows="4" class="form-control @error('description_en') is-invalid @enderror"
+                            placeholder="Product description in English..." dir="ltr">{{ old('description_en') }}</textarea>
+                        @error('description_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
                 </div>
             </div>
         </div>

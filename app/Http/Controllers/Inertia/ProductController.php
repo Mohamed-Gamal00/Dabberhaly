@@ -96,6 +96,11 @@ class ProductController extends Controller
     public function show($slug)
     {
         $product = Product::with(['images', 'parent', 'features'])->where('slug', $slug)->firstOrFail();
+
+        // The whole model is serialized to the page: serve the English
+        // description when the locale is English and it is filled in.
+        $product->description = $product->localizedDescription();
+
         return Inertia::render('Products/Show', [
             'product' => $product,
         ]);

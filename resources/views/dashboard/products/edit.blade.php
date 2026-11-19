@@ -58,6 +58,10 @@
                         <label class="form-label fw-semibold">الوصف</label>
                         <textarea name="description" rows="4" class="form-control">{{ old('description', $product->description) }}</textarea>
                     </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">الوصف بالإنجليزية</label>
+                        <textarea name="description_en" rows="4" class="form-control" dir="ltr">{{ old('description_en', $product->description_en) }}</textarea>
+                    </div>
                 </div>
             </div>
         </div>

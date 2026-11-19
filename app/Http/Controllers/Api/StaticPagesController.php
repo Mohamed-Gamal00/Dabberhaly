@@ -60,16 +60,25 @@ class StaticPagesController extends Controller
 
     public function common_questions()
     {
-        $questions = CommonQuestion::select('title', 'description')->get();
+        $questions = CommonQuestion::select('title', 'description', 'title_en', 'description_en')->get();
 
         if ($questions->isEmpty()) {
             return ApiResponse::sendResponse(200, 'Data not found');
         }
 
-        // Translate each question's title and description
-        $questions = $questions->map(function ($question) {
-            $question->title = translateWithHTMLTags($question->title);
-            $question->description = translateWithHTMLTags($question->description);
+        // Serve the admin-written English title/description when the
+        // locale is English and they are filled in; otherwise fall back
+        // to the Arabic values with the previous machine-translation
+        // behaviour (same as static_pages above).
+        $isEnglish = app()->getLocale() === 'en';
+
+        $questions = $questions->map(function ($question) use ($isEnglish) {
+            $question->title = $isEnglish && !empty($question->title_en)
+                ? $question->title_en
+                : translateWithHTMLTags($question->title);
+            $question->description = $isEnglish && !empty($question->description_en)
+                ? $question->description_en
+                : translateWithHTMLTags($question->description);
             return $question;
         });
 

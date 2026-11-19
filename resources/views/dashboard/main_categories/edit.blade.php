@@ -71,6 +71,28 @@
                                     </div>
                                 </div>
 
+                                <div class="row mb-3">
+                                    <label for="example-text-input" class="col-sm-2 col-form-label fw-bold">وصف
+                                        القسم</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="description" rows="3">{{ old('description', $category->description) }}</textarea>
+                                        @error('description')
+                                            <span class="error">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <label for="example-text-input" class="col-sm-2 col-form-label fw-bold">وصف
+                                        القسم بالإنجليزية</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="description_en" rows="3" dir="ltr">{{ old('description_en', $category->description_en) }}</textarea>
+                                        @error('description_en')
+                                            <span class="error">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
 
 
                                 <div class="row mb-3">
@@ -147,6 +169,28 @@
                                         <input class="form-control" name="name_en" type="text" id="example-text-input"
                                             value="{{ old('name', $category->name_en) }}">
                                         @error('name_en')
+                                            <span class="error">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <label for="example-text-input" class="col-sm-2 col-form-label fw-bold">وصف القسم
+                                        الفرعي</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="description" rows="3">{{ old('description', $category->description) }}</textarea>
+                                        @error('description')
+                                            <span class="error">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <label for="example-text-input" class="col-sm-2 col-form-label fw-bold">وصف القسم
+                                        الفرعي بالإنجليزية</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="description_en" rows="3" dir="ltr">{{ old('description_en', $category->description_en) }}</textarea>
+                                        @error('description_en')
                                             <span class="error">{{ $message }}</span>
                                         @enderror
                                     </div>

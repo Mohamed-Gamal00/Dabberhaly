@@ -24,6 +24,8 @@ class MainCategoryRequest extends FormRequest
     return [
       'name' => ['required', 'string', 'max:255'],
       'name_en' => ['nullable', 'string', 'max:255'],
+      'description' => ['nullable', 'string'],
+      'description_en' => ['nullable', 'string'],
       'choice_id' => ['nullable', 'exists:choices,id'],
       'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,svg', 'max:2048'],
 

@@ -81,6 +81,23 @@ class HandleInertiaRequests extends Middleware
                 'canonical_url'           => $setting?->canonical_url,
                 'robots_index'            => $setting?->robots_index ?? 'index,follow',
             ],
+
+            // Store contact details + social links from the settings row
+            // (same source as the Contact Us page) — the footer is rendered
+            // on every page via the layout, so it reads these shared props.
+            // Phone prefers phone_number, falling back to phone.
+            'siteContact' => [
+                'phone'   => $setting?->phone_number ?? $setting?->phone,
+                'email'   => $setting?->email,
+                'address' => $setting?->address,
+                'social'  => [
+                    'facebook'  => $setting?->facebook,
+                    'twitter'   => $setting?->twitter,
+                    'instagram' => $setting?->instagram,
+                    'snapchat'  => $setting?->snap,
+                    'tiktok'    => $setting?->tiktok,
+                ],
+            ],
         ];
     }
 }
