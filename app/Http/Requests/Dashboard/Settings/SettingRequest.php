@@ -24,6 +24,8 @@ class SettingRequest extends FormRequest
             'phone_number'             => ['nullable', 'numeric'],
             'value_added_tax'          => ['nullable', 'numeric'],
             'free_shipping_threshold'  => ['nullable', 'numeric', 'min:0'],
+            'payment_cod_enabled'      => ['nullable', 'boolean'],
+            'payment_card_enabled'     => ['nullable', 'boolean'],
             'tax_number'               => ['nullable', 'numeric'],
             'email'                    => 'nullable|email',
             'facebook'                 => 'nullable',
@@ -63,5 +65,27 @@ class SettingRequest extends FormRequest
         ];
 
         return $rules;
+    }
+
+    /**
+     * At least one payment method must stay visible: hiding both
+     * would leave checkout with no way to pay. Only enforced when
+     * the toggles are actually submitted (other settings updates
+     * that don't touch them are unaffected).
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if (! $this->has('payment_cod_enabled') && ! $this->has('payment_card_enabled')) {
+                return;
+            }
+
+            if (! $this->boolean('payment_cod_enabled') && ! $this->boolean('payment_card_enabled')) {
+                $validator->errors()->add(
+                    'payment_card_enabled',
+                    'يجب إظهار طريقة دفع واحدة على الأقل (الدفع عند الاستلام أو الدفع بالبطاقة).'
+                );
+            }
+        });
     }
 }

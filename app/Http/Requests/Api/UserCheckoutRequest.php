@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Models\Setting;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UserCheckoutRequest extends FormRequest
 {
@@ -27,11 +29,11 @@ class UserCheckoutRequest extends FormRequest
 
             'user_address' => $isAddingNewAddress ? 'nullable' : 'required', // لو اليوزر مسجل وهيضيف عنوان جديد
             'terms' => 'nullable|boolean',
-            // Only the payment methods the store actually supports:
-            // an unknown value must never silently become cash on
-            // delivery (the checkout treats anything but card_payment
-            // as COD).
-            'payment_method' => 'required|in:cash_on_delivery,cash,card_payment',
+            // Only the payment methods the admin enabled in settings:
+            // a disabled method must never be orderable, and an unknown
+            // value must never silently become cash on delivery (the
+            // checkout treats anything but card_payment as COD).
+            'payment_method' => ['required', Rule::in(Setting::allowedPaymentMethodValues())],
             'first_name' => $isAddingNewAddress ? 'required' : 'nullable',
             'last_name' => $isAddingNewAddress ? 'required' : 'nullable',
             'phone_number' => $isAddingNewAddress ? 'required' : 'nullable',
