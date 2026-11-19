@@ -84,7 +84,7 @@
                                 type="tel"
                                 inputmode="tel"
                                 autocomplete="tel"
-                                placeholder="05xxxxxxxx"
+                                placeholder="01xxxxxxxxx"
                                 variant="outlined"
                                 density="comfortable"
                                 hide-details="auto"

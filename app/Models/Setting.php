@@ -54,6 +54,13 @@ class Setting extends Model
         'robots_index',
     ];
 
+    protected $casts = [
+        // Secrets are stored encrypted at rest, never as plaintext.
+        'secret_key' => 'encrypted',
+        'sms_api_key' => 'encrypted',
+        'publishable_key' => 'encrypted',
+    ];
+
     public function getImageUrlAttribute()
     {
         if (!$this->image) {

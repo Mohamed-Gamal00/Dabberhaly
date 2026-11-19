@@ -13,6 +13,7 @@ use App\Services\CheckOut\CheckoutServices;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 use Throwable;
 
@@ -74,7 +75,8 @@ class CheckoutController extends Controller
             return $this->checkOutservice->checkPaymentMethod($request, $order);
         } catch (Throwable $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Order creation failed', 'error' => $e->getMessage()], 500);
+            Log::error('API user checkout failed', ['exception' => $e]);
+            return response()->json(['message' => 'Order creation failed'], 500);
         }
     }
 
@@ -108,6 +110,11 @@ class CheckoutController extends Controller
     {
 
         $shipping = ShippingTypesAndPrice::find(1);
+
+        // No shipping row configured — a clean error, not a 500 on null.
+        if (! $shipping) {
+            return ApiResponse::sendResponse(422, 'طريقة الشحن غير مُعدّة في المتجر بعد.');
+        }
 
         $data = [
             'shipping_info' => new ShippingResource($shipping),

@@ -9,6 +9,12 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Test user — local development only. Never create a known
+        // test account in production.
+        if (! app()->environment('local')) {
+            return;
+        }
+
         $users = [
             [
                 'first_name' => 'Mohamed',

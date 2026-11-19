@@ -67,7 +67,7 @@ class PersonalInfoController extends Controller
     public function changeProfileImage(Request $request)
     {
         $request->validate([
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
         
         $user = $request->user();

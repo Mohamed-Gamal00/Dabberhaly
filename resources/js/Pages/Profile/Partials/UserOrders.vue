@@ -188,18 +188,36 @@
         <v-snackbar v-model="snackbar" location="top right" :color="snackbarColor" timeout="2500">
             {{ snackbarMsg }}
         </v-snackbar>
+
+        <!-- Pagination (orders arrive paginated, 10/page) -->
+        <div class="d-flex justify-center mt-6" v-if="ordersPage.last_page > 1">
+            <v-pagination
+                v-model="page"
+                :length="ordersPage.last_page"
+                total-visible="5"
+                rounded="lg"
+                @update:model-value="goto"
+            />
+        </div>
     </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import axios from 'axios';
+import { router, usePage } from '@inertiajs/vue3';
 import { useLocale } from '../../../composables/useLocale';
 
 const { t, locale } = useLocale();
 const props = defineProps({ user: { type: Object, required: true } });
 
-const orders = computed(() => (props.user.orders || []).filter(o => !o.return_order));
+const ordersPage = computed(() => usePage().props.orders || { data: [], last_page: 1, current_page: 1 });
+const orders = computed(() => (ordersPage.value.data || []).filter(o => !o.return_order));
+const page = ref(ordersPage.value.current_page);
+watch(() => ordersPage.value.current_page, (val) => page.value = val);
+function goto(val) {
+    router.get('/user-profile?tab=orders', { page: val }, { preserveState: true, preserveScroll: true });
+}
 const dialog    = ref(false);
 const selected  = ref(null);
 const returning = ref(false);

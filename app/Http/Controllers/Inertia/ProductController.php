@@ -95,7 +95,9 @@ class ProductController extends Controller
 
     public function show($slug)
     {
-        $product = Product::with(['images', 'parent', 'features'])->where('slug', $slug)->firstOrFail();
+        $product = Product::with(['images', 'parent', 'features'])
+            ->withIsInWishlist(Auth::guard('web')->user())
+            ->where('slug', $slug)->firstOrFail();
 
         // The whole model is serialized to the page: serve the English
         // description when the locale is English and it is filled in.

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-navigation-drawer v-model="drawer" temporary location="left" width="400" class="cart-drawer">
+        <v-navigation-drawer v-model="drawer" temporary :location="drawerLocation" :width="drawerWidth" class="cart-drawer">
             <div class="cart-drawer-inner">
 
                 <!-- Header -->
@@ -15,8 +15,20 @@
                     </button>
                 </div>
 
+                <!-- Load error (a failed GET /cart must never look like an empty cart) -->
+                <div v-if="cartError && !cartItems.length" class="cd-error">
+                    <div class="cd-empty-icon">
+                        <v-icon size="44" color="#B4452F">mdi-alert-circle-outline</v-icon>
+                    </div>
+                    <div class="cd-empty-title">{{ t('cart_load_error') }}</div>
+                    <v-btn color="primary" height="46" rounded="lg" class="cd-empty-btn" :loading="loadingCart" @click="fetchCart">
+                        <v-icon size="18" class="me-1">mdi-refresh</v-icon>
+                        {{ t('retry') }}
+                    </v-btn>
+                </div>
+
                 <!-- Empty state -->
-                <div v-if="!cartItems.length" class="cd-empty">
+                <div v-else-if="!cartItems.length" class="cd-empty">
                     <div class="cd-empty-icon">
                         <v-icon size="44" color="#76543D">mdi-cart-outline</v-icon>
                     </div>
@@ -30,6 +42,13 @@
 
                 <!-- Filled state -->
                 <template v-else>
+                    <!-- Inline error after a failed qty/remove (items stay visible) -->
+                    <div v-if="cartError" class="cd-inline-error">
+                        <v-icon size="16" color="#B4452F">mdi-alert-circle-outline</v-icon>
+                        <span>{{ t('cart_load_error') }}</span>
+                        <button class="cd-inline-retry" @click="fetchCart">{{ t('retry') }}</button>
+                    </div>
+
                     <!-- Free shipping progress -->
                     <div class="cd-shipping">
                         <div class="cd-shipping-head">
@@ -58,7 +77,7 @@
                     <!-- Items list -->
                     <div class="cd-items">
                         <div v-for="item in cartItems" :key="item.id" class="cd-item">
-                            <img :src="item.image" class="cd-item-img" alt="product" />
+                            <img :src="item.image" class="cd-item-img" alt="product" @error="onImgError" />
                             <div class="cd-item-details">
                                 <div class="cd-item-name">{{ pick(item, 'name') }}</div>
                                 <div class="cd-item-price-row">
@@ -93,7 +112,7 @@
                         <p class="cd-shipping-note">{{ t('cart_shipping_note') }}</p>
                         <v-btn block color="primary" height="48" rounded="lg" class="cd-cta" href="/checkout">
                             {{ t('cart_checkout') }}
-                            <v-icon size="18" class="ms-1">mdi-arrow-left</v-icon>
+                            <v-icon size="18" class="ms-1">{{ isAr ? 'mdi-arrow-left' : 'mdi-arrow-right' }}</v-icon>
                         </v-btn>
                         <v-btn block variant="outlined" color="primary" height="44" rounded="lg" class="mt-2 cd-continue" @click="drawer = false">
                             {{ t('cart_continue') }}
@@ -109,12 +128,31 @@
 <script setup>
 import { ref, computed, inject, onMounted } from 'vue';
 import axios from 'axios';
+import { useDisplay } from 'vuetify';
 import { useLocale } from '../../composables/useLocale';
-const { t, pick } = useLocale();
+const { t, pick, isAr } = useLocale();
 
 const Emitter = inject('Emitter');
 const drawer = ref(false);
 const cartItems = ref([]);
+const cartError = ref(false);
+const loadingCart = ref(false);
+
+// Drawer side follows the cart button: the button sits at the inline-end
+// of the header (left in RTL, right in LTR), so the drawer slides in
+// from that same side. Width is full-viewport on phones, 400px on desktop.
+const { smAndDown } = useDisplay();
+const drawerLocation = computed(() => (isAr.value ? 'left' : 'right'));
+const drawerWidth = computed(() => (smAndDown.value ? '100vw' : 400));
+
+// Local placeholder (Vanilla Latte) shown when an item image fails to load.
+const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="#F7F0E5"/><g fill="none" stroke="#76543D" stroke-width="6"><path d="M55 75 L100 55 L145 75 L145 130 L100 150 L55 130 Z"/><path d="M55 75 L100 95 L145 75 M100 95 L100 150"/></g></svg>`
+);
+
+function onImgError(e) {
+    if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
+}
 // From the store settings (GET /cart); 500 is the fallback until
 // the first fetch returns the configured value.
 const freeShippingThreshold = ref(500);
@@ -146,13 +184,18 @@ function applyThreshold(data) {
 }
 
 async function fetchCart() {
+    loadingCart.value = true;
     try {
         const { data } = await axios.get('/cart');
         cartItems.value = data.items;
         applyThreshold(data);
+        cartError.value = false;
         Emitter.emit('cart-updated', data.count);
     } catch (e) {
         console.error('Cart fetch error', e);
+        cartError.value = true;
+    } finally {
+        loadingCart.value = false;
     }
 }
 
@@ -163,9 +206,11 @@ async function changeQty(item, delta) {
         const { data } = await axios.patch(`/cart/${item.id}`, { quantity: newQty });
         cartItems.value = data.items;
         applyThreshold(data);
+        cartError.value = false;
         Emitter.emit('cart-updated', data.count);
     } catch (e) {
         console.error(e);
+        cartError.value = true;
     }
 }
 
@@ -174,9 +219,11 @@ async function removeItem(id) {
         const { data } = await axios.delete(`/cart/${id}`);
         cartItems.value = data.items;
         applyThreshold(data);
+        cartError.value = false;
         Emitter.emit('cart-updated', data.count);
     } catch (e) {
         console.error(e);
+        cartError.value = true;
     }
 }
 
@@ -297,6 +344,41 @@ onMounted(() => {
     text-transform: none;
     font-size: 14px;
     font-weight: 700;
+}
+
+/* ===== Load error ===== */
+.cd-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 56px 16px 32px;
+}
+
+.cd-inline-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #FDF0EC;
+    border: 1px solid #F3C1B5;
+    color: #8C3A26;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.cd-inline-retry {
+    margin-inline-start: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #76543D;
+    font-weight: 800;
+    font-size: 12.5px;
+    text-decoration: underline;
+    white-space: nowrap;
 }
 
 /* ===== Free shipping ===== */

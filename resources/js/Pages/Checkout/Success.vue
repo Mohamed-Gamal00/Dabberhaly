@@ -1,5 +1,6 @@
 <template>
     <div class="os-page" :dir="dir">
+        <SeoHead :title="t('order_success_title')" noindex />
         <v-container class="py-10">
             <div class="os-card">
 
@@ -27,7 +28,7 @@
                     </div>
                     <div class="os-row os-row--total">
                         <span class="os-label">{{ t('total') }}</span>
-                        <span class="os-val os-amount">{{ ((order.total_price || 0) + (order.shipping_price || 0)).toFixed(2) }} {{ t('currency_sar') }}</span>
+                        <span class="os-val os-amount">{{ Number(order.total_price || 0).toFixed(2) }} {{ t('currency_sar') }}</span>
                     </div>
                 </div>
 
@@ -54,6 +55,7 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 const { props } = usePage();
 const order = computed(() => props.order);

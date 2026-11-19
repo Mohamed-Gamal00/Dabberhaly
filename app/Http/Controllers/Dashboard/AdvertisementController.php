@@ -7,6 +7,7 @@ use App\Http\Requests\Dashboard\Advertisement\AdvertisementRequest;
 use App\Models\Advertisement;
 use App\Repositories\Advertisement\AdvertisementRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 
 class AdvertisementController extends Controller
@@ -47,6 +48,7 @@ class AdvertisementController extends Controller
     }
     // dd($data);
     $this->advertisementRepository->store($data);
+    Cache::forget('active_advertisements');
 
     return redirect()->route('advertisements.index')
       ->with('success', __('messages.ADVERTISEMENT_CREATED') );
@@ -69,6 +71,7 @@ class AdvertisementController extends Controller
     }
 
     $this->advertisementRepository->update($data, $advertisement->id);
+    Cache::forget('active_advertisements');
 
     return redirect()->route('advertisements.index')
       ->with('success', __('messages.ADVERTISEMENT_UPDATED'));
@@ -78,6 +81,7 @@ class AdvertisementController extends Controller
   {
     Gate::authorize('advertisement.delete');
     $this->advertisementRepository->delete($id);
+    Cache::forget('active_advertisements');
     return redirect()->route('advertisements.index')
       ->with('success', __('messages.ADVERTISEMENT_DELETED'));
   }
@@ -86,6 +90,7 @@ class AdvertisementController extends Controller
   {
     Gate::authorize('advertisement.edit');
     $advertisement->update(['is_active' => !$advertisement->is_active]);
+    Cache::forget('active_advertisements');
     return redirect()->back()->with('success',
       $advertisement->is_active ? 'تم تفعيل الإعلان' : 'تم إيقاف الإعلان'
     );

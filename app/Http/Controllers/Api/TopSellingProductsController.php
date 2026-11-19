@@ -22,7 +22,8 @@ class TopSellingProductsController extends Controller
         }
 
 
-        $topSellingProducts = Product::select('products.*', DB::raw('SUM(order_items.quantity) as total_quantity_sold'))
+        $topSellingProducts = Product::with('parent', 'availability')
+            ->select('products.*', DB::raw('SUM(order_items.quantity) as total_quantity_sold'))
             ->join('order_items', 'products.id', '=', 'order_items.product_id')
             ->groupBy('products.id')
             ->orderByDesc('total_quantity_sold')
@@ -48,7 +49,8 @@ class TopSellingProductsController extends Controller
         //     ->limit(50)
         //     ->paginate(10);
 
-        $topSellingProducts = Product::select('products.*', 'sales.total_quantity_sold')
+        $topSellingProducts = Product::with('parent', 'availability')
+            ->select('products.*', 'sales.total_quantity_sold')
             ->joinSub(
                 OrderItem::select('product_id', DB::raw('SUM(quantity) as total_quantity_sold'))
                     ->groupBy('product_id'),

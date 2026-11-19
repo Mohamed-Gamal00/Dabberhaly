@@ -87,6 +87,12 @@ APP_KEY=
 APP_DEBUG=true
 APP_URL=http://localhost:8000
 
+# NOTE: the values above are for LOCAL development only. For production
+# see docs/DEPLOYMENT.md — APP_ENV=production, APP_DEBUG=false, a real
+# SMTP provider (mailpit is dev-only), QUEUE_CONNECTION=database, and
+# Moyasar/SMS keys are managed in the settings table (/admin/front_settings),
+# not in .env.
+
 # Database
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -106,6 +112,9 @@ MAIL_FROM_ADDRESS="hello@example.com"
 MAIL_FROM_NAME="${APP_NAME}"
 
 # Payment Gateway (Moyasar)
+# NOTE: no code reads MOYASAR_* from .env — the real keys live in the
+# `settings` table and are managed from /admin/front_settings. The
+# SettingsSeeder only copies these from the environment at seed time.
 MOYASAR_PUBLISHABLE_KEY=pk_test_your_publishable_key
 MOYASAR_SECRET_KEY=sk_test_your_secret_key
 
@@ -115,7 +124,7 @@ SMS_USER_NAME=your_sms_username
 SMS_SENDER=YourCompany
 
 # Queue Configuration
-QUEUE_CONNECTION=sync  # Use 'redis' or 'database' for production
+QUEUE_CONNECTION=database  # 'sync' is local-dev only; production must use 'database' (see docs/DEPLOYMENT.md §5)
 
 # Session & Cache
 SESSION_DRIVER=file  # Use 'redis' for production
@@ -239,7 +248,6 @@ php artisan migrate:fresh --seed
 
 **What gets seeded**:
 - Application settings (including Moyasar and SMS credentials from .env)
-- Default order statuses
 - Shipping configuration
 - Admin user (if AdminSeeder exists)
 
@@ -258,14 +266,6 @@ php artisan tinker
     'super_admin' => true
 ]);
 
-// Create default order status
-\App\Models\OrderStatus::create([
-    'name' => 'قيد الانتظار',
-    'name_en' => 'Pending',
-    'default_status' => true,
-    'arrangement' => 1
-]);
-
 // Create shipping configuration
 \App\Models\ShippingTypesAndPrice::create([
     'add_pickup_from_store' => true,
@@ -274,7 +274,9 @@ php artisan tinker
 ]);
 ```
 
-**Note**: The SettingsSeeder automatically pulls Moyasar and SMS credentials from your `.env` file.
+**Note**: Order statuses are a PHP enum (`App\Enums\OrderStatus`) — there
+is no `OrderStatus` model or table to seed. The SettingsSeeder
+automatically pulls Moyasar and SMS credentials from your `.env` file.
 
 ## Running the Application
 
@@ -295,11 +297,10 @@ php artisan serve --host=0.0.0.0 --port=8080
 
 #### Using Laravel Sail (Docker)
 
-If using Laravel Sail:
-
-```bash
-./vendor/bin/sail up
-```
+> Laravel Sail was removed from this project — there is no
+> `./vendor/bin/sail`. Use `php artisan serve` above, or Dockerize the
+> app yourself. Production deployment is documented in
+> `docs/DEPLOYMENT.md`.
 
 ### Frontend Development
 
@@ -739,7 +740,6 @@ After successful installation:
    - Adjust styling (Vuetify theme)
 
 5. **Review Security**:
-   - Fix hard-coded OTP code in `VerificationServices.php`
    - Implement rate limiting
    - Add authorization policies
    - Review CORS settings
@@ -753,22 +753,6 @@ After successful installation:
 - **Laravel Sanctum**: https://laravel.com/docs/10.x/sanctum
 
 ## Additional Notes
-
-### Critical Security Fix Required
-
-Before deployment, fix the hard-coded OTP verification code:
-
-**File**: `app/Services/VerificationServices.php`
-
-**Current (INSECURE)**:
-```php
-'code' => 1111,
-```
-
-**Should be**:
-```php
-'code' => $code,
-```
 
 ### Performance Recommendations
 

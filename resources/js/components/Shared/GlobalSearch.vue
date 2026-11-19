@@ -6,6 +6,7 @@
                 v-model="query"
                 class="gs-input"
                 :placeholder="t('search_placeholder')"
+                :aria-label="t('search_placeholder')"
                 @input="onInput"
                 @focus="open = true"
                 @keydown.escape="close"
@@ -38,21 +39,21 @@
                         class="gs-item"
                         @click="close"
                     >
-                        <img :src="item.image_url" class="gs-item-img" alt="" />
+                        <img :src="item.image_url" class="gs-item-img" alt="" @error="onImgError" />
                         <div class="gs-item-info">
                             <div class="gs-item-name">{{ pick(item, 'name') }}</div>
                             <div class="gs-item-price">
-                                ${{ Math.ceil(item.discount_price || item.price) }}
+                                {{ Math.ceil(item.discount_price || item.price) }} {{ t('currency_sar') }}
                                 <span v-if="item.discount_price && item.discount_price < item.price" class="gs-item-old">
-                                    ${{ item.price }}
+                                    {{ item.price }} {{ t('currency_sar') }}
                                 </span>
                             </div>
                         </div>
-                        <v-icon size="13" color="grey">mdi-chevron-left</v-icon>
+                        <v-icon size="13" color="grey">{{ isAr ? 'mdi-chevron-left' : 'mdi-chevron-right' }}</v-icon>
                     </a>
                     <a :href="`/products?search=${encodeURIComponent(query)}`" class="gs-view-all" @click="close">
                         {{ t('search_view_all') }} "{{ query }}"
-                        <v-icon size="14">mdi-arrow-left</v-icon>
+                        <v-icon size="14">{{ isAr ? 'mdi-arrow-left' : 'mdi-arrow-right' }}</v-icon>
                     </a>
                 </template>
 
@@ -70,7 +71,16 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useLocale } from '../../composables/useLocale';
-const { t, pick } = useLocale();
+const { t, pick, isAr } = useLocale();
+
+// Local placeholder (Vanilla Latte) shown when a product image fails to load.
+const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" fill="#F7F0E5"/><g fill="none" stroke="#76543D" stroke-width="4"><path d="M35 45 L60 32 L85 45 L85 78 L60 91 L35 78 Z"/><path d="M35 45 L60 58 L85 45 M60 58 L60 91"/></g></svg>`
+);
+
+function onImgError(e) {
+    if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
+}
 
 const query    = ref('');
 const results  = ref([]);
@@ -178,6 +188,11 @@ onUnmounted(() => {
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 }
 
+.gs-input-wrap:focus-within {
+    outline: 2px solid #C69763;
+    outline-offset: 1px;
+}
+
 .gs-input {
     flex: 1;
     border: none;
@@ -186,7 +201,6 @@ onUnmounted(() => {
     font-size: 13px;
     color: rgba(255,255,255,0.9);
     min-width: 0;
-    direction: rtl;
 }
 
 .gs-open .gs-input { color: #111827; }
@@ -230,7 +244,7 @@ onUnmounted(() => {
 .gs-section {
     font-size: 10px;
     font-weight: 700;
-    color: #9ca3af;
+    color: #77736B;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding: 10px 14px 4px;
@@ -270,7 +284,7 @@ onUnmounted(() => {
 
 .gs-item-price {
     font-size: 12px;
-    color: #1a237e;
+    color: #76543D;
     font-weight: 700;
     margin-top: 2px;
     display: flex;
@@ -280,7 +294,7 @@ onUnmounted(() => {
 
 .gs-item-old {
     font-size: 11px;
-    color: #9ca3af;
+    color: #77736B;
     text-decoration: line-through;
     font-weight: 400;
 }
@@ -292,11 +306,11 @@ onUnmounted(() => {
     padding: 12px 14px;
     font-size: 13px;
     font-weight: 700;
-    color: #1a237e;
+    color: #76543D;
     text-decoration: none;
-    background: #f0f2ff;
-    border-top: 1px solid #e8eaf6;
+    background: #F7F0E5;
+    border-top: 1px solid #E6D3BB;
 }
 
-.gs-view-all:hover { background: #e8eaf6; }
+.gs-view-all:hover { background: #EFE7D8; }
 </style>

@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\SendNewsToUser;
+use App\Models\Setting;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\UserAddress;
 use App\Models\UserDiscountCode;
@@ -54,9 +55,89 @@ class CheckoutServices
         }
     }
 
+    /**
+     * VAT rate from settings (percent). 0 / null means no tax.
+     */
+    public static function vatRate(): float
+    {
+        return (float) (Setting::first()?->value_added_tax ?? 0);
+    }
+
+    /** Free-shipping threshold from settings (null = never free). */
+    public static function freeShippingThreshold(): ?float
+    {
+        $threshold = Setting::first()?->free_shipping_threshold;
+
+        return $threshold === null ? null : (float) $threshold;
+    }
+
+    /** VAT on a discounted items subtotal. */
+    public static function taxFor(float $subtotal): float
+    {
+        return round($subtotal * self::vatRate() / 100, 2);
+    }
+
+    /**
+     * Free shipping applies when the items subtotal (after per-product
+     * offers, before any coupon) reaches the configured threshold.
+     */
+    public static function freeShippingApplies(float $subtotalBeforeCoupon): bool
+    {
+        $threshold = self::freeShippingThreshold();
+
+        return $threshold !== null && $subtotalBeforeCoupon >= $threshold;
+    }
+
+    /**
+     * Is there a live coupon discount on this cart? A discounted_price
+     * left on a cart row only counts when a discount code is actually
+     * active — web (session) or API (usage row written when the code
+     * was applied). Otherwise the row is a stale leftover (e.g. the
+     * customer closed the page mid-discount) and must be ignored.
+     */
+    public function hasActiveCouponDiscount($user): bool
+    {
+        if (session('applied_discount_code_id')) {
+            return true;
+        }
+
+        $cookieIds = $this->getCartItems($user)->pluck('cookie_id')->filter()->unique();
+
+        if ($cookieIds->isEmpty()) {
+            return false;
+        }
+
+        return UserDiscountCode::whereIn('cookie_id', $cookieIds)->exists();
+    }
+
+    /** Unit price before any coupon: product offer price if set. */
+    public static function baseUnitPrice($product): float
+    {
+        return (float) ($product->discount_price ?? $product->price);
+    }
+
+    /**
+     * Unit price actually charged: the coupon discounted_price only
+     * when a discount is active, otherwise the base price.
+     */
+    public static function chargedUnitPrice($cartItem, bool $hasActiveDiscount): float
+    {
+        if ($hasActiveDiscount && $cartItem->discounted_price !== null) {
+            return (float) $cartItem->discounted_price;
+        }
+
+        return self::baseUnitPrice($cartItem->product);
+    }
+
     public function calculateShippingPrice($request, $user): float
     {
         $shipping = ShippingTypesAndPrice::find(1);
+
+        // No shipping row configured — a clean error, not a 500 on null.
+        if (! $shipping) {
+            throw new \Exception('طريقة الشحن غير مُعدّة في المتجر بعد. يرجى التواصل مع الدعم.', 400);
+        }
+
         $shippingPrice = 0;
 
         // الاستلام من المتجر
@@ -95,6 +176,12 @@ class CheckoutServices
             throw new \Exception('تأكد من اختيارك طريقة شحن متاحة', 200);
         }
 
+        // Free shipping: waived when the items subtotal (after
+        // per-product offers, before any coupon) reaches the threshold.
+        if ($shippingPrice > 0 && self::freeShippingApplies($this->calculateTotalBeforeDiscount($user))) {
+            $shippingPrice = 0;
+        }
+
         return (float) $shippingPrice;
     }
 
@@ -130,6 +217,8 @@ class CheckoutServices
     {
         $totalPrice          = $this->calculateTotal($user);
         $totalBeforeDiscount = $this->calculateTotalBeforeDiscount($user);
+        // VAT base = discounted items subtotal; 0 when no rate is set.
+        $taxAmount           = self::taxFor($totalPrice);
         $cookieId = Cart::getCookieId();
 
         // Consume the applied discount code now (not at apply time),
@@ -162,8 +251,9 @@ class CheckoutServices
             'status'              => OrderStatus::Pending,
             'note'                => $request->note,
             'shipping_price'      => $shippingPrice,
+            'tax_amount'          => $taxAmount,
             'totalBeforeDiscount' => $totalBeforeDiscount,
-            'total_price'         => $totalPrice + $shippingPrice,
+            'total_price'         => $totalPrice + $shippingPrice + $taxAmount,
             'cookie_id'           => $user ? null : $cookieId,
         ]);
     }
@@ -171,6 +261,7 @@ class CheckoutServices
     public function createOrderItems($order, $user)
     {
         $cartItems = $this->getCartItems($user);
+        $hasActiveDiscount = $this->hasActiveCouponDiscount($user);
 
         foreach ($cartItems as $cartItem) {
             // Lock the product row and refuse to oversell: without the
@@ -186,7 +277,9 @@ class CheckoutServices
                 'order_id'     => $order->id,
                 'product_id'   => $cartItem->product_id,
                 'product_name' => $cartItem->product->name,
-                'price'        => $cartItem->product->discount_price ?? $cartItem->product->price,
+                // The unit price actually charged (coupon price only
+                // when a discount is active, else the offer price).
+                'price'        => self::chargedUnitPrice($cartItem, $hasActiveDiscount),
                 'quantity'     => $cartItem->quantity,
             ]);
 
@@ -196,27 +289,19 @@ class CheckoutServices
 
     public function calculateTotal($user): float
     {
-        // السعر بعد الخصم لو فيه خصم
+        // السعر بعد الخصم لو فيه خصم — والخصم يُحتسب فقط لو الكود
+        // فعّال فعلاً (انظر hasActiveCouponDiscount)، وإلا يُتجاهل
+        // أي discounted_price عالق في صفوف السلة.
+        $hasActiveDiscount = $this->hasActiveCouponDiscount($user);
+
         return $this->getCartItems($user)
-            ->sum(function ($item) {
-                if ($item->product->discount_price) {
-                    return $item->quantity * ($item->discounted_price ?? $item->product->discount_price);
-                } else {
-                    return $item->quantity * ($item->discounted_price ?? $item->product->price);
-                }
-            });
+            ->sum(fn ($item) => $item->quantity * self::chargedUnitPrice($item, $hasActiveDiscount));
     }
 
     public function calculateTotalBeforeDiscount($user): float
     {
         return $this->getCartItems($user)
-            ->sum(function ($item) {
-                if ($item->product->discount_price) {
-                    return $item->quantity * $item->product->discount_price;
-                } else {
-                    return $item->quantity * $item->product->price;
-                }
-            });
+            ->sum(fn ($item) => $item->quantity * self::baseUnitPrice($item->product));
     }
 
     public function isAddingNewAddress($order, $request, $user)

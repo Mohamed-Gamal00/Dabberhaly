@@ -18,6 +18,12 @@ use Inertia\Inertia;
 |
 */
 
+// Lightweight health check for the server / load balancer / uptime monitor.
+// No auth, no database query — it only proves the app boots and routes.
+Route::get('/up', function () {
+    return response()->json(['status' => 'ok'], 200);
+})->name('up');
+
     Route::get('/login', [UserAuthController::class, 'loginView'])->name('login');
     Route::get('/register', [UserAuthController::class, 'registerView'])->name('register');
     Route::get('/verify-email', [UserAuthController::class, 'verifyView'])->name('auth.verify.view');
@@ -29,7 +35,7 @@ use Inertia\Inertia;
     Route::post('/verify', [UserAuthController::class, 'verifyCode'])->middleware('throttle:5,1')->name('auth.verify');
     Route::post('/verify-resend', [UserAuthController::class, 'resendVerificationCode'])->middleware('throttle:5,1')->name('auth.verify.resend');
     Route::post('/forgot-password', [UserAuthController::class, 'forgotPassword'])->name('auth.forgot');
-    Route::post('/update-password', [UserAuthController::class, 'passwordUpdate'])->name('auth.update');
+    Route::post('/update-password', [UserAuthController::class, 'passwordUpdate'])->middleware('throttle:5,1')->name('auth.update');
 Route::middleware('auth:web')->group(function () {
     Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
     // صفحة الحساب الشخصي
@@ -56,6 +62,9 @@ Route::get('/reviews/{productId}', [\App\Http\Controllers\Inertia\ReviewControll
 Route::get('/compare', [\App\Http\Controllers\Inertia\CompareController::class, 'index'])->name('compare');
 
 Route::get('/', [\App\Http\Controllers\Inertia\HomeController::class, 'index'])->name('home');
+
+// Sitemap (cached XML, see SitemapController)
+Route::get('/sitemap.xml', \App\Http\Controllers\SitemapController::class)->name('sitemap');
 
 // Offers
 Route::get('/offers', [\App\Http\Controllers\Inertia\OfferProductController::class, 'index'])->name('offers');
@@ -94,6 +103,7 @@ Route::get('/checkout', [\App\Http\Controllers\Inertia\CheckoutController::class
 Route::get('/checkout/success', [\App\Http\Controllers\Inertia\CheckoutController::class, 'success'])->name('checkout.success');
 Route::post('/checkout', [\App\Http\Controllers\Inertia\CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('/checkout/apply-discount', [\App\Http\Controllers\Inertia\CheckoutController::class, 'applyDiscount'])->name('checkout.discount');
+Route::post('/checkout/remove-discount', [\App\Http\Controllers\Inertia\CheckoutController::class, 'removeDiscount'])->name('checkout.remove-discount');
 
 // Payment page (web) — works for both guests and authenticated users
 Route::get('/payment/{order_number}', [\App\Http\Controllers\Inertia\PaymentController::class, 'show'])->name('user.payment');

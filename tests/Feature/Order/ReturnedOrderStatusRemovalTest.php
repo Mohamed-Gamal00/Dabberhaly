@@ -14,7 +14,7 @@ class ReturnedOrderStatusRemovalTest extends TestCase
 
     public function test_returned_order_page_has_no_status_update_form(): void
     {
-        $admin = Admin::create([
+        $admin = Admin::forceCreate([
             'name' => 'Admin', 'email' => 'admin@example.com',
             'password' => 'password', 'super_admin' => true,
         ]);
@@ -34,7 +34,7 @@ class ReturnedOrderStatusRemovalTest extends TestCase
 
     public function test_returned_order_status_update_route_is_gone(): void
     {
-        $admin = Admin::create([
+        $admin = Admin::forceCreate([
             'name' => 'Admin', 'email' => 'admin@example.com',
             'password' => 'password', 'super_admin' => true,
         ]);

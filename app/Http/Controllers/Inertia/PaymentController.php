@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Inertia;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 
@@ -14,12 +16,21 @@ class PaymentController extends Controller
 {
     /**
      * Show the Moyasar payment form for a given order number ..
+     *
+     * A bare order number is not enough: the page only serves the
+     * order owner — the logged-in user for a user order, or the
+     * browser holding the cart cookie the order was placed with for
+     * a guest order.
      */
     public function show($order_number)
     {
         $order = Order::where('number', $order_number)
             ->with(['addresses', 'orderItems'])
             ->firstOrFail();
+
+        if (! $this->ownsOrder($order)) {
+            abort(404);
+        }
 
         // Already paid — redirect to success
         if ($order->payment_status === 'paid') {
@@ -59,6 +70,15 @@ class PaymentController extends Controller
             ->with('orderItems')
             ->firstOrFail();
 
+        // A different logged-in user must not open another customer's
+        // payment result. (No identity at all — e.g. the Moyasar
+        // redirect for a guest — still proceeds, because the payment
+        // itself is verified against Moyasar below.)
+        $user = Auth::guard('web')->user();
+        if ($order->user_id && $user && (int) $user->id !== (int) $order->user_id) {
+            abort(404);
+        }
+
         // Already paid — go straight to success page
         if ($order->payment_status === 'paid') {
             return Inertia::render('Payment/Success', [
@@ -67,6 +87,18 @@ class PaymentController extends Controller
         }
 
         $paymentId  = $request->query('id');
+
+        // No payment id: Moyasar never confirmed anything, so the
+        // order stays unpaid (it must NOT be marked failed — the
+        // payment may still have succeeded and the webhook can pick
+        // it up). Show the failure page without changing the order.
+        if (! $paymentId) {
+            return Inertia::render('Payment/Failed', [
+                'order'   => $this->orderData($order),
+                'message' => 'تعذّر التحقق من عملية الدفع. يرجى التواصل مع الدعم.',
+            ]);
+        }
+
         $setting    = Setting::first();
         $secret_key = $setting?->secret_key;
         $token      = base64_encode($secret_key . ':');
@@ -147,5 +179,22 @@ class PaymentController extends Controller
             'items_count'    => $order->orderItems->sum('quantity'),
             'is_guest'       => is_null($order->user_id),
         ];
+    }
+
+    /**
+     * Does the current browser own this order? Logged-in user orders
+     * need the matching user; guest orders need the cart cookie the
+     * order was placed with.
+     */
+    private function ownsOrder(Order $order): bool
+    {
+        $user = Auth::guard('web')->user();
+
+        if ($order->user_id) {
+            return $user !== null && (int) $user->id === (int) $order->user_id;
+        }
+
+        return $order->cookie_id !== null
+            && $order->cookie_id === Cart::getCookieId();
     }
 }

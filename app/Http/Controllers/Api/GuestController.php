@@ -15,6 +15,12 @@ class GuestController extends Controller
         // cookie_id is NOT NULL (unique) — minting a guest without one
         // 500s on insert, so generate it here.
         $guest = Guest::create(['cookie_id' => (string) Str::uuid()]);
-        return ApiResponse::sendResponse(200, 'Guest Created Successfully', ['id' => $guest->id]);
+        // The mobile app identifies the guest by cookie_id everywhere
+        // (cart, checkout, orders), so return it alongside the numeric
+        // id — the id alone cannot look the guest back up.
+        return ApiResponse::sendResponse(200, 'Guest Created Successfully', [
+            'id' => $guest->id,
+            'cookie_id' => $guest->cookie_id,
+        ]);
     }
 }

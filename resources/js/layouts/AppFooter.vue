@@ -388,6 +388,12 @@ async function subscribe() {
     align-items: center;
 }
 
+/* mdi-send points up-right; the footer is RTL, so the icon is flipped
+   to point up-left (the sending direction in Arabic). */
+.newsletter-btn .v-icon {
+    transform: scaleX(-1);
+}
+
 .newsletter-btn:hover { background: #b38556; }
 .newsletter-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 

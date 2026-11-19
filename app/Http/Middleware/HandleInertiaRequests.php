@@ -49,13 +49,15 @@ class HandleInertiaRequests extends Middleware
 
             'locale' => app()->getLocale(),
 
-            'advertisements' => fn() => Advertisement::where('is_active', true)
+            // Cached 1h, same pattern as site_settings — this used to
+            // hit the DB on every single Inertia request.
+            'advertisements' => fn() => cache()->remember('active_advertisements', 3600, fn() => Advertisement::where('is_active', true)
                 ->get()
                 ->map(fn($a) => [
                     'title' => app()->getLocale() === 'en' && $a->title_en ? $a->title_en : $a->title,
                 ])
                 ->values()
-                ->toArray(),
+                ->toArray()),
 
             'flash' => [
                 'success' => $request->session()->get('success'),

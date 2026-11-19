@@ -119,7 +119,7 @@ class PaymentCallbackTest extends TestCase
         ]);
 
         $this->get("/api/v1/payment-page/{$order->number}/payment/callback?id=pay-test-1")
-            ->assertOk();
+            ->assertStatus(422);
 
         $this->assertEquals('failed', $order->fresh()->payment_status);
     }

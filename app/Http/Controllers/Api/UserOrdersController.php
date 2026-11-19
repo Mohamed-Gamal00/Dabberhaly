@@ -11,7 +11,9 @@ use App\Http\Resources\OrderResource;
 use App\Http\Resources\ProductsResource;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\User;
+use App\Services\CheckOut\CheckoutServices;
 use Illuminate\Http\Request;
 
 class UserOrdersController extends Controller
@@ -94,25 +96,34 @@ class UserOrdersController extends Controller
             return ApiResponse::sendResponse(422, 'لا يمكن تعديل هذا الطلب');
         }
 
+        // A paid order must not be edited: the customer already paid
+        // for these items.
+        if ($order->payment_status === 'paid') {
+            return ApiResponse::sendResponse(422, 'لا يمكن تعديل طلب مدفوع');
+        }
+
+        // Return the removed quantity to stock.
+        $removedQuantity = $orderItem->quantity > 1 ? 1 : $orderItem->quantity;
+
         if ($orderItem->quantity > 1) {
             $orderItem->decrement('quantity', 1);
         } else {
             $orderItem->delete();
         }
 
-        // Recalculate the totals after the deletion
-        $newTotalBeforeDiscount = $order->orderItems->sum(function ($item) {
-            return $item->quantity * $item->product->price;
-        });
+        Product::where('id', $request->product_id)->increment('quantity', $removedQuantity);
 
-        $newTotalPrice = $order->orderItems->sum(function ($item) {
-            return $item->quantity * ($item->discounted_price ?? $item->product->price);
-        });
+        // Recalculate from the STORED order-item prices (never the live
+        // product price), including shipping and VAT.
+        $remainingItems = OrderItem::where('order_id', $order->id)->get();
+        $newSubtotal = $remainingItems->sum(fn ($item) => $item->quantity * $item->price);
+        $newTax = CheckoutServices::taxFor($newSubtotal);
 
         // Update the order with the new totals
         $order->update([
-            'totalBeforeDiscount' => $newTotalBeforeDiscount,
-            'total_price' => $newTotalPrice,
+            'totalBeforeDiscount' => $newSubtotal,
+            'tax_amount' => $newTax,
+            'total_price' => $newSubtotal + (float) ($order->shipping_price ?? 0) + $newTax,
         ]);
         // Check if the order has no remaining items and delete it if necessary
         if (!$order->orderItems()->exists()) {
@@ -188,6 +199,14 @@ class UserOrdersController extends Controller
                 'return_order' => true,
                 'status'       => OrderStatus::Pending,
             ]);
+
+            // Returned items go back to stock. payment_status is left
+            // untouched on purpose: refunds are manual, via the Moyasar
+            // dashboard.
+            foreach ($order->orderItems as $orderItem) {
+                Product::where('id', $orderItem->product_id)
+                    ->increment('quantity', $orderItem->quantity);
+            }
 
             event(new OrderReturned($order));
         }

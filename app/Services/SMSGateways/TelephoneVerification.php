@@ -21,12 +21,19 @@ class TelephoneVerification
     {
         $verificationData = $this->sms_service->setVerificationCode($user->id, $isResetPassword);
         $message = $this->sms_service->getSMSVerifyMessageByAppName($verificationData->code);
-        $smsSent = true;
+
+        // Actually send the SMS — the old code hardcoded $smsSent = true
+        // and never called the gateway, so no SMS ever went out.
+        $smsSent = $this->moraSms->sendSms($user->phone_number, $message);
 
         if ($smsSent) {
-            return ApiResponse::sendResponse(200, translateWithHTMLTags($message), $data);
+            // NEVER return the code itself: the old code put the full SMS
+            // text (code included) in the JSON response, so anyone could
+            // request a code for a victim's number and read it straight
+            // from the response. Only a generic "code sent" message goes out.
+            return ApiResponse::sendResponse(200, __('flash.otp_sent'), $data);
         } else {
-            return ApiResponse::sendResponse(500, "Failed to send verification SMS. Please try again.");
+            return ApiResponse::sendResponse(500, __('flash.sms_send_failed'));
         }
     }
 }

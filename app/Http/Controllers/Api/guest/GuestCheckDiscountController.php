@@ -8,6 +8,7 @@ use App\Models\Cart;
 use App\Models\DiscountCode;
 use App\Models\UserDiscountCode;
 use App\Repositories\Cart\CartRepository;
+use App\Services\Discount\CheckDiscountService;
 use Illuminate\Http\Request;
 
 class GuestCheckDiscountController extends Controller
@@ -71,21 +72,12 @@ class GuestCheckDiscountController extends Controller
         // Decrement the number of uses for this discount code
         $discountCode->decrement('number_of_used');
 
-        foreach ($cartItems as $item) {
-            if ($isGlobalDiscount || $discountCode->products->contains($item->product_id)) {
-                // Apply the discount based on its type (percentage or fixed amount)
-                if ($discountCode->discount_type == 'percentage') {
-                    $discountAmount = ($item->product->price * $discountCode->price) / 100;
-                } else {
-                    $discountAmount = $discountCode->price;
-                }
-
-                // Set the discounted price
-                $item->discounted_price = $discountAmount;
-//                $item->discounted_price = max(0, $item->product->price - $discountAmount);
-                $item->save();
-            }
-        }
+        // Shared with the web and API-user flows: percentage is per
+        // unit, a fixed amount applies ONCE per order (spread across
+        // the eligible lines, each capped at its own total) — never
+        // the full amount off every matching product, and never the
+        // discount amount itself as the new price.
+        CheckDiscountService::applyDiscountToItems($cartItems, $discountCode, $isGlobalDiscount);
 
         return response()->json([
             'message' => 'Discount code applied successfully.',

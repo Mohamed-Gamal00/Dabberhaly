@@ -214,3 +214,8 @@ Route::middleware(['changeLanguage'])->group(function () {
 Route::get('/payment-page/{order_number}', [\App\Http\Controllers\Api\PaymentController::class, 'index'])->name('api.user.payment');
 /*عملية الدفع*/
 Route::get('/payment-page/{number}/payment/callback', [\App\Http\Controllers\Api\PaymentController::class, 'callback'])->name('api.payment.callback');
+
+// Moyasar webhook — marks orders paid when the redirect callback never
+// ran (customer closed the tab). Must be registered in the Moyasar
+// dashboard (Settings → Webhooks) to receive anything.
+Route::post('/webhooks/moyasar', [\App\Http\Controllers\Webhooks\MoyasarWebhookController::class, 'handle'])->name('webhooks.moyasar');

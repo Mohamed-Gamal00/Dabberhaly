@@ -35,10 +35,10 @@
 
                 <v-form @submit.prevent="submit">
                     <label class="field-label">{{ t('login_email') }}</label>
-                    <v-text-field v-model="form.email" placeholder="example@email.com" variant="outlined" density="comfortable" hide-details="auto" class="mb-4 mt-1" prepend-inner-icon="mdi-email-outline" dir="ltr" rounded="lg" bg-color="grey-lighten-5" />
+                    <v-text-field v-model="form.email" placeholder="example@email.com" autocomplete="username" :error-messages="form.errors.email" variant="outlined" density="comfortable" hide-details="auto" class="mb-4 mt-1" prepend-inner-icon="mdi-email-outline" dir="ltr" rounded="lg" bg-color="grey-lighten-5" />
 
                     <label class="field-label">{{ t('login_password') }}</label>
-                    <v-text-field v-model="form.password" placeholder="••••••••" :type="showPassword ? 'text' : 'password'" variant="outlined" density="comfortable" hide-details="auto" class="mb-2 mt-1" prepend-inner-icon="mdi-lock-outline" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'" @click:append-inner="showPassword = !showPassword" rounded="lg" bg-color="grey-lighten-5" />
+                    <v-text-field v-model="form.password" placeholder="••••••••" autocomplete="current-password" :error-messages="form.errors.password" :type="showPassword ? 'text' : 'password'" variant="outlined" density="comfortable" hide-details="auto" class="mb-2 mt-1" prepend-inner-icon="mdi-lock-outline" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'" @click:append-inner="showPassword = !showPassword" rounded="lg" bg-color="grey-lighten-5" />
 
                     <div class="d-flex justify-end mb-5">
                         <a :href="route('forgot')" class="text-primary text-decoration-none" style="font-size:13px">
@@ -89,7 +89,11 @@ const submit = () => {
     form.post('/login', {
         onFinish: () => (loading.value = false),
         onError: (errors) => {
-            errorMessage.value = errors.email || errors.password || t('error_occurred');
+            // Field errors are shown beside their fields (:error-messages);
+            // the banner is kept only for non-field errors.
+            errorMessage.value = (!errors.email && !errors.password)
+                ? (errors.message || t('error_occurred'))
+                : null;
         },
     });
 };

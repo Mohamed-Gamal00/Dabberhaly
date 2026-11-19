@@ -1,5 +1,6 @@
 <template>
     <div style="background:#f7f0e5; min-height:100vh; padding-bottom:48px">
+        <SeoHead :title="page?.title || ''" :description="page?.content || ''" />
         <div style="background:linear-gradient(135deg,#76543D,#8d6b51); padding:40px 16px 50px">
             <h1 class="text-white font-weight-bold text-center" style="font-size:28px">{{ page?.title || t('home') }}</h1>
         </div>
@@ -14,6 +15,7 @@
 </template>
 
 <script setup>
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 const { t } = useLocale();
 defineProps({ page: Object, view: String });

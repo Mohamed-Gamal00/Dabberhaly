@@ -38,8 +38,12 @@ class UserProfileController extends Controller
     {
         $user = Auth::user();
 
+        // Orders are paginated (10/page) instead of loading every order
+        // with all its items at once; they arrive as a separate prop so
+        // the orders tab can page through them.
+        $orders = $user->orders()->with('orderItems')->latest()->paginate(10);
+
         $user->load([
-            'orders.orderItems',
             'addresses',
             'wishlistProducts' => function ($query) use ($user) {
                 $query->with(['images', 'parent'])
@@ -52,7 +56,14 @@ class UserProfileController extends Controller
         // English and it is filled in.
         $user->wishlistProducts->each(fn ($p) => $p->description = $p->localizedDescription());
 
-        return Inertia::render('Profile/Index', compact('user'));
+        return Inertia::render('Profile/Index', [
+            'user' => $user,
+            'orders' => $orders,
+            // Tab badges used to count user.orders in the browser; with
+            // pagination the page only holds 10, so send the totals.
+            'ordersCount' => $user->orders()->count(),
+            'returnsCount' => $user->orders()->where('return_order', true)->count(),
+        ]);
     }
 
     public function userAddressesStore(CreateNewAddressRequest $request)

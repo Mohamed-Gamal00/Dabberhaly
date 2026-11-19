@@ -1,5 +1,6 @@
 <template>
     <div class="co-page" :dir="dir">
+        <SeoHead :title="t('checkout_title')" noindex />
         <v-container class="py-6 py-md-8">
 
             <!-- ===== Page header + steps ===== -->
@@ -180,6 +181,7 @@
                                     <div class="co-opt-title">{{ t('weight_shipping') }}</div>
                                     <div class="co-opt-desc">{{ t('weight_shipping_desc') }}</div>
                                 </div>
+                                <span class="co-opt-price">{{ weightShippingCost ? weightShippingCost + ' ' + t('currency_sar') : '—' }}</span>
                             </label>
                             <label v-if="shipping?.add_price_based_on_city" class="co-opt" :class="{ active: shippingOption === 'shipping_based_on_city' }">
                                 <input type="radio" v-model="shippingOption" value="shipping_based_on_city" class="co-opt-radio" />
@@ -295,6 +297,7 @@
                                 <span>- {{ discountSaving }} {{ t('currency_sar') }}</span>
                             </div>
                             <div class="co-sum-row"><span>{{ t('shipping_cost') }}</span><span>{{ shippingCost ? Math.ceil(shippingCost) + ' ' + t('currency_sar') : t('free_shipping') }}</span></div>
+                            <div v-if="vatRate > 0" class="co-sum-row"><span>{{ t('tax') }}</span><span>{{ Math.ceil(taxAmount) }} {{ t('currency_sar') }}</span></div>
                             <div class="co-sum-row co-sum-total"><span>{{ t('total') }}</span><span>{{ grandTotal }} {{ t('currency_sar') }}</span></div>
 
                             <div v-if="errors.general" class="text-red text-caption mt-3 text-center">{{ errors.general }}</div>
@@ -329,6 +332,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import axios from 'axios';
 import { useLocale } from '../../composables/useLocale';
 const { t, pick, isEn, dir } = useLocale();
@@ -356,6 +360,8 @@ const cartTotal = computed(() =>
 const countries     = ref(props.countries || []);
 const cities        = ref(props.cities || []);
 const shipping      = ref(props.shipping);
+const vatRate       = ref(Number(props.vatRate) || 0);
+const freeShippingThreshold = ref(props.freeShippingThreshold ? Number(props.freeShippingThreshold) : null);
 const discountPrice = ref(props.discountPrice || 0);
 const userAddresses = ref(props.userAddresses || []);
 
@@ -420,14 +426,31 @@ const cityShippingPrice = computed(() => {
 
 const shippingCost = computed(() => {
     if (shippingOption.value === 'noShipping') return 0;
+    // Free shipping once the items subtotal (after product offers,
+    // before any coupon) reaches the configured threshold.
+    if (freeShippingThreshold.value && cartTotal.value >= freeShippingThreshold.value) return 0;
     if (shippingOption.value === 'fixed_shipping') return Number(shipping.value?.normal_shipping_price) || 0;
     if (shippingOption.value === 'shipping_based_on_city') return Number(cityShippingPrice.value) || 0;
-    if (shippingOption.value === 'shipping_based_on_weight') return Number(shipping.value?.weight_price) || 0;
+    if (shippingOption.value === 'shipping_based_on_weight') return weightShippingCost.value;
     return 0;
 });
 
+const totalWeight = computed(() =>
+    cartItems.value.reduce((sum, item) => sum + Number(item.weight || 0) * Number(item.quantity), 0)
+);
+
+// Weight shipping is charged on the TOTAL weight, not the per-kg price alone.
+const weightShippingCost = computed(() =>
+    Math.ceil(totalWeight.value * (Number(shipping.value?.weight_price) || 0))
+);
+
+// VAT base = discounted items subtotal (after the coupon, if any).
+const taxAmount = computed(() =>
+    vatRate.value > 0 ? Math.max(0, cartTotal.value - discountSaving.value) * vatRate.value / 100 : 0
+);
+
 const grandTotal = computed(() =>
-    Math.ceil(Number(cartTotal.value) + Number(shippingCost.value) - Number(discountSaving.value))
+    Math.ceil(Number(cartTotal.value) + Number(shippingCost.value) - Number(discountSaving.value) + Number(taxAmount.value))
 );
 
 async function applyDiscount() {
@@ -459,7 +482,15 @@ async function applyDiscount() {
     }
 }
 
-function removeDiscount() {
+async function removeDiscount() {
+    // Real round-trip: the server forgets the session code and resets
+    // discounted_price on the cart rows, so a later checkout is
+    // charged the full price and the code is not consumed.
+    try {
+        await axios.post('/checkout/remove-discount');
+    } catch (e) {
+        console.error('Remove discount failed:', e.response?.data);
+    }
     appliedDiscount.value = null;
     discountPrice.value   = 0;
     discountInput.value   = '';

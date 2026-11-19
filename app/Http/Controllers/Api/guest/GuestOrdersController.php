@@ -10,17 +10,40 @@ use App\Http\Resources\OrderResource;
 use App\Models\Guest;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
+use App\Services\CheckOut\CheckoutServices;
 use Illuminate\Http\Request;
 
 class GuestOrdersController extends Controller
 {
+    /**
+     * Resolve the guest from the guest-id header. The header carries
+     * the cookie_id (the mobile guest identity) — never the numeric
+     * guest id — so look the Guest row up by cookie_id first.
+     */
+    protected function resolveGuest(Request $request): ?Guest
+    {
+        $cookieId = $request->header('guest-id');
+
+        if (! $cookieId) {
+            return null;
+        }
+
+        return Guest::where('cookie_id', $cookieId)->first();
+    }
+
     public function mainOrders(Request $request)
     {
-        $guest = $request->header('guest-id');
-//        return $guest;
+        $guest = $this->resolveGuest($request);
+
+        // No Guest row for this cookie_id: the guest has no orders.
+        if (! $guest) {
+            return response()->json(['orders' => []]);
+        }
+
         $orders = Order::latest()
             ->with('products', 'orderItems', 'orderItems.product')
-            ->where('guest_id', $guest)
+            ->where('guest_id', $guest->id)
             ->where('return_order', false)
             ->paginate(6);
 //        return $orders;
@@ -32,7 +55,10 @@ class GuestOrdersController extends Controller
 
     public function showOrder(Request $request, $number)
     {
-        $guest = $request->header('guest-id');
+        $guest = $this->resolveGuest($request);
+        if (! $guest) {
+            return ApiResponse::sendResponse(404, 'الطلب غير موجود');
+        }
         if (!$number) {
             return response()->json([
                 'message' => 'Order number is required',
@@ -44,7 +70,7 @@ class GuestOrdersController extends Controller
 
         $order = Order::latest()
             ->with('products', 'orderItems', 'orderItems.product')
-            ->where('guest_id', $guest)
+            ->where('guest_id', $guest->id)
             ->where('return_order', false)
             ->where('number', $number)
             ->first();
@@ -67,9 +93,14 @@ class GuestOrdersController extends Controller
             'order_number' => 'required|string|exists:orders,number',
         ]);
 
+        $guest = $this->resolveGuest($request);
+
+        if (! $guest) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
 
         $order = Order::where('number', $request->order_number)
-            ->where('guest_id', $request->header('guest-id'))
+            ->where('guest_id', $guest->id)
             ->firstOrFail();
         $orderItem = $order->orderItems()->where('product_id', $request->product_id)->firstOrFail();
 
@@ -79,29 +110,38 @@ class GuestOrdersController extends Controller
             return ApiResponse::sendResponse(422, 'لا يمكن تعديل هذا الطلب');
         }
 
+        // A paid order must not be edited: the customer already paid
+        // for these items.
+        if ($order->payment_status === 'paid') {
+            return ApiResponse::sendResponse(422, 'لا يمكن تعديل طلب مدفوع');
+        }
+
+        // Return the removed quantity to stock.
+        $removedQuantity = $orderItem->quantity > 1 ? 1 : $orderItem->quantity;
+
         if ($orderItem->quantity > 1) {
             $orderItem->decrement('quantity', 1);
         } else {
             $orderItem->delete();
         }
 
-        // Recalculate the totals after the deletion
-        $newTotalBeforeDiscount = $order->orderItems->sum(function ($item) {
-            return $item->quantity * $item->product->price;
-        });
+        Product::where('id', $request->product_id)->increment('quantity', $removedQuantity);
 
-        $newTotalPrice = $order->orderItems->sum(function ($item) {
-            return $item->quantity * ($item->discounted_price ?? $item->product->price);
-        });
+        // Recalculate from the STORED order-item prices (never the live
+        // product price), including shipping and VAT.
+        $remainingItems = OrderItem::where('order_id', $order->id)->get();
+        $newSubtotal = $remainingItems->sum(fn ($item) => $item->quantity * $item->price);
+        $newTax = CheckoutServices::taxFor($newSubtotal);
 
         // Update the order with the new totals
         $order->update([
-            'totalBeforeDiscount' => $newTotalBeforeDiscount,
-            'total_price' => $newTotalPrice,
+            'totalBeforeDiscount' => $newSubtotal,
+            'tax_amount' => $newTax,
+            'total_price' => $newSubtotal + (float) ($order->shipping_price ?? 0) + $newTax,
         ]);
 
         // Check if the order has no remaining items and delete it if necessary
-        if (!$order->orderItems()->exists()) {
+        if (! $order->orderItems()->exists()) {
             $order->delete();
         }
         return ApiResponse::sendResponse(200, 'تم الحذف بنجاح');
@@ -111,12 +151,13 @@ class GuestOrdersController extends Controller
     /*  المرتجعات  */
     public function returns(Request $request)
     {
-        $guest_id = $request->header('guest-id');
+        // The header carries the cookie_id, not the numeric guest id.
+        $guest = $this->resolveGuest($request);
 //        return $guest_id;
         // Fetch user with related return products and orders with products
-        $returnProducts = Guest::with('returnProducts', 'orders.products')
-            ->where('id', $guest_id)
-            ->first();
+        $returnProducts = $guest
+            ? Guest::with('returnProducts', 'orders.products')->find($guest->id)
+            : null;
 
         if (!$returnProducts) {
             return response()->json(['message' => 'Guest or related data not found'], 404);
@@ -155,9 +196,12 @@ class GuestOrdersController extends Controller
         // If return_order_id is provided, update the order to mark it as a return order
         if ($request->return_order_id) {
             // The order must belong to the guest identified by the guest-id header.
-            $order = Order::where('id', $request->return_order_id)
-                ->where('guest_id', $request->header('guest-id'))
-                ->first();
+            $guest = $this->resolveGuest($request);
+            $order = $guest
+                ? Order::where('id', $request->return_order_id)
+                    ->where('guest_id', $guest->id)
+                    ->first()
+                : null;
 
             if (!$order) {
                 return response()->json(['status_code' => 404, 'message' => 'Order not found'], 404);
@@ -178,6 +222,14 @@ class GuestOrdersController extends Controller
                 'return_order' => true,
                 'status'       => OrderStatus::Pending,
             ]);
+
+            // Returned items go back to stock. payment_status is left
+            // untouched on purpose: refunds are manual, via the Moyasar
+            // dashboard.
+            foreach ($order->orderItems as $orderItem) {
+                Product::where('id', $orderItem->product_id)
+                    ->increment('quantity', $orderItem->quantity);
+            }
 
             event(new OrderReturned($order));
         }

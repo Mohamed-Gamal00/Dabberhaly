@@ -19,6 +19,7 @@
                     class="pc-img"
                     loading="lazy"
                     decoding="async"
+                    @error="onImgError"
                 />
             </component>
 
@@ -88,8 +89,8 @@
 
             <!-- Price block -->
             <div class="pc-price">
-                <span class="pc-price-now">${{ formatPrice(finalPrice) }}</span>
-                <span v-if="hasDiscount" class="pc-price-old">${{ formatPrice(item.price) }}</span>
+                <span class="pc-price-now">{{ formatPrice(finalPrice) }} {{ t('currency_sar') }}</span>
+                <span v-if="hasDiscount" class="pc-price-old">{{ formatPrice(item.price) }} {{ t('currency_sar') }}</span>
             </div>
 
             <!-- Low stock hint -->
@@ -159,6 +160,15 @@ const justAdded    = ref(false);
 const snackbar     = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor   = ref('success');
+
+// Local placeholder (Vanilla Latte) shown when the product image fails to load.
+const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="#F7F0E5"/><g fill="none" stroke="#76543D" stroke-width="10"><path d="M110 150 L200 110 L290 150 L290 260 L200 300 L110 260 Z"/><path d="M110 150 L200 190 L290 150 M200 190 L200 300"/></g></svg>`
+);
+
+function onImgError(e) {
+    if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
+}
 
 /* ── Derived state ── */
 const isOutOfStock = computed(() => props.item.quantity < 1);

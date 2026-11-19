@@ -1,6 +1,28 @@
 <script setup>
 import { defineProps, computed } from 'vue'
+import { usePage } from '@inertiajs/vue3';
 import SeoHead from '../components/Shared/SeoHead.vue';
+import JsonLd from '../components/Shared/JsonLd.vue';
+
+// Organization + WebSite structured data for the home page.
+const orgJsonLd = computed(() => {
+    const siteName = usePage().props.seo?.site_name || '';
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    return [
+        {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: siteName,
+            url: baseUrl || undefined,
+        },
+        {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: siteName,
+            url: baseUrl || undefined,
+        },
+    ];
+});
 
 const props = defineProps({
     products: {
@@ -41,6 +63,7 @@ const sectionColors = {
 <template>
     <div class="home">
         <SeoHead />
+        <JsonLd :data="orgJsonLd" />
         <UpperPanner :banners="banners" />
         <TheFeatures :bgColor="sectionColors.white" />
         <!-- <TopCategories :bgColor="sectionColors.vanilla" /> -->

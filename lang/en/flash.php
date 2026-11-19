@@ -37,6 +37,7 @@ return [
     'invalid_discount_code' => 'Invalid or expired discount code.',
     'discount_not_applicable' => 'This discount code does not apply to any product in your cart.',
     'discount_applied_success' => 'Discount code applied successfully.',
+    'discount_removed' => 'Discount code removed.',
     'currency_updated_success' => 'Default currency updated successfully.',
     'newsletter_already_subscribed' => 'You are already subscribed to the newsletter.',
     'newsletter_subscribed_success' => '✓ Successfully subscribed!',

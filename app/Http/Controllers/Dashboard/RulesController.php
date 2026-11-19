@@ -7,6 +7,7 @@ use App\Models\Rule;
 use App\Repositories\Rule\RuleRepository;
 use Couchbase\Role;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
 class RulesController extends Controller
@@ -54,6 +55,26 @@ class RulesController extends Controller
   }
 
   /**
+   * An admin must never edit a group that is assigned to themselves:
+   * they could add any ability to their own group and escalate to
+   * super-admin-level access.
+   */
+  private function ensureGroupIsNotOwn(Rule $rule): void
+  {
+    $admin = Auth::guard('admin')->user();
+
+    // A super admin already holds every ability, so there is nothing to
+    // escalate to — only staff admins are blocked from their own group.
+    if (! $admin || $admin->super_admin) {
+      return;
+    }
+
+    if ($rule->admins()->where('admins.id', $admin->id)->exists()) {
+      abort(403);
+    }
+  }
+
+  /**
    * Display the specified resource.
    */
   public function show(string $id)
@@ -68,6 +89,8 @@ class RulesController extends Controller
   {
     Gate::authorize('admin.group.edit');
 
+    $this->ensureGroupIsNotOwn($rule);
+
     $rule_abilities = $rule->abilities()->pluck('type', 'ability')->toArray();
 
     return view('dashboard.admins.rules.edit', compact('rule', 'rule_abilities'));
@@ -79,6 +102,8 @@ class RulesController extends Controller
   public function update(Request $request, Rule $rule)
   {
     Gate::authorize('admin.group.edit');
+
+    $this->ensureGroupIsNotOwn($rule);
 
     if (!$request->input('abilities')) {
       return back()->with('info', 'برجاء تحديد صلاحية واحده على الاقل أو مسح المجموعة');

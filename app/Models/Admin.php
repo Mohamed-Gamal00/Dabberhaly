@@ -14,7 +14,9 @@ class Admin extends User
 
     protected $guard = 'admin';
 
-    protected $fillable = ['name', 'email', 'password', 'super_admin', 'image'];
+    protected $fillable = ['name', 'email', 'password', 'image'];
+
+    protected $hidden = ['password', 'remember_token'];
 
 
     public function rules()

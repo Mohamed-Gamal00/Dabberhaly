@@ -4,16 +4,18 @@
             :title="product.name"
             :description="product.description"
             :image="product.image_url"
+            og-type="product"
         />
+        <JsonLd :data="productJsonLd" />
 
         <!-- Breadcrumb -->
         <div class="pd-breadcrumb">
             <v-container>
                 <div class="d-flex align-center" style="gap:6px; font-size:13px; color:#6b7280">
                     <a href="/" class="text-decoration-none text-grey-darken-1">{{ t('home') }}</a>
-                    <v-icon size="14" color="grey">mdi-chevron-left</v-icon>
+                    <v-icon size="14" color="grey">{{ isAr ? 'mdi-chevron-left' : 'mdi-chevron-right' }}</v-icon>
                     <a href="/products" class="text-decoration-none text-grey-darken-1">{{ t('products') }}</a>
-                    <v-icon size="14" color="grey">mdi-chevron-left</v-icon>
+                    <v-icon size="14" color="grey">{{ isAr ? 'mdi-chevron-left' : 'mdi-chevron-right' }}</v-icon>
                     <span class="text-primary font-weight-medium">{{ product.name }}</span>
                 </div>
             </v-container>
@@ -28,7 +30,7 @@
 
                         <!-- Main image -->
                         <div class="pd-main-img">
-                            <img :src="activeImage || product.image_url" :alt="product.name" />
+                            <img :src="activeImage || product.image_url" :alt="product.name" @error="onImgError" />
 
                             <!-- Discount badge -->
                             <div v-if="discountPercent" class="pd-discount-badge">
@@ -42,7 +44,8 @@
                                 variant="flat"
                                 class="pd-wish-btn"
                                 :color="wished ? 'red' : 'white'"
-                                @click="wished = !wished"
+                                :loading="wishLoading"
+                                @click="toggleWishlist"
                             >
                                 <v-icon :color="wished ? 'white' : 'grey-darken-2'" size="18">
                                     {{ wished ? 'mdi-heart' : 'mdi-heart-outline' }}
@@ -59,7 +62,7 @@
                                 :class="{ 'pd-thumb--active': activeImage === img.image_url }"
                                 @click="activeImage = img.image_url"
                             >
-                                <img :src="img.image_url" alt="thumb" />
+                                <img :src="img.image_url" alt="thumb" @error="onImgError" />
                             </div>
                         </div>
                     </div>
@@ -77,11 +80,13 @@
                         <!-- Name -->
                         <h1 class="pd-name">{{ product.name }}</h1>
 
-                        <!-- Rating row -->
+                        <!-- Rating row (real reviews only — hidden when there are none; stock always shown) -->
                         <div class="d-flex align-center mb-4" style="gap:10px">
-                            <v-rating :model-value="4.5" half-increments readonly color="amber" density="compact" size="small" />
-                            <span class="text-grey" style="font-size:12px">4.5 (24 {{ t('quickview_rating') }})</span>
-                            <v-divider vertical class="mx-1" style="height:14px" />
+                            <template v-if="reviewsCount > 0">
+                                <v-rating :model-value="reviewsAvg" half-increments readonly color="amber" density="compact" size="small" />
+                                <span class="text-grey" style="font-size:12px">{{ reviewsAvg?.toFixed(1) }} ({{ reviewsCount }} {{ t('quickview_rating') }})</span>
+                                <v-divider vertical class="mx-1" style="height:14px" />
+                            </template>
                             <span :class="product.quantity > 0 ? 'text-green' : 'text-red'" style="font-size:12px; font-weight:600">
                                 <v-icon size="12">mdi-circle-small</v-icon>
                                 {{ product.quantity > 0 ? t('in_stock') : t('not_available') }}
@@ -91,12 +96,12 @@
                         <!-- Price -->
                         <div class="pd-price-block">
                             <template v-if="product.discount_price && product.discount_price < product.price">
-                                <span class="pd-price-new">${{ Math.ceil(product.discount_price) }}</span>
-                                <span class="pd-price-old">${{ product.price }}</span>
-                                <v-chip color="red" size="x-small" variant="flat" class="ms-2">{{ t('save') }} ${{ Math.ceil(product.price - product.discount_price) }}</v-chip>
+                                <span class="pd-price-new">{{ Math.ceil(product.discount_price) }} {{ t('currency_sar') }}</span>
+                                <span class="pd-price-old">{{ product.price }} {{ t('currency_sar') }}</span>
+                                <v-chip color="red" size="x-small" variant="flat" class="ms-2">{{ t('save') }} {{ Math.ceil(product.price - product.discount_price) }} {{ t('currency_sar') }}</v-chip>
                             </template>
                             <template v-else>
-                                <span class="pd-price-new">${{ Math.ceil(product.price) }}</span>
+                                <span class="pd-price-new">{{ Math.ceil(product.price) }} {{ t('currency_sar') }}</span>
                             </template>
                         </div>
 
@@ -129,7 +134,7 @@
                                 <span>{{ quantity }}</span>
                                 <button @click="quantity < product.quantity ? quantity++ : null"><v-icon size="16">mdi-plus</v-icon></button>
                             </div>
-                            <span class="text-grey-darken-1" style="font-size:13px">{{ t('subtotal') }}: <strong class="text-primary">${{ subtotal }}</strong></span>
+                            <span class="text-grey-darken-1" style="font-size:13px">{{ t('subtotal') }}: <strong class="text-primary">{{ subtotal }} {{ t('currency_sar') }}</strong></span>
                         </div>
 
                         <!-- Action buttons -->
@@ -148,7 +153,8 @@
                                 rounded="lg"
                                 height="50"
                                 icon
-                                @click="wished = !wished"
+                                :loading="wishLoading"
+                                @click="toggleWishlist"
                             >
                                 <v-icon :color="wished ? 'red' : 'primary'">
                                     {{ wished ? 'mdi-heart' : 'mdi-heart-outline' }}
@@ -255,22 +261,49 @@
 
 <script setup>
 import { ref, computed, inject, onMounted } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
 import axios from 'axios';
 import { useRecentlyViewed } from '../../composables/useRecentlyViewed';
 import { useLocale } from '../../composables/useLocale';
 import ProductCard from '../../components/Shared/ProductCard.vue';
 import SeoHead from '../../components/Shared/SeoHead.vue';
+import JsonLd from '../../components/Shared/JsonLd.vue';
 
 const { props } = usePage();
 const product = props.product;
+
+// Product structured data for rich results.
+const productJsonLd = computed(() => {
+    const price = product.discount_price ?? product.price;
+    const plainDescription = String(product.description || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 500);
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: product.name,
+        description: plainDescription || undefined,
+        image: product.image_url ? [product.image_url] : undefined,
+        url: typeof window !== 'undefined' ? window.location.href : undefined,
+        offers: {
+            '@type': 'Offer',
+            priceCurrency: 'SAR',
+            price: price != null ? Number(price) : undefined,
+            availability: product.quantity > 0
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
+        },
+    };
+});
 const Emitter = inject('Emitter');
 const { add: addToRecent, getExcluding } = useRecentlyViewed();
-const { t, pick } = useLocale();
+const { t, pick, isAr } = useLocale();
 
 const activeImage = ref(product.image_url);
 const quantity    = ref(1);
-const wished      = ref(false);
+// Initial state comes from the server (product.is_in_wishlist) — see the
+// handoff note in the report: ProductController::show must pass it.
+const wished      = ref(product.is_in_wishlist || false);
+const wishLoading = ref(false);
 const btnLoading  = ref(false);
 const snackbar    = ref(false);
 const snackbarMessage = ref('');
@@ -339,6 +372,43 @@ const effectivePrice = computed(() =>
 );
 
 const subtotal = computed(() => Math.ceil(effectivePrice.value) * quantity.value);
+
+// Local placeholder (Vanilla Latte) shown when a product image fails to load.
+const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect width="400" height="400" fill="#F7F0E5"/><g fill="none" stroke="#76543D" stroke-width="10"><path d="M110 150 L200 110 L290 150 L290 260 L200 300 L110 260 Z"/><path d="M110 150 L200 190 L290 150 M200 190 L200 300"/></g></svg>`
+);
+
+function onImgError(e) {
+    if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
+}
+
+function notify(message, color = 'success') {
+    snackbarMessage.value = message;
+    snackbarColor.value = color;
+    snackbar.value = true;
+}
+
+// Real wishlist toggle — same API as ProductCard (wishlist.add/remove).
+// The heart only flips on a successful response, never optimistically.
+function toggleWishlist() {
+    if (wishLoading.value) return;
+    if (!user) {
+        notify(t('wishlist_login_required'), 'warning');
+        return;
+    }
+    wishLoading.value = true;
+    const action = wished.value ? 'wishlist.remove' : 'wishlist.add';
+    router.post(route(action, product.id), {}, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            wished.value = !wished.value;
+            notify(wished.value ? t('added_to_wishlist') : t('removed_from_wishlist'));
+        },
+        onError: () => notify(t('error_occurred'), 'error'),
+        onFinish: () => { wishLoading.value = false; },
+    });
+}
 
 async function addToCart() {
     btnLoading.value = true;
@@ -432,7 +502,7 @@ async function addToCart() {
 }
 
 .pd-thumb:hover { transform: translateY(-2px); }
-.pd-thumb--active { border-color: #3949ab; }
+.pd-thumb--active { border-color: #76543D; }
 
 .pd-thumb img { width: 100%; height: 100%; object-fit: contain; }
 
@@ -441,8 +511,8 @@ async function addToCart() {
 
 .pd-tag {
     display: inline-block;
-    background: #e8eaf6;
-    color: #3949ab;
+    background: #EFE7D8;
+    color: #76543D;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -467,7 +537,7 @@ async function addToCart() {
     margin-bottom: 4px;
 }
 
-.pd-price-new { font-size: 28px; font-weight: 800; color: #1a237e; }
+.pd-price-new { font-size: 28px; font-weight: 800; color: #76543D; }
 .pd-price-old { font-size: 16px; color: #9ca3af; text-decoration: line-through; }
 
 .pd-desc {
@@ -534,7 +604,7 @@ async function addToCart() {
     font-weight: 700;
     color: #111827;
     padding-bottom: 10px;
-    border-bottom: 2px solid #e8eaf6;
+    border-bottom: 2px solid #E6D3BB;
 }
 
 .pd-feature-card {
@@ -588,8 +658,8 @@ async function addToCart() {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #e8eaf6;
-    color: #1a237e;
+    background: #EFE7D8;
+    color: #76543D;
     font-weight: 700;
     font-size: 14px;
     display: flex;

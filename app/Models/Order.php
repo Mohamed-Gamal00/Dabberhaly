@@ -29,6 +29,7 @@ class Order extends Model
         'totalBeforeDiscount',
         'total_price',
         'shipping_price',
+        'tax_amount',
     ];
 
     protected $casts = [
@@ -173,24 +174,23 @@ class Order extends Model
     }
 
     /**
+     * Cash on delivery — the only payment method whose money is taken
+     * in hand at delivery (values used across the codebase).
+     */
+    public function isCashPayment(): bool
+    {
+        return in_array($this->payment_method, ['cash_on_delivery', 'cash'], true);
+    }
+
+    /**
      * Amount Moyasar must charge for this order, in halalas (SAR * 100).
      *
-     * The two checkout paths store totals differently: web and API user
-     * checkout (CheckoutServices::createOrder) store total_price
-     * INCLUDING shipping, while the guest API checkout stores
-     * total_price WITHOUT shipping (shipping_price is separate). A
-     * guest-API order is a guest order with no web cart cookie, so
-     * shipping is added back only for those.
+     * total_price already includes shipping and VAT in every checkout
+     * path (web, API user and API guest), so it is charged as stored.
      */
     public function expectedPaymentAmountHalalas(): int
     {
-        $total = (float) $this->total_price;
-
-        if ($this->guest_id && is_null($this->user_id) && is_null($this->cookie_id)) {
-            $total += (float) ($this->shipping_price ?? 0);
-        }
-
-        return (int) round($total * 100);
+        return (int) round((float) $this->total_price * 100);
     }
 
     public function billingAddress()

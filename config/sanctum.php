@@ -46,7 +46,7 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => 525600, // 365 days: tokens must not live forever.
 
     /*
     |--------------------------------------------------------------------------

@@ -12,7 +12,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Keep Telescope's tables from growing forever.
+        $schedule->command('telescope:prune')->daily();
+        // Drop failed jobs older than 3 days.
+        $schedule->command('queue:prune-failed --hours=72')->daily();
+        // Delete expired verification codes and abandoned carts.
+        $schedule->command('app:prune-expired-data')->daily();
     }
 
     /**

@@ -20,16 +20,16 @@
                 <!-- Search -->
                 <div class="filter-search">
                     <v-icon size="16" color="grey">mdi-magnify</v-icon>
-                    <input v-model="localSearch" :placeholder="t('search_in_products')" class="filter-search-input" />
+                    <input v-model="localSearch" :placeholder="t('search_in_products')" :aria-label="t('search_in_products')" class="filter-search-input" />
 
                 </div>
 
-                <select v-model="localCat" class="filter-select" @change="applyFilters">
+                <select v-model="localCat" class="filter-select" :aria-label="t('all_categories')" @change="applyFilters">
                     <option value="">{{ t('all_categories') }}</option>
                     <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                 </select>
 
-                <select v-model="localSort" class="filter-select" @change="applyFilters">
+                <select v-model="localSort" class="filter-select" :aria-label="t('sort_by')" @change="applyFilters">
                     <option value="latest">{{ t('sort_latest') }}</option>
                     <option value="price_asc">{{ t('sort_price_asc') }}</option>
                     <option value="price_desc">{{ t('sort_price_desc') }}</option>
@@ -37,9 +37,9 @@
                 </select>
 
                 <div class="filter-price">
-                    <input v-model="localMin" type="number" :placeholder="t('from')" class="filter-price-input" min="0" />
-                    <span style="color:#9ca3af; font-size:12px">—</span>
-                    <input v-model="localMax" type="number" :placeholder="t('to')" class="filter-price-input" min="0" />
+                    <input v-model="localMin" type="number" :placeholder="t('from')" :aria-label="t('from')" class="filter-price-input" min="0" />
+                    <span style="color:#77736B; font-size:12px">—</span>
+                    <input v-model="localMax" type="number" :placeholder="t('to')" :aria-label="t('to')" class="filter-price-input" min="0" />
                     <button class="filter-apply-btn" @click="applyFilters">{{ t('apply') }}</button>
                 </div>
 
@@ -81,7 +81,7 @@
             <div v-else style="text-align:center; padding:64px 0; margin-top:16px">
                 <v-icon size="64" color="grey-lighten-1">mdi-shopping-search</v-icon>
                 <p style="margin-top:12px; color:#374151; font-weight:600">{{ t('no_products') }}</p>
-                <p style="color:#9ca3af; font-size:13px">{{ t('no_products_hint') }}</p>
+                <p style="color:#77736B; font-size:13px">{{ t('no_products_hint') }}</p>
                 <button class="filter-apply-btn mt-4" @click="clearFilters">{{ t('clear_filters') }}</button>
             </div>
 
@@ -214,7 +214,7 @@ watch(() => props.products.current_page, (val) => page.value = val);
     width: 100%;
 }
 
-.filter-search-input::placeholder { color: #9ca3af; }
+.filter-search-input::placeholder { color: #77736B; }
 
 .filter-select {
     border: 1px solid #e5e7eb;

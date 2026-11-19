@@ -158,6 +158,7 @@ class ProductsController extends Controller
      */
     public function update(ProductRequest $request, string $id)
     {
+        Gate::authorize('product.edit');
 
         $data = $request->validated();
         $data['slug'] = str_replace(' ', '-', $request->name);
@@ -225,9 +226,12 @@ class ProductsController extends Controller
 
     public function imageDelete(Request $request)
     {
+        Gate::authorize('product.edit');
+
         $request->validate([
             'image_id' => 'required|exists:product_images,id'
         ]);
+        $deletedImage = false;
         $image = ProductImage::find($request->image_id);
         if ($image) {
             $deletedImage = $image->delete();

@@ -130,7 +130,20 @@
 
         <!-- Mobile search -->
         <div class="pa-3">
-            <v-text-field v-model="search" :placeholder="t('search_placeholder')" hide-details variant="outlined" density="compact" rounded="lg" prepend-inner-icon="mdi-magnify" bg-color="grey-lighten-5" />
+            <v-text-field
+                v-model="search"
+                :placeholder="t('search_placeholder')"
+                :aria-label="t('search_placeholder')"
+                hide-details
+                variant="outlined"
+                density="compact"
+                rounded="lg"
+                prepend-inner-icon="mdi-magnify"
+                :append-inner-icon="isAr ? 'mdi-arrow-left' : 'mdi-arrow-right'"
+                bg-color="grey-lighten-5"
+                @keyup.enter="goMobileSearch"
+                @click:append-inner="goMobileSearch"
+            />
         </div>
 
         <v-list nav density="compact">
@@ -158,6 +171,23 @@
                 />
             </v-list-group>
         </v-list>
+
+        <v-divider class="my-2" />
+
+        <!-- Mobile language switcher -->
+        <div class="px-3 pb-1">
+            <v-btn
+                block
+                variant="outlined"
+                color="primary"
+                rounded="lg"
+                style="text-transform:none"
+                prepend-icon="mdi-translate"
+                @click="switchLocale(locale === 'ar' ? 'en' : 'ar'); mobileDrawer = false"
+            >
+                {{ t('header_change_language') }} — {{ locale === 'ar' ? 'EN' : 'عربي' }}
+            </v-btn>
+        </div>
 
         <v-divider class="my-2" />
 
@@ -190,7 +220,7 @@
 
 <script setup>
 import { ref, inject, computed, onMounted, onBeforeUnmount } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import GlobalSearch from '../components/Shared/GlobalSearch.vue';
 import { useLocale } from '../composables/useLocale';
 
@@ -202,7 +232,7 @@ const cartCount = ref(0);
 const { props } = usePage();
 const categories = computed(() => usePage().props.categories ?? []);
 const user = computed(() => usePage().props.auth?.user);
-const { locale, switchLocale, t, pick } = useLocale();
+const { locale, isAr, switchLocale, t, pick } = useLocale();
 const siteName = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
 
 const menu = computed(() => [
@@ -219,6 +249,14 @@ function isActive(href) {
 
 function openCart() {
     Emitter.emit('openCart');
+}
+
+// Mobile search: same destination as the desktop GlobalSearch Enter
+// (products page filtered by the query).
+function goMobileSearch() {
+    if (!search.value.trim()) return;
+    mobileDrawer.value = false;
+    router.get('/products', { search: search.value.trim() }, { preserveState: false });
 }
 
 function updateCart(count) {

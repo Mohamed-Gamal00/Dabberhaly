@@ -11,9 +11,11 @@ use App\Models\ShippingTypesAndPrice;
 use App\Models\UserDiscountCode;
 use App\Repositories\Cart\CartRepository;
 use App\Services\CheckOut\CheckoutServices;
+use App\Services\Discount\CheckDiscountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Throwable;
 
@@ -28,11 +30,15 @@ class CheckoutController extends Controller
 
     public function create(CartRepository $cart)
     {
-        if ($cart->get()->count() == 0) {
+        // One cart query for the whole page load (the page used to run
+        // the same query five times).
+        $items = $cart->get();
+
+        if ($items->count() == 0) {
             return redirect()->route('home');
         }
 
-        foreach ($cart->get() as $item) {
+        foreach ($items as $item) {
             $item->update(['weight' => $item->quantity * ($item->product->weight ?? 0)]);
         }
 
@@ -44,7 +50,7 @@ class CheckoutController extends Controller
         $discount      = DB::table('cookie_discount_ids')->where('cookie_id', Cart::getCookieId())->first();
         $discountPrice = $discount ? DiscountCode::where('id', $discount->discount_id)->value('price') : null;
 
-        $cartItems = $cart->get()->map(fn($item) => [
+        $cartItems = $items->map(fn($item) => [
             'id'             => $item->id,
             'product_id'     => $item->product_id,
             'name'           => $item->product?->name,
@@ -52,6 +58,7 @@ class CheckoutController extends Controller
             'image'          => $item->product?->image_url,
             'price'          => (float) $item->product?->price,
             'discount_price' => $item->product?->discount_price ? (float) $item->product->discount_price : null,
+            'weight'         => (float) ($item->product?->weight ?? 0),
             'quantity'       => (int) $item->quantity,
         ]);
 
@@ -79,6 +86,10 @@ class CheckoutController extends Controller
             'shipping'      => $shipping,
             'discountPrice' => $discountPrice,
             'userAddresses' => $userAddresses,
+            // The summary needs these to show the VAT line and to
+            // waive shipping at the free-shipping threshold.
+            'vatRate'             => CheckoutServices::vatRate(),
+            'freeShippingThreshold' => CheckoutServices::freeShippingThreshold(),
         ]);
     }
 
@@ -184,7 +195,8 @@ class CheckoutController extends Controller
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
-            return response()->json(['message' => __('flash.order_creation_failed'), 'error' => $e->getMessage()], 500);
+            Log::error('Web checkout failed', ['exception' => $e]);
+            return response()->json(['message' => __('flash.order_creation_failed')], 500);
         }
 
         // Notify admins and customer asynchronously through the UserOrder event.
@@ -198,6 +210,11 @@ class CheckoutController extends Controller
     /**
      * Order success page — the landing for guest cash-on-delivery
      * orders (logged-in customers land on their profile instead).
+     *
+     * A bare order number is not enough: the page only serves the
+     * order owner — the logged-in user for a user order, or the
+     * browser holding the cart cookie the order was placed with for
+     * a guest order.
      */
     public function success(Request $request)
     {
@@ -207,6 +224,10 @@ class CheckoutController extends Controller
 
         if (! $order) {
             return redirect()->route('home');
+        }
+
+        if (! $this->ownsOrder($order)) {
+            abort(404);
         }
 
         return Inertia::render('Checkout/Success', [
@@ -278,18 +299,9 @@ class CheckoutController extends Controller
             return response()->json(['message' => __('flash.discount_already_used')], 422);
         }
 
-        // Apply discount to matching cart items only
-        foreach ($cartItems as $item) {
-            if ($isGlobal || $code->products->contains($item->product_id)) {
-                $discountAmount = $code->discount_type === 'percentage'
-                    ? (($item->product->discount_price ?? $item->product->price) * $code->price) / 100
-                    : $code->price;
-
-                $original               = $item->product->discount_price ?? $item->product->price;
-                $item->discounted_price = max(0, $original - $discountAmount);
-                $item->save();
-            }
-        }
+        // Apply discount to matching cart items only — shared with
+        // the API flows: a fixed amount applies ONCE per order.
+        CheckDiscountService::applyDiscountToItems($cartItems, $code, $isGlobal);
 
         $newTotal = $this->checkoutService->calculateTotal($user);
 
@@ -303,5 +315,43 @@ class CheckoutController extends Controller
             'discount_type'  => $code->discount_type,
             'new_total'      => (float) $newTotal,
         ]);
+    }
+
+    /**
+     * Remove an applied discount code for real: forget the session
+     * code and reset discounted_price on the active cart rows, so a
+     * later checkout is charged the full price and the code is not
+     * consumed.
+     */
+    public function removeDiscount(Request $request)
+    {
+        $user = Auth::guard('web')->user();
+
+        session()->forget('applied_discount_code_id');
+
+        $this->checkoutService->getCartItems($user)
+            ->each(fn ($item) => $item->update(['discounted_price' => null]));
+
+        return response()->json([
+            'message'   => __('flash.discount_removed'),
+            'new_total' => (float) $this->checkoutService->calculateTotal($user),
+        ]);
+    }
+
+    /**
+     * Does the current browser own this order? Logged-in user orders
+     * need the matching user; guest orders need the cart cookie the
+     * order was placed with.
+     */
+    protected function ownsOrder(Order $order): bool
+    {
+        $user = Auth::guard('web')->user();
+
+        if ($order->user_id) {
+            return $user !== null && (int) $user->id === (int) $order->user_id;
+        }
+
+        return $order->cookie_id !== null
+            && $order->cookie_id === Cart::getCookieId();
     }
 }

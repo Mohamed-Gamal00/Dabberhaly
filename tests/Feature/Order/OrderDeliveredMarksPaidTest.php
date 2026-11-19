@@ -2,48 +2,102 @@
 
 namespace Tests\Feature\Order;
 
-use App\Enums\OrderStatus;
+use App\Models\Admin;
 use App\Models\Order;
-use App\Repositories\Order\OrderRepository;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class OrderDeliveredMarksPaidTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_updating_status_to_delivered_marks_order_as_paid(): void
+    private function makeAdmin(): Admin
     {
-        $order = Order::create([
-            'status' => OrderStatus::Confirmed->value,
-            'payment_status' => 'unpaid',
-            'payment_method' => 'cash',
+        // forceCreate: super_admin must be set even if another change
+        // removes it from $fillable — the Gate bypass depends on it.
+        return Admin::forceCreate([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+            'password' => 'password',
+            'super_admin' => true,
         ]);
-
-        $repository = new OrderRepository(new Order);
-        $repository->update(new Request(['status' => 'delivered']), $order->id);
-
-        $order = $order->fresh();
-
-        $this->assertSame(OrderStatus::Delivered, $order->status);
-        $this->assertSame('paid', $order->payment_status);
     }
 
-    public function test_updating_status_to_other_values_does_not_change_payment_status(): void
+    public function test_updating_a_cash_on_delivery_order_to_delivered_marks_it_as_paid(): void
     {
+        $admin = $this->makeAdmin();
+        $user = User::factory()->create(['password' => 'password']);
         $order = Order::create([
-            'status' => OrderStatus::Confirmed->value,
+            'user_id' => $user->id,
+            'payment_method' => 'cash_on_delivery',
             'payment_status' => 'unpaid',
-            'payment_method' => 'cash',
         ]);
 
-        $repository = new OrderRepository(new Order);
-        $repository->update(new Request(['status' => 'shipped']), $order->id);
+        $this->actingAs($admin, 'admin')
+            ->put(route('orders.update', $order->id), ['status' => 'delivered'])
+            ->assertRedirect(route('orders.index'));
 
-        $order = $order->fresh();
+        $this->assertSame('paid', $order->fresh()->payment_status);
+    }
 
-        $this->assertSame(OrderStatus::Shipped, $order->status);
-        $this->assertSame('unpaid', $order->payment_status);
+    public function test_updating_a_card_order_to_delivered_leaves_it_unpaid(): void
+    {
+        $admin = $this->makeAdmin();
+        $user = User::factory()->create(['password' => 'password']);
+        $order = Order::create([
+            'user_id' => $user->id,
+            'payment_method' => 'card_payment',
+            'payment_status' => 'unpaid',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->put(route('orders.update', $order->id), ['status' => 'delivered'])
+            ->assertRedirect(route('orders.index'));
+
+        $this->assertSame('unpaid', $order->fresh()->payment_status);
+    }
+
+    public function test_cancelling_an_order_restores_stock(): void
+    {
+        $admin = $this->makeAdmin();
+        $user = User::factory()->create(['password' => 'password']);
+        $product = \App\Models\Product::factory()->create(['quantity' => 3]);
+        $order = Order::create([
+            'user_id' => $user->id,
+            'payment_method' => 'cash_on_delivery',
+            'payment_status' => 'unpaid',
+        ]);
+        \App\Models\OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'price' => 100,
+            'quantity' => 2,
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->put(route('orders.update', $order->id), ['status' => 'cancelled'])
+            ->assertRedirect(route('orders.index'));
+
+        $this->assertSame(5, $product->fresh()->quantity);
+        // Refunds stay manual: payment_status untouched.
+        $this->assertSame('unpaid', $order->fresh()->payment_status);
+    }
+
+    public function test_updating_an_order_to_another_status_leaves_payment_status_untouched(): void
+    {
+        $admin = $this->makeAdmin();
+        $user = User::factory()->create(['password' => 'password']);
+        $order = Order::create([
+            'user_id' => $user->id,
+            'payment_status' => 'unpaid',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->put(route('orders.update', $order->id), ['status' => 'shipped'])
+            ->assertRedirect(route('orders.index'));
+
+        $this->assertSame('unpaid', $order->fresh()->payment_status);
     }
 }

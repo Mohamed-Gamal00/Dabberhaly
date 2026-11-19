@@ -13,6 +13,7 @@ use App\Models\User_verfication;
 use App\Models\UserAddress;
 use App\Notifications\EmailVerificationCodeNotification;
 use App\Services\CheckOut\CheckoutServices;
+use App\Services\VerificationServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,10 +25,12 @@ use Inertia\Inertia;
 class UserAuthController extends Controller
 {
     protected CheckoutServices $checkoutServices;
+    protected VerificationServices $verificationServices;
 
-    public function __construct(CheckoutServices $checkoutServices)
+    public function __construct(CheckoutServices $checkoutServices, VerificationServices $verificationServices)
     {
         $this->checkoutServices = $checkoutServices;
+        $this->verificationServices = $verificationServices;
     }
 
     /* ================== AUTH VIEWS ================== */
@@ -97,26 +100,22 @@ class UserAuthController extends Controller
         return redirect()->route('auth.verify.view');
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
-        ]);
+        // LoginRequest::authenticate() enforces the 5-attempt RateLimiter
+        // (throttle key: email + IP) and throws a validation error when
+        // the limit is hit or the credentials are wrong.
+        $request->authenticate();
 
-        if (Auth::guard('web')->attempt($credentials)) {
-            $request->session()->regenerate();
+        $request->session()->regenerate();
 
-            try {
-                $this->checkoutServices->mergeGuestCart(Auth::guard('web')->id());
-            } catch (\Throwable $e) {
-                logger()->error('Cart merge failed on login: ' . $e->getMessage());
-            }
-
-            return redirect()->route('home');
+        try {
+            $this->checkoutServices->mergeGuestCart(Auth::guard('web')->id());
+        } catch (\Throwable $e) {
+            logger()->error('Cart merge failed on login: ' . $e->getMessage());
         }
 
-        return back()->withErrors(['email' => trans('auth.failed')]);
+        return redirect()->route('home');
     }
 
     public function logout(Request $request)
@@ -184,6 +183,7 @@ class UserAuthController extends Controller
         session()->forget(['pending_registration', 'pending_otp']);
 
         Auth::guard('web')->login($user);
+        $request->session()->regenerate();
 
         try {
             $this->checkoutServices->mergeGuestCart($user->id);
@@ -226,7 +226,12 @@ class UserAuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        event(new UserForgotPassword($user));
+        // Create the reset code HERE, synchronously: the queued listener
+        // only sends it. If creation lived in the listener, no queue
+        // worker would mean no code is ever created and reset is dead.
+        $code = $this->verificationServices->createPasswordResetCode($user->id);
+
+        event(new UserForgotPassword($user, $code));
 
         session(['user_id' => $user->id]);
 
@@ -251,6 +256,14 @@ class UserAuthController extends Controller
             ->first();
 
         if (! $record || $record->code !== $request->code) {
+            // Wrong-code attempts invalidate the code after the limit, so
+            // a 4-digit code cannot be brute-forced indefinitely.
+            $attempts = $this->verificationServices->recordFailedOtpAttempt($userId, true);
+
+            if ($attempts >= VerificationServices::MAX_OTP_ATTEMPTS) {
+                return back()->with('error', __('flash.code_expired'));
+            }
+
             return back()->with('error', __('flash.invalid_code'));
         }
 
@@ -261,6 +274,7 @@ class UserAuthController extends Controller
         $user = User::find($userId);
         $user->update(['password' => Hash::make($request->password)]);
         $record->update(['is_verified' => true]);
+        $this->verificationServices->clearOtpAttempts($userId, true);
 
         session()->forget('user_id');
 
