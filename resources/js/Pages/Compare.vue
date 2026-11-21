@@ -103,9 +103,9 @@
                             </div>
 
                             <div class="cmp-col-price">
-                                <div class="cmp-price-new">{{ Math.ceil(p.discount_price || p.price) }} {{ t('currency_sar') }}</div>
+                                <div class="cmp-price-new">{{ Math.ceil(p.discount_price || p.price) }} {{ t('currency_egp') }}</div>
                                 <div v-if="p.discount_price && p.discount_price < p.price" class="cmp-price-old">
-                                    {{ p.price }} {{ t('currency_sar') }}
+                                    {{ p.price }} {{ t('currency_egp') }}
                                 </div>
                             </div>
 
@@ -205,8 +205,8 @@
                         <!-- Price + actions -->
                         <div class="cmp-card-footer">
                             <div class="cmp-card-price">
-                                <span class="cmp-price-new">{{ Math.ceil(p.discount_price || p.price) }} {{ t('currency_sar') }}</span>
-                                <span v-if="p.discount_price && p.discount_price < p.price" class="cmp-price-old">{{ p.price }} {{ t('currency_sar') }}</span>
+                                <span class="cmp-price-new">{{ Math.ceil(p.discount_price || p.price) }} {{ t('currency_egp') }}</span>
+                                <span v-if="p.discount_price && p.discount_price < p.price" class="cmp-price-old">{{ p.price }} {{ t('currency_egp') }}</span>
                             </div>
                             <div class="cmp-card-actions">
                                 <button class="cmp-card-btn cmp-card-btn-cart" :disabled="p.quantity < 1" @click="addToCart(p)">

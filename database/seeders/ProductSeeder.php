@@ -29,83 +29,58 @@ class ProductSeeder extends Seeder
             ['name_en' => 'Default Company']
         );
 
-        // Categories
-        $electronics = MainCategory::updateOrCreate(
-            ['name' => 'إلكترونيات'],
-            ['name_en' => 'Electronics', 'slug' => 'electronics']
+        // Categories — exactly three: gifts, household essentials,
+        // accessories. The old demo categories (electronics, clothing,
+        // home & kitchen) and their products are removed below.
+        Product::whereIn('slug', ['Smartphone', 'Laptop', 'Cotton-T-Shirt', 'Winter-Jacket'])->delete();
+        MainCategory::whereIn('slug', ['electronics', 'clothing', 'home-kitchen'])->delete();
+
+        $gifts = MainCategory::updateOrCreate(
+            ['name' => 'هدايا'],
+            ['name_en' => 'Gifts', 'slug' => 'gifts', 'description' => 'هدايا مختارة بعناية لمن تحب', 'description_en' => 'Thoughtfully picked gifts for your loved ones']
         );
 
-        $clothing = MainCategory::updateOrCreate(
-            ['name' => 'ملابس'],
-            ['name_en' => 'Clothing', 'slug' => 'clothing']
+        $household = MainCategory::updateOrCreate(
+            ['name' => 'مستلزمات منزلية'],
+            ['name_en' => 'Household Essentials', 'slug' => 'household-essentials', 'description' => 'كل ما يحتاجه بيتك من مستلزمات يومية', 'description_en' => 'Everything your home needs, day after day']
         );
 
-        $home = MainCategory::updateOrCreate(
-            ['name' => 'المنزل والمطبخ'],
-            ['name_en' => 'Home & Kitchen', 'slug' => 'home-kitchen']
+        $accessories = MainCategory::updateOrCreate(
+            ['name' => 'اكسسوارات'],
+            ['name_en' => 'Accessories', 'slug' => 'accessories', 'description' => 'اكسسوارات ولمسات تكمل بيتك', 'description_en' => 'Accessories and finishing touches for your home']
         );
 
         // Products
         $products = [
             [
-                'name'                   => 'هاتف ذكي',
-                'name_en'                => 'Smartphone',
-                'description'            => 'هاتف ذكي بمواصفات عالية',
-                'price'                  => 1999.00,
-                'discount_price'         => 1799.00,
-                'quantity'               => 50,
+                'name'                   => 'علبة هدايا فاخرة',
+                'name_en'                => 'Luxury Gift Box',
+                'description'            => 'علبة هدايا فاخرة بتغليف أنيق وجاهزة للإهداء',
+                'price'                  => 249.00,
+                'discount_price'         => 199.00,
+                'quantity'               => 40,
                 'status'                 => "active",
                 'is_special'             => true,
-                'weight'                 => 0.2,
-                'category_id'            => $electronics->id,
+                'weight'                 => 0.8,
+                'category_id'            => $gifts->id,
                 'company_id'             => $company->id,
                 'product_availability_id'=> $inStock->id,
-                'colors'                 => [$black->id, $white->id],
+                'colors'                 => [$red->id, $black->id],
             ],
             [
-                'name'                   => 'لابتوب',
-                'name_en'                => 'Laptop',
-                'description'            => 'لابتوب للأعمال والدراسة',
-                'price'                  => 3500.00,
+                'name'                   => 'سلة هدايا منزلية',
+                'name_en'                => 'Home Gift Basket',
+                'description'            => 'سلة هدايا منزلية مشكلة بأصناف مختارة بعناية',
+                'price'                  => 349.00,
                 'discount_price'         => null,
-                'quantity'               => 20,
+                'quantity'               => 25,
                 'status'                 => "active",
                 'is_special'             => false,
-                'weight'                 => 1.8,
-                'category_id'            => $electronics->id,
+                'weight'                 => 1.5,
+                'category_id'            => $gifts->id,
                 'company_id'             => $company->id,
                 'product_availability_id'=> $inStock->id,
-                'colors'                 => [$black->id],
-            ],
-            [
-                'name'                   => 'تيشيرت قطني',
-                'name_en'                => 'Cotton T-Shirt',
-                'description'            => 'تيشيرت قطني مريح',
-                'price'                  => 89.00,
-                'discount_price'         => 69.00,
-                'quantity'               => 200,
-                'status'                 => "active",
-                'is_special'             => false,
-                'weight'                 => 0.3,
-                'category_id'            => $clothing->id,
-                'company_id'             => $company->id,
-                'product_availability_id'=> $inStock->id,
-                'colors'                 => [$red->id, $blue->id, $black->id, $white->id],
-            ],
-            [
-                'name'                   => 'جاكيت شتوي',
-                'name_en'                => 'Winter Jacket',
-                'description'            => 'جاكيت دافئ للشتاء',
-                'price'                  => 350.00,
-                'discount_price'         => null,
-                'quantity'               => 80,
-                'status'                 => "active",
-                'is_special'             => true,
-                'weight'                 => 0.9,
-                'category_id'            => $clothing->id,
-                'company_id'             => $company->id,
-                'product_availability_id'=> $inStock->id,
-                'colors'                 => [$black->id, $blue->id],
+                'colors'                 => [],
             ],
             [
                 'name'                   => 'مكنسة كهربائية',
@@ -117,7 +92,7 @@ class ProductSeeder extends Seeder
                 'status'                 => "active",
                 'is_special'             => false,
                 'weight'                 => 3.5,
-                'category_id'            => $home->id,
+                'category_id'            => $household->id,
                 'company_id'             => $company->id,
                 'product_availability_id'=> $inStock->id,
                 'colors'                 => [$white->id],
@@ -132,10 +107,40 @@ class ProductSeeder extends Seeder
                 'status'                 => "active",
                 'is_special'             => false,
                 'weight'                 => 4.0,
-                'category_id'            => $home->id,
+                'category_id'            => $household->id,
                 'company_id'             => $company->id,
                 'product_availability_id'=> $outStock->id,
                 'colors'                 => [],
+            ],
+            [
+                'name'                   => 'ساعة حائط',
+                'name_en'                => 'Wall Clock',
+                'description'            => 'ساعة حائط بتصميم عصري يناسب كل غرف البيت',
+                'price'                  => 120.00,
+                'discount_price'         => 99.00,
+                'quantity'               => 60,
+                'status'                 => "active",
+                'is_special'             => false,
+                'weight'                 => 0.6,
+                'category_id'            => $accessories->id,
+                'company_id'             => $company->id,
+                'product_availability_id'=> $inStock->id,
+                'colors'                 => [$black->id, $white->id],
+            ],
+            [
+                'name'                   => 'إطار صور خشبي',
+                'name_en'                => 'Wooden Photo Frame',
+                'description'            => 'إطار صور خشبي أنيق لذكرياتك المفضلة',
+                'price'                  => 85.00,
+                'discount_price'         => null,
+                'quantity'               => 100,
+                'status'                 => "active",
+                'is_special'             => true,
+                'weight'                 => 0.4,
+                'category_id'            => $accessories->id,
+                'company_id'             => $company->id,
+                'product_availability_id'=> $inStock->id,
+                'colors'                 => [$black->id],
             ],
         ];
 

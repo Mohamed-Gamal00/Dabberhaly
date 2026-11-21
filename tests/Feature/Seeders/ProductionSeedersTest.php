@@ -9,6 +9,7 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Design;
+use App\Models\MainCategory;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\ShippingTypesAndPrice;
@@ -18,6 +19,7 @@ use Database\Seeders\AdminSeeder;
 use Database\Seeders\CountryCitySeeder;
 use Database\Seeders\CurrencySeeder;
 use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\ProductSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -48,25 +50,47 @@ class ProductionSeedersTest extends TestCase
         $this->assertTrue(City::where('country_id', $egypt->id)->where('name_en', 'Cairo')->exists());
         $this->assertTrue(City::where('country_id', $egypt->id)->where('name_en', 'Giza')->exists());
         $this->assertTrue(City::where('country_id', $egypt->id)->where('name_en', 'Alexandria')->exists());
-        $this->assertGreaterThanOrEqual(20, City::where('country_id', $egypt->id)->count());
+        $this->assertSame(27, City::where('country_id', $egypt->id)->count());
 
-        // Gulf countries are kept.
-        $this->assertTrue(Country::where('code', 'SA')->exists());
+        // Egypt only: re-seeding removes any non-Egyptian country.
+        $this->assertSame(1, Country::count());
+        $this->assertFalse(Country::where('code', 'SA')->exists());
+        $this->assertFalse(Country::whereIn('code', ['SA', 'AE', 'KW', 'BH', 'QA'])->exists());
     }
 
-    public function test_currency_seeder_creates_egp_and_keeps_sar_default(): void
+    public function test_currency_seeder_creates_egp_as_default_and_removes_sar(): void
     {
         $this->seed(CurrencySeeder::class);
 
-        $sar = Currency::where('code', 'SAR')->first();
-        $this->assertNotNull($sar);
-        $this->assertTrue((bool) $sar->default_currency);
-
         $egp = Currency::where('code', 'EGP')->first();
         $this->assertNotNull($egp);
+        $this->assertTrue((bool) $egp->default_currency);
         $this->assertSame('جنيه مصري', $egp->name_ar);
-        $this->assertFalse((bool) $egp->default_currency);
         $this->assertSame(1, Currency::where('default_currency', true)->count());
+
+        // EGP is the only currency now: the old rows are deleted on re-seed.
+        $this->assertSame(1, Currency::count());
+        $this->assertFalse(Currency::whereIn('code', ['SAR', 'USD', 'EUR', 'GBP', 'AED'])->exists());
+    }
+
+    public function test_product_seeder_creates_exactly_three_categories(): void
+    {
+        $this->seed(ProductSeeder::class);
+
+        $this->assertSame(3, MainCategory::count());
+        $this->assertSame(
+            ['accessories', 'gifts', 'household-essentials'],
+            MainCategory::orderBy('slug')->pluck('slug')->all()
+        );
+        $this->assertSame('هدايا', MainCategory::where('slug', 'gifts')->first()->name);
+        $this->assertSame('Gifts', MainCategory::where('slug', 'gifts')->first()->name_en);
+        $this->assertSame('مستلزمات منزلية', MainCategory::where('slug', 'household-essentials')->first()->name);
+        $this->assertSame('Household Essentials', MainCategory::where('slug', 'household-essentials')->first()->name_en);
+        $this->assertSame('اكسسوارات', MainCategory::where('slug', 'accessories')->first()->name);
+        $this->assertSame('Accessories', MainCategory::where('slug', 'accessories')->first()->name_en);
+
+        // The old demo categories are gone.
+        $this->assertFalse(MainCategory::whereIn('slug', ['electronics', 'clothing', 'home-kitchen'])->exists());
     }
 
     public function test_database_seeder_in_non_local_env_creates_core_data_but_no_demo_data(): void
@@ -114,15 +138,16 @@ class ProductionSeedersTest extends TestCase
         $this->assertFalse(Admin::where('email', 'admin@admin.com')->exists());
     }
 
-    public function test_admin_seeder_without_env_credentials_never_uses_known_password(): void
+    public function test_admin_seeder_without_env_credentials_uses_default_password(): void
     {
         $this->seed(AdminSeeder::class);
 
-        $this->assertFalse(Admin::where('email', 'admin@admin.com')->exists());
-
-        $admin = Admin::first();
+        $admin = Admin::where('email', 'admin@dabberhaly.com')->first();
         $this->assertNotNull($admin);
-        $this->assertFalse(Hash::check('12345678', $admin->password));
+        $this->assertTrue((bool) $admin->super_admin);
+        $this->assertTrue(Hash::check('12345678', $admin->password));
+
+        $this->assertFalse(Admin::where('email', 'admin@admin.com')->exists());
     }
 
     public function test_prune_expired_data_command_deletes_expired_codes_and_old_carts(): void

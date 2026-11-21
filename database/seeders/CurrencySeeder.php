@@ -9,23 +9,34 @@ class CurrencySeeder extends Seeder
 {
     public function run(): void
     {
-        $currencies = [
-            // Default currency - SAR, always 'used'
-            ['name' => 'Saudi Riyal',    'name_ar' => 'ريال سعودي',      'code' => 'SAR', 'symbol' => 'ر.س', 'price_in_default_currency' => 1,      'default_currency' => true,  'status' => 'used'],
-            // Egyptian Pound. SAR stays the default currency because
-            // Moyasar charges in SAR — do not flip default_currency here.
-            // price_in_default_currency is approximate (1 SAR ≈ 14.34 EGP
-            // as of Nov 2026); update it from the admin panel when
-            // rates move.
-            ['name' => 'Egyptian Pound', 'name_ar' => 'جنيه مصري',       'code' => 'EGP', 'symbol' => 'ج.م', 'price_in_default_currency' => 14.34, 'default_currency' => false, 'status' => 'used'],
-            ['name' => 'US Dollar',      'name_ar' => 'دولار أمريكي',    'code' => 'USD', 'symbol' => '$',   'price_in_default_currency' => 0.2667, 'default_currency' => false, 'status' => 'used'],
-            ['name' => 'Euro',           'name_ar' => 'يورو',             'code' => 'EUR', 'symbol' => '€',   'price_in_default_currency' => 0.2459, 'default_currency' => false, 'status' => 'used'],
-            ['name' => 'British Pound',  'name_ar' => 'جنيه إسترليني',   'code' => 'GBP', 'symbol' => '£',   'price_in_default_currency' => 0.2101, 'default_currency' => false, 'status' => 'not_used'],
-            ['name' => 'UAE Dirham',     'name_ar' => 'درهم إماراتي',    'code' => 'AED', 'symbol' => 'د.إ', 'price_in_default_currency' => 0.9791, 'default_currency' => false, 'status' => 'not_used'],
-        ];
+        // The store is Egyptian and sells in Egyptian pounds only, so EGP
+        // is the only seeded currency and the default (rate 1 — stored
+        // prices are EGP amounts, no conversion). The currency switcher
+        // reads this table (GET /api/v1/all-currencies returns the
+        // status='used' rows, and App\currency\Currency::getCurrencyApi()
+        // appends the default currency's code to API prices), so seeding
+        // EGP only means the switcher offers EGP only.
+        //
+        // SAR was removed deliberately: nothing in the store reads it.
+        // Moyasar does NOT read this table — it hardcodes 'SAR' in the
+        // payment form, the callback/webhook verification and the
+        // payment_transactions default — so removing SAR here cannot break
+        // card payments. The delete below also removes SAR (and the other
+        // old rows) from databases seeded before this change, since
+        // updateOrCreate alone would leave them behind.
+        Currency::whereIn('code', ['SAR', 'USD', 'EUR', 'GBP', 'AED'])->delete();
 
-        foreach ($currencies as $currency) {
-            Currency::updateOrCreate(['code' => $currency['code']], $currency);
-        }
+        Currency::updateOrCreate(
+            ['code' => 'EGP'],
+            [
+                'name'                      => 'Egyptian Pound',
+                'name_ar'                   => 'جنيه مصري',
+                'code'                      => 'EGP',
+                'symbol'                    => 'جنيه',
+                'price_in_default_currency' => 1,
+                'default_currency'          => true,
+                'status'                    => 'used',
+            ]
+        );
     }
 }

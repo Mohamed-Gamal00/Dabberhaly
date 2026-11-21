@@ -21,7 +21,7 @@
                 <div class="pay-summary-row">
                     <span class="pay-summary-label">{{ t('total_amount') }}</span>
                     <span class="pay-summary-val pay-amount">
-                        {{ totalAmount.toFixed(2) }} {{ t('currency_sar') }}
+                        {{ totalAmount.toFixed(2) }} {{ t('currency_egp') }}
                     </span>
                 </div>
             </div>

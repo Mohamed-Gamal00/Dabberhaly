@@ -28,7 +28,7 @@
                 </div>
                 <div>
                     <div class="text-muted small">إجمالي المحصّل</div>
-                    <div class="fw-bold fs-5">{{ number_format($stats['total_paid'], 2) }} ر.س</div>
+                    <div class="fw-bold fs-5">{{ number_format($stats['total_paid'], 2) }} جنيه</div>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@
                 </div>
                 <div>
                     <div class="text-muted small">إيرادات اليوم</div>
-                    <div class="fw-bold fs-5">{{ number_format($stats['today_paid'], 2) }} ر.س</div>
+                    <div class="fw-bold fs-5">{{ number_format($stats['today_paid'], 2) }} جنيه</div>
                 </div>
             </div>
         </div>
@@ -158,7 +158,7 @@
                             <span class="badge bg-{{ $tx->status_color }}">{{ $tx->status_label }}</span>
                         </td>
                         <td class="text-center fw-bold" style="color:#1a237e">
-                            {{ number_format($tx->amount, 2) }} ر.س
+                            {{ number_format($tx->amount, 2) }} جنيه
                         </td>
                         <td style="font-size:12px; color:#6b7280">
                             {{ $tx->created_at->format('d/m/Y H:i') }}

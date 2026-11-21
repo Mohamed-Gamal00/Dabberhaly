@@ -41,7 +41,7 @@
                 </div>
                 <div class="fw-bold" style="font-size:22px;color:#111827">
                     {{ number_format($totalRevenue, 0) }}
-                    <small class="text-muted fw-normal" style="font-size:12px">{{ $mainCurrency->name_ar ?? 'ر.س' }}</small>
+                    <small class="text-muted fw-normal" style="font-size:12px">{{ $mainCurrency->name_ar ?? 'جنيه' }}</small>
                 </div>
                 <div class="text-muted" style="font-size:12px">إجمالي الإيرادات المحصّلة</div>
                 @if($todayRevenue > 0)
@@ -132,7 +132,7 @@
                     <i class="mdi mdi-chart-line me-2 text-primary"></i>
                     المبيعات — آخر 7 أيام
                 </div>
-                <span class="text-muted" style="font-size:12px">{{ $mainCurrency->name_ar ?? 'ر.س' }}</span>
+                <span class="text-muted" style="font-size:12px">{{ $mainCurrency->name_ar ?? 'جنيه' }}</span>
             </div>
             <div class="card-body">
                 <canvas id="salesChart" height="100"></canvas>

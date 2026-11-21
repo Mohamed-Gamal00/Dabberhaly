@@ -28,7 +28,7 @@
                     </div>
                     <div class="os-row os-row--total">
                         <span class="os-label">{{ t('total') }}</span>
-                        <span class="os-val os-amount">{{ Number(order.total_price || 0).toFixed(2) }} {{ t('currency_sar') }}</span>
+                        <span class="os-val os-amount">{{ Number(order.total_price || 0).toFixed(2) }} {{ t('currency_egp') }}</span>
                     </div>
                 </div>
 

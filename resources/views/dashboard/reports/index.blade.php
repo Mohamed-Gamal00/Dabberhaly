@@ -94,7 +94,7 @@
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="kpi-icon"><i class="mdi mdi-cash-multiple"></i></div>
                     <div>
-                        <div class="kpi-value">{{ number_format($kpis['revenue'], 2) }} ر.س</div>
+                        <div class="kpi-value">{{ number_format($kpis['revenue'], 2) }} جنيه</div>
                         <div class="kpi-label">الإيرادات</div>
                     </div>
                 </div>
@@ -116,7 +116,7 @@
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="kpi-icon"><i class="mdi mdi-receipt-text-outline"></i></div>
                     <div>
-                        <div class="kpi-value">{{ number_format($kpis['avg_order_value'], 2) }} ر.س</div>
+                        <div class="kpi-value">{{ number_format($kpis['avg_order_value'], 2) }} جنيه</div>
                         <div class="kpi-label">متوسط قيمة الطلب</div>
                     </div>
                 </div>
@@ -144,7 +144,7 @@
                         <i class="mdi mdi-chart-line me-2" style="color:#76543D"></i>
                         الإيرادات اليومية
                     </div>
-                    <span class="text-muted" style="font-size:12px">ر.س</span>
+                    <span class="text-muted" style="font-size:12px">جنيه</span>
                 </div>
                 <div class="card-body">
                     @if (!empty($trend['labels']))
@@ -270,7 +270,7 @@
                                             <th>المنتج</th>
                                             <th>التصنيف</th>
                                             <th>الكمية المباعة</th>
-                                            <th>الإيرادات (ر.س)</th>
+                                            <th>الإيرادات (جنيه)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -280,7 +280,7 @@
                                                 <td>{{ $item->product_name }}</td>
                                                 <td>{{ $item->category_name ?? '—' }}</td>
                                                 <td>{{ number_format($item->quantity_sold) }}</td>
-                                                <td>{{ number_format($item->revenue, 2) }} ر.س</td>
+                                                <td>{{ number_format($item->revenue, 2) }} جنيه</td>
                                             </tr>
                                         @empty
                                             <tr>
@@ -315,7 +315,7 @@
                                         <tr>
                                             <th>المنتج</th>
                                             <th>التصنيف</th>
-                                            <th>السعر (ر.س)</th>
+                                            <th>السعر (جنيه)</th>
                                             <th>الكمية المتبقية</th>
                                             <th>آخر عملية بيع</th>
                                         </tr>
@@ -325,7 +325,7 @@
                                             <tr>
                                                 <td>{{ $product->CurrentNameLang }}</td>
                                                 <td>{{ $product->parent?->CurrentNameLang ?? '—' }}</td>
-                                                <td>{{ number_format($product->discount_price ?: $product->price, 2) }} ر.س</td>
+                                                <td>{{ number_format($product->discount_price ?: $product->price, 2) }} جنيه</td>
                                                 <td>
                                                     @if ($product->quantity <= 0)
                                                         <span class="badge bg-danger">نفدت الكمية</span>
@@ -362,7 +362,7 @@
                                             <th>العميل</th>
                                             <th>الهاتف</th>
                                             <th>عدد الطلبات</th>
-                                            <th>إجمالي المشتريات (ر.س)</th>
+                                            <th>إجمالي المشتريات (جنيه)</th>
                                             <th>آخر طلب</th>
                                         </tr>
                                     </thead>
@@ -377,7 +377,7 @@
                                                 </td>
                                                 <td>{{ $customer->phone ?? '—' }}</td>
                                                 <td>{{ number_format($customer->orders_count) }}</td>
-                                                <td>{{ number_format($customer->total_spent, 2) }} ر.س</td>
+                                                <td>{{ number_format($customer->total_spent, 2) }} جنيه</td>
                                                 <td>{{ !empty($customer->last_order_at) ? \Carbon\Carbon::parse($customer->last_order_at)->format('d/m/Y') : '—' }}</td>
                                             </tr>
                                         @empty
@@ -440,8 +440,8 @@
                                             <th>الكود</th>
                                             <th>الاسم</th>
                                             <th>مرات الاستخدام</th>
-                                            <th>إجمالي الخصم (ر.س)</th>
-                                            <th>إيرادات الطلبات المستخدمة (ر.س)</th>
+                                            <th>إجمالي الخصم (جنيه)</th>
+                                            <th>إيرادات الطلبات المستخدمة (جنيه)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -450,8 +450,8 @@
                                                 <td>{{ $coupon->code }}</td>
                                                 <td>{{ $coupon->name }}</td>
                                                 <td>{{ number_format($coupon->times_used) }}</td>
-                                                <td>{{ number_format($coupon->discount_given, 2) }} ر.س</td>
-                                                <td>{{ number_format($coupon->revenue, 2) }} ر.س</td>
+                                                <td>{{ number_format($coupon->discount_given, 2) }} جنيه</td>
+                                                <td>{{ number_format($coupon->revenue, 2) }} جنيه</td>
                                             </tr>
                                         @empty
                                             <tr>
@@ -487,7 +487,7 @@
                 data: {
                     labels: trend.labels,
                     datasets: [{
-                        label: 'الإيرادات (ر.س)',
+                        label: 'الإيرادات (جنيه)',
                         data: trend.revenue,
                         borderColor: '#76543D',
                         backgroundColor: 'rgba(118, 84, 61, 0.12)',

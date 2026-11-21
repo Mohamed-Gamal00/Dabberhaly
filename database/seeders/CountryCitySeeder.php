@@ -10,6 +10,9 @@ class CountryCitySeeder extends Seeder
 {
     public function run(): void
     {
+        // Egypt only — the store serves the 27 Egyptian governorates.
+        // Any other country seeded before (Saudi Arabia, UAE, Kuwait,
+        // Bahrain, Qatar) is removed below, together with its cities.
         $data = [
             [
                 'country' => ['name_ar' => 'مصر', 'name_en' => 'Egypt', 'code' => 'EG', 'phone_code' => '+20', 'status' => 'used'],
@@ -43,50 +46,6 @@ class CountryCitySeeder extends Seeder
                     ['name_ar' => 'البحر الأحمر', 'name_en' => 'Red Sea', 'shipping_price' => 45],
                 ],
             ],
-            [
-                'country' => ['name_ar' => 'المملكة العربية السعودية', 'name_en' => 'Saudi Arabia', 'code' => 'SA', 'phone_code' => '+966', 'status' => 'used'],
-                'cities'  => [
-                    ['name_ar' => 'الرياض',  'name_en' => 'Riyadh',  'shipping_price' => 20],
-                    ['name_ar' => 'جدة',     'name_en' => 'Jeddah',  'shipping_price' => 25],
-                    ['name_ar' => 'مكة المكرمة', 'name_en' => 'Mecca','shipping_price' => 25],
-                    ['name_ar' => 'المدينة المنورة', 'name_en' => 'Medina', 'shipping_price' => 30],
-                    ['name_ar' => 'الدمام',  'name_en' => 'Dammam',  'shipping_price' => 30],
-                    ['name_ar' => 'الخبر',   'name_en' => 'Khobar',  'shipping_price' => 30],
-                    ['name_ar' => 'أبها',    'name_en' => 'Abha',    'shipping_price' => 35],
-                    ['name_ar' => 'تبوك',    'name_en' => 'Tabuk',   'shipping_price' => 35],
-                ],
-            ],
-            [
-                'country' => ['name_ar' => 'الإمارات العربية المتحدة', 'name_en' => 'United Arab Emirates', 'code' => 'AE', 'phone_code' => '+971', 'status' => 'used'],
-                'cities'  => [
-                    ['name_ar' => 'دبي',      'name_en' => 'Dubai',      'shipping_price' => 40],
-                    ['name_ar' => 'أبوظبي',   'name_en' => 'Abu Dhabi',  'shipping_price' => 40],
-                    ['name_ar' => 'الشارقة',  'name_en' => 'Sharjah',    'shipping_price' => 45],
-                    ['name_ar' => 'عجمان',    'name_en' => 'Ajman',      'shipping_price' => 45],
-                ],
-            ],
-            [
-                'country' => ['name_ar' => 'الكويت', 'name_en' => 'Kuwait', 'code' => 'KW', 'phone_code' => '+965', 'status' => 'used'],
-                'cities'  => [
-                    ['name_ar' => 'مدينة الكويت', 'name_en' => 'Kuwait City', 'shipping_price' => 50],
-                    ['name_ar' => 'حولي',         'name_en' => 'Hawalli',     'shipping_price' => 50],
-                    ['name_ar' => 'الفروانية',    'name_en' => 'Farwaniya',   'shipping_price' => 50],
-                ],
-            ],
-            [
-                'country' => ['name_ar' => 'البحرين', 'name_en' => 'Bahrain', 'code' => 'BH', 'phone_code' => '+973', 'status' => 'used'],
-                'cities'  => [
-                    ['name_ar' => 'المنامة', 'name_en' => 'Manama',   'shipping_price' => 50],
-                    ['name_ar' => 'المحرق',  'name_en' => 'Muharraq', 'shipping_price' => 50],
-                ],
-            ],
-            [
-                'country' => ['name_ar' => 'قطر', 'name_en' => 'Qatar', 'code' => 'QA', 'phone_code' => '+974', 'status' => 'used'],
-                'cities'  => [
-                    ['name_ar' => 'الدوحة',   'name_en' => 'Doha',      'shipping_price' => 50],
-                    ['name_ar' => 'الريان',   'name_en' => 'Al Rayyan', 'shipping_price' => 50],
-                ],
-            ],
         ];
 
         foreach ($data as $entry) {
@@ -102,5 +61,8 @@ class CountryCitySeeder extends Seeder
                 );
             }
         }
+
+        // Drop countries from earlier seeds (their cities cascade).
+        Country::where('code', '!=', 'EG')->delete();
     }
 }

@@ -59,7 +59,7 @@
                     <button @click="removeFilter('cat')">×</button>
                 </span>
                 <span v-if="filters.min || filters.max" class="filter-chip">
-                    {{ t('filter_price') }} {{ filters.min || '0' }} — {{ filters.max || '∞' }} ر.س
+                    {{ t('filter_price') }} {{ filters.min || '0' }} — {{ filters.max || '∞' }} {{ t('currency_egp') }}
                     <button @click="removeFilter('price')">×</button>
                 </span>
             </div>

@@ -54,7 +54,7 @@
                         <div class="cd-shipping-head">
                             <v-icon size="18" color="#76543D">mdi-truck-outline</v-icon>
                             <span v-if="total < freeShippingThreshold" class="cd-shipping-text">
-                                {{ t('cart_free_shipping_remaining') }} — <strong>{{ freeShippingThreshold - total }} {{ t('currency_sar') }}</strong>
+                                {{ t('cart_free_shipping_remaining') }} — <strong>{{ freeShippingThreshold - total }} {{ t('currency_egp') }}</strong>
                             </span>
                             <span v-else class="cd-shipping-text cd-shipping-text--done">
                                 <v-icon size="16" color="#15803d">mdi-check-circle</v-icon>
@@ -81,8 +81,8 @@
                             <div class="cd-item-details">
                                 <div class="cd-item-name">{{ pick(item, 'name') }}</div>
                                 <div class="cd-item-price-row">
-                                    <span class="cd-item-price">{{ Math.ceil(item.discount_price || item.price) }} {{ t('currency_sar') }}</span>
-                                    <span v-if="item.discount_price && Number(item.discount_price) < Number(item.price)" class="cd-item-old-price">{{ Math.ceil(item.price) }} {{ t('currency_sar') }}</span>
+                                    <span class="cd-item-price">{{ Math.ceil(item.discount_price || item.price) }} {{ t('currency_egp') }}</span>
+                                    <span v-if="item.discount_price && Number(item.discount_price) < Number(item.price)" class="cd-item-old-price">{{ Math.ceil(item.price) }} {{ t('currency_egp') }}</span>
                                 </div>
                                 <div class="cd-item-footer">
                                     <div class="cd-qty">
@@ -90,7 +90,7 @@
                                         <span class="cd-qty-value">{{ item.quantity }}</span>
                                         <v-icon size="16" class="cd-qty-icon" @click="changeQty(item, 1)">mdi-plus</v-icon>
                                     </div>
-                                    <span class="cd-item-total">{{ Math.ceil((Number(item.discount_price) || Number(item.price)) * Number(item.quantity)) }} {{ t('currency_sar') }}</span>
+                                    <span class="cd-item-total">{{ Math.ceil((Number(item.discount_price) || Number(item.price)) * Number(item.quantity)) }} {{ t('currency_egp') }}</span>
                                 </div>
                             </div>
                             <button class="cd-remove" @click="removeItem(item.id)">
@@ -103,11 +103,11 @@
                     <div class="cd-footer">
                         <div v-if="totalSavings > 0" class="cd-sum-row cd-sum-saving">
                             <span><v-icon size="14" color="#15803d" class="me-1">mdi-tag-outline</v-icon>{{ t('cart_you_save') }}</span>
-                            <span>- {{ totalSavings }} {{ t('currency_sar') }}</span>
+                            <span>- {{ totalSavings }} {{ t('currency_egp') }}</span>
                         </div>
                         <div class="cd-sum-row cd-sum-total">
                             <span>{{ t('cart_total') }}</span>
-                            <span>{{ total }} {{ t('currency_sar') }}</span>
+                            <span>{{ total }} {{ t('currency_egp') }}</span>
                         </div>
                         <p class="cd-shipping-note">{{ t('cart_shipping_note') }}</p>
                         <v-btn block color="primary" height="48" rounded="lg" class="cd-cta" href="/checkout">

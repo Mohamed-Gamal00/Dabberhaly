@@ -17,7 +17,7 @@
             <div class="result-card">
                 <div class="result-row"><span class="result-label">{{ t('order_number') }}</span><span class="result-val fw-bold">#{{ order.number }}</span></div>
                 <div class="result-row"><span class="result-label">{{ t('items_count') }}</span><span class="result-val">{{ order.items_count }} {{ t('pieces') }}</span></div>
-                <div class="result-row"><span class="result-label">{{ t('amount_paid') }}</span><span class="result-val result-amount">{{ ((order.total_price || 0) + (order.shipping_price || 0)).toFixed(2) }} ر.س</span></div>
+                <div class="result-row"><span class="result-label">{{ t('amount_paid') }}</span><span class="result-val result-amount">{{ ((order.total_price || 0) + (order.shipping_price || 0)).toFixed(2) }} {{ t('currency_egp') }}</span></div>
                 <div class="result-row"><span class="result-label">{{ t('payment_status') }}</span><span class="badge bg-success px-3 py-2">{{ t('paid_status') }}</span></div>
             </div>
 

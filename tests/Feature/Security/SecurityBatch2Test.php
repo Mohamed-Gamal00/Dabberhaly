@@ -43,13 +43,6 @@ class SecurityBatch2Test extends TestCase
             'name_ar' => 'القاهرة', 'name_en' => 'Cairo', 'status' => 'used',
             'country_id' => $this->countryId, 'shipping_price' => 25,
         ]);
-
-        // API registration hardcodes country_id 178 for the new address
-        // (UserService::createUser), so it must exist for the FK.
-        DB::table('countries')->insert([
-            'id' => 178, 'name_ar' => 'السعودية', 'name_en' => 'Saudi Arabia',
-            'status' => 'used',
-        ]);
     }
 
     protected function tearDown(): void

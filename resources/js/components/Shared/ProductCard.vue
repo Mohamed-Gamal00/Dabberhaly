@@ -89,8 +89,8 @@
 
             <!-- Price block -->
             <div class="pc-price">
-                <span class="pc-price-now">{{ formatPrice(finalPrice) }} {{ t('currency_sar') }}</span>
-                <span v-if="hasDiscount" class="pc-price-old">{{ formatPrice(item.price) }} {{ t('currency_sar') }}</span>
+                <span class="pc-price-now">{{ formatPrice(finalPrice) }} {{ t('currency_egp') }}</span>
+                <span v-if="hasDiscount" class="pc-price-old">{{ formatPrice(item.price) }} {{ t('currency_egp') }}</span>
             </div>
 
             <!-- Low stock hint -->

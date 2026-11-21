@@ -364,7 +364,7 @@
   "footer_privacy_short": "الخصوصية",
 
   "features_free_shipping": "شحن مجاني",
-  "features_free_shipping_sub": "على الطلبات فوق 200 ر.س",
+  "features_free_shipping_sub": "على الطلبات فوق 200 جنيه",
   "features_secure_payment": "دفع آمن",
   "features_secure_payment_sub": "بيانات مشفرة 100%",
   "features_free_returns": "إرجاع مجاني",
@@ -453,7 +453,7 @@
   "orders_status_shipped": "تم الشحن",
   "orders_status_delivered": "تم التسليم",
   "orders_status_cancelled": "ملغي",
-  "currency_sar": "ر.س",
+  "currency_egp": "جنيه",
   "account_subtitle": "إدارة حسابك الشخصي وطلباتك",
   "account_go_to_profile": "الذهاب للملف الشخصي",
   "account_back_home": "العودة للرئيسية",

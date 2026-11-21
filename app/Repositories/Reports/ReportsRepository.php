@@ -391,7 +391,7 @@ class ReportsRepository implements ReportInterface
         $this->attachCategoryNames($rows);
 
         return [
-            ['المنتج', 'التصنيف', 'الكمية المباعة', 'الإيراد (ر.س)'],
+            ['المنتج', 'التصنيف', 'الكمية المباعة', 'الإيراد (جنيه)'],
             $rows->map(fn ($row) => [
                 $row->product_name ?? '',
                 $row->category_name ?? '',
@@ -408,7 +408,7 @@ class ReportsRepository implements ReportInterface
         $rows = $this->lowStockQuery($threshold)->limit(5000)->get();
 
         return [
-            ['المنتج', 'التصنيف', 'الكمية المتاحة', 'السعر (ر.س)', 'آخر عملية بيع'],
+            ['المنتج', 'التصنيف', 'الكمية المتاحة', 'السعر (جنيه)', 'آخر عملية بيع'],
             $rows->map(fn (Product $product) => [
                 $product->name ?? '',
                 $product->parent?->name ?? '',
@@ -424,7 +424,7 @@ class ReportsRepository implements ReportInterface
         $rows = $this->topCustomersQuery($start, $end)->limit(5000)->get();
 
         return [
-            ['العميل', 'البريد الإلكتروني', 'رقم الهاتف', 'عدد الطلبات', 'إجمالي الإنفاق (ر.س)', 'آخر طلب'],
+            ['العميل', 'البريد الإلكتروني', 'رقم الهاتف', 'عدد الطلبات', 'إجمالي الإنفاق (جنيه)', 'آخر طلب'],
             $rows->map(fn ($row) => [
                 $row->name ?? '',
                 $row->email ?? '',
@@ -454,7 +454,7 @@ class ReportsRepository implements ReportInterface
         $rows = $this->couponsQuery($start, $end)->limit(5000)->get();
 
         return [
-            ['الكود', 'الاسم', 'مرات الاستخدام', 'قيمة الخصم (ر.س)', 'الإيراد (ر.س)'],
+            ['الكود', 'الاسم', 'مرات الاستخدام', 'قيمة الخصم (جنيه)', 'الإيراد (جنيه)'],
             $rows->map(fn ($row) => [
                 $row->code ?? '',
                 $row->name ?? '',
