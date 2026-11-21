@@ -65,6 +65,7 @@
                 color="primary"
                 rounded="lg"
                 height="44"
+                class="ua-save-btn"
                 style="text-transform:none; min-width:140px"
                 :loading="form.processing"
                 @click="updateInfo"
@@ -109,4 +110,8 @@ const updateInfo = () => {
     font-weight: 600;
     color: #374151;
 }
+
+/* Same glued-icon issue as the contact submit button: Vuetify's
+   `start` margin doesn't render a gap, so space it explicitly. */
+.ua-save-btn :deep(.v-btn__content) { gap: 8px; }
 </style>
