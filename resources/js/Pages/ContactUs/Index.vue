@@ -53,7 +53,7 @@
                                     <v-textarea v-model="form.text" variant="outlined" density="comfortable" rounded="lg" bg-color="#FAF6EF" hide-details="auto" rows="4" class="mt-1 mb-4" :error-messages="form.errors.text" />
                                 </v-col>
                             </v-row>
-                            <v-btn type="submit" color="primary" block height="48" rounded="lg" style="text-transform:none; font-size:15px; font-weight:600" :loading="form.processing">
+                            <v-btn type="submit" color="primary" block height="48" rounded="lg" class="cu-submit-btn" style="text-transform:none; font-size:15px; font-weight:600" :loading="form.processing">
                                 <v-icon start size="18" class="cu-send-icon">mdi-send</v-icon>
                                 {{ t('contact_send') }}
                             </v-btn>
@@ -142,4 +142,9 @@ a.cu-info-value:hover { color: #76543D; }
 
 /* mdi-send points right; in RTL it must point left (forward). */
 [dir="rtl"] .cu-send-icon { transform: scaleX(-1); }
+
+/* The send icon was glued to the label: Vuetify's `start` margin
+   doesn't render a gap here, so space the button content
+   explicitly (gap works whichever side the icon lands on). */
+.cu-submit-btn :deep(.v-btn__content) { gap: 8px; }
 </style>
