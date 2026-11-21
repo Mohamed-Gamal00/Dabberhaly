@@ -51,7 +51,12 @@ class HandleInertiaRequests extends Middleware
 
             // Cached 1h, same pattern as site_settings — this used to
             // hit the DB on every single Inertia request.
-            'advertisements' => fn() => cache()->remember('active_advertisements', 3600, fn() => Advertisement::where('is_active', true)
+            // The key MUST include the locale: the title is localized
+            // inside the closure, so a locale-blind key serves the
+            // first-visited language to every other language until
+            // the cache expires (the marquee stayed Arabic after
+            // switching the site to English).
+            'advertisements' => fn() => cache()->remember('active_advertisements_' . app()->getLocale(), 3600, fn() => Advertisement::where('is_active', true)
                 ->get()
                 ->map(fn($a) => [
                     'title' => app()->getLocale() === 'en' && $a->title_en ? $a->title_en : $a->title,

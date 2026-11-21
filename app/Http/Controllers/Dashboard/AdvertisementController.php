@@ -48,7 +48,7 @@ class AdvertisementController extends Controller
     }
     // dd($data);
     $this->advertisementRepository->store($data);
-    Cache::forget('active_advertisements');
+    $this->forgetAdvertisementsCache();
 
     return redirect()->route('advertisements.index')
       ->with('success', __('messages.ADVERTISEMENT_CREATED') );
@@ -71,7 +71,7 @@ class AdvertisementController extends Controller
     }
 
     $this->advertisementRepository->update($data, $advertisement->id);
-    Cache::forget('active_advertisements');
+    $this->forgetAdvertisementsCache();
 
     return redirect()->route('advertisements.index')
       ->with('success', __('messages.ADVERTISEMENT_UPDATED'));
@@ -81,7 +81,7 @@ class AdvertisementController extends Controller
   {
     Gate::authorize('advertisement.delete');
     $this->advertisementRepository->delete($id);
-    Cache::forget('active_advertisements');
+    $this->forgetAdvertisementsCache();
     return redirect()->route('advertisements.index')
       ->with('success', __('messages.ADVERTISEMENT_DELETED'));
   }
@@ -90,9 +90,21 @@ class AdvertisementController extends Controller
   {
     Gate::authorize('advertisement.edit');
     $advertisement->update(['is_active' => !$advertisement->is_active]);
-    Cache::forget('active_advertisements');
+    $this->forgetAdvertisementsCache();
     return redirect()->back()->with('success',
       $advertisement->is_active ? 'تم تفعيل الإعلان' : 'تم إيقاف الإعلان'
     );
+  }
+
+  /**
+   * The marquee cache is keyed per locale (see HandleInertiaRequests),
+   * so every mutation must clear all languages, not just the one
+   * the admin happens to be using.
+   */
+  private function forgetAdvertisementsCache(): void
+  {
+    foreach (['ar', 'en'] as $locale) {
+      Cache::forget('active_advertisements_' . $locale);
+    }
   }
 }
