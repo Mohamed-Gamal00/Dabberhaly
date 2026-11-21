@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Checkout;
 
+use App\Rules\EgyptianMobileNumber;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 class CheckoutRequest extends FormRequest
@@ -28,7 +30,7 @@ class CheckoutRequest extends FormRequest
             $rules = [
                 "addr.shipping.first_name" => ['required', 'max:255'],
                 "addr.shipping.last_name" => ['required', 'max:255'],
-                "addr.shipping.phone_number" => ['required', 'regex:/^[0-9+\s\-]{7,20}$/'],
+                "addr.shipping.phone_number" => ['required', new EgyptianMobileNumber],
                 "addr.shipping.address" => ['required', 'string', 'max:255'],
                 "addr.shipping.country_id" => ['required', 'exists:countries,id'],
                 "addr.shipping.city_id" => ['required', 'exists:cities,id'],
@@ -41,7 +43,7 @@ class CheckoutRequest extends FormRequest
             $rules = [
                 "addr.billing.first_name" => ['required', 'max:255'],
                 "addr.billing.last_name" => ['required', 'max:255'],
-                "addr.billing.phone_number" => ['required', 'regex:/^[0-9+\s\-]{7,20}$/'],
+                "addr.billing.phone_number" => ['required', new EgyptianMobileNumber],
                 "addr.billing.address" => ['required', 'string', 'max:255'],
                 "addr.billing.country_id" => ['required', 'exists:countries,id'],
                 "addr.billing.city_id" => ['required', 'exists:cities,id'],

@@ -118,7 +118,7 @@ class UserProfileUpdateTest extends TestCase
         $this->assertNotSame('abcdef', $user->fresh()->phone_number);
     }
 
-    public function test_profile_update_rejects_phone_shorter_than_seven_digits(): void
+    public function test_profile_update_rejects_too_short_phone_number(): void
     {
         $user = User::factory()->create(['password' => 'password']);
 

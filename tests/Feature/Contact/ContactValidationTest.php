@@ -8,8 +8,8 @@ use Tests\TestCase;
 /**
  * Validation gaps fixed in the web contact form:
  * - phone_number used `numeric`, rejecting valid phones starting
- *   with `+` — now the canonical `regex:/^[0-9+\s\-]{7,20}$/`
- *   (same as RegisterRequest).
+ *   with `+` — now the shared Egyptian-mobile rule
+ *   (App\Rules\EgyptianMobileNumber).
  * - contact_email had no max (column is varchar(255)).
  * Errors are shown next to each field via form.errors (Inertia
  * useForm) — a failed submit keeps the form open with the errors.

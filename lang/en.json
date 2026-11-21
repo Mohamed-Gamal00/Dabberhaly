@@ -264,7 +264,7 @@
   "val_max_50":             "Must not exceed 50 characters.",
   "val_letters_only":       "Letters only.",
   "val_email_invalid":      "Please enter a valid email address.",
-  "val_phone_invalid":      "Invalid phone number, digits only.",
+  "val_phone_invalid":      "The phone number must be a valid Egyptian mobile number starting with 010, 011, 012 or 015.",
   "val_password_min":       "Password must be at least 8 characters.",
   "val_password_uppercase": "Must contain at least one uppercase letter.",
   "val_password_lowercase": "Must contain at least one lowercase letter.",

@@ -177,7 +177,7 @@
                                     <tr>
                                         <td>{{ $city->country->name_ar }}</td>
                                         <td>{{ $city->name_ar }}</td>
-                                        <td>{{ $city->shipping_price }}</td>
+                                        <td>{{ $city->shipping_price }} جنيه</td>
                                     </tr>
                                 @endif
                             </tbody>

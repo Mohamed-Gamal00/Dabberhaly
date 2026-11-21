@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'egyptian_mobile' => 'The phone number must be a valid Egyptian mobile number starting with 010, 011, 012 or 015.',
     'register' => [
         'first_name_required'   => 'First name is required.',
         'first_name_min'        => 'First name must be at least 2 characters.',
@@ -17,7 +18,6 @@ return [
         'email_taken'           => 'This email address is already registered.',
 
         'phone_required'        => 'Phone number is required.',
-        'phone_invalid'         => 'Phone number is invalid, digits only.',
         'phone_taken'           => 'This phone number is already registered.',
 
         'address_required'      => 'Address is required.',

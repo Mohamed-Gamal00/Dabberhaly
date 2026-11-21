@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api;
 
 use App\Helper\ApiResponse;
 use App\Models\Admin;
+use App\Rules\EgyptianMobileNumber;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Notification;
@@ -29,7 +30,9 @@ class ContactUsRequest extends FormRequest
         return [
             'full_name' => 'required|string|max:255|min:10',
             'email' => 'required|email',
-            'phone_number' => 'required|numeric|digits_between:7,15',
+            // Was `numeric|digits_between:7,15` — it rejected every valid
+            // +20 number (the known +-rejection bug).
+            'phone_number' => ['required', 'string', new EgyptianMobileNumber],
             'message' => 'required|string|min:10'
         ];
 

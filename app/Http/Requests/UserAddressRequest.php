@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\EgyptianMobileNumber;
+
 use App\Helper\ApiResponse;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -37,7 +39,7 @@ class UserAddressRequest extends FormRequest
                 'address' => 'required|string|max:255',
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'nullable|string|max:255',
-                'phone_number' => ['required', 'regex:/^[0-9+\s\-]{7,20}$/'],
+                'phone_number' => ['required', new EgyptianMobileNumber],
                 'city_id' => 'required|exists:cities,id',
         ];
     }

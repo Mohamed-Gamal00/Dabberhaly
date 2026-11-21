@@ -7,8 +7,8 @@ use Tests\TestCase;
 
 /**
  * Validation gap fixed in the web bulk-order form:
- * - phone had no format rule at all — now the canonical
- *   `regex:/^[0-9+\s\-]{7,20}$/` (same as RegisterRequest).
+ * - phone had no format rule at all — now the shared
+ *   Egyptian-mobile rule (App\Rules\EgyptianMobileNumber).
  * Errors are shown next to each field via form.errors (Inertia
  * useForm) — a failed submit keeps the form open with the errors.
  */
@@ -54,6 +54,31 @@ class BulkOrderValidationTest extends TestCase
         ]));
 
         $response->assertSessionHasErrors('phone');
+        $this->assertDatabaseCount('bulk_orders', 0);
+    }
+
+    // API bulk-order endpoint (POST /api/v1/store-bulk-order): its
+    // FormRequest class was missing entirely, so the endpoint 500'd
+    // on every call. It now validates with the same Egyptian-mobile
+    // rule as the web form.
+    public function test_api_bulk_order_accepts_valid_egyptian_phone(): void
+    {
+        $response = $this->postJson('/api/v1/store-bulk-order', $this->validPayload([
+            'phone' => '01054125230',
+        ]));
+
+        $response->assertOk();
+        $this->assertDatabaseHas('bulk_orders', ['phone' => '01054125230']);
+    }
+
+    public function test_api_bulk_order_rejects_wrong_prefix_phone(): void
+    {
+        $response = $this->postJson('/api/v1/store-bulk-order', $this->validPayload([
+            'phone' => '01312345678',
+        ]));
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('phone');
         $this->assertDatabaseCount('bulk_orders', 0);
     }
 }

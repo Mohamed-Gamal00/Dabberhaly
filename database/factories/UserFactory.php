@@ -22,7 +22,10 @@ class UserFactory extends Factory
             'first_name'   => fake()->firstName(),
             'family_name'   => fake()->lastName(),
             'email'         => fake()->unique()->safeEmail(),
-            'phone_number'  => fake()->unique()->numerify('05########'),
+            // Valid Egyptian mobile (010/011/012/015 + 8 digits, or
+            // +20/20 form). Faker has no char-class numerify, so the
+            // 010 prefix stands in for all four.
+            'phone_number'  => fake()->unique()->numerify('010########'),
             'password'      => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'address'       => fake()->address(),
             'image'         => null,

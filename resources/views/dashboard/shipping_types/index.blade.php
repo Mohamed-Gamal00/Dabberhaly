@@ -45,8 +45,8 @@
                                         <td data-field="id">{{ $shippingData->add_normal_price ? 'مفعل' : 'غير مفعل' }}</td>
                                         <td data-field="id">
                                             {{ $shippingData->add_price_based_on_city ? 'مفعل' : 'غير مفعل' }}</td>
-                                        <td data-field="id">{{ $shippingData->weight_price }}</td>
-                                        <td data-field="id">{{ $shippingData->normal_shipping_price }}</td>
+                                        <td data-field="id">{{ $shippingData->weight_price }} جنيه</td>
+                                        <td data-field="id">{{ $shippingData->normal_shipping_price }} جنيه</td>
                                         {{-- <td data-field="id">
                                             @if ($shippingData->status == '1')
                                                 نشط

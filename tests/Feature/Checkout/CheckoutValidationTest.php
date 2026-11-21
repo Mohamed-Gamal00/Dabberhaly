@@ -19,7 +19,7 @@ use Tests\TestCase;
  * Validation gaps fixed in the web checkout + API guest checkout:
  * - phone_number used `numeric` / no format rule, rejecting valid
  *   phones starting with `+` and accepting gibberish — now the
- *   canonical `regex:/^[0-9+\s\-]{7,20}$/` (same as RegisterRequest).
+ *   shared Egyptian-mobile rule (App\Rules\EgyptianMobileNumber).
  * - guest_email had no max; address allowed 500 chars but the
  *   user_addresses column is varchar(255).
  * - discount_code had no max.

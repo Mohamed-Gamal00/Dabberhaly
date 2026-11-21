@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Inertia;
 
+use App\Rules\EgyptianMobileNumber;
+
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\ContactUs;
@@ -31,7 +33,7 @@ class ContactUsController extends Controller
         $request->validate([
             'full_name'     => 'required|string|max:255',
             'contact_email' => 'required|email|max:255',
-            'phone_number'  => ['required', 'regex:/^[0-9+\s\-]{7,20}$/'],
+            'phone_number'  => ['required', new EgyptianMobileNumber],
             'text'          => 'required|string',
         ]);
 

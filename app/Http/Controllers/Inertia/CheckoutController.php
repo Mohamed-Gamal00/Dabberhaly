@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Inertia;
 
+use App\Rules\EgyptianMobileNumber;
+
 use App\Events\UserOrder;
 use App\Exceptions\CheckoutException;
 use App\Http\Controllers\Controller;
@@ -149,7 +151,7 @@ class CheckoutController extends Controller
             $request->validate([
                 "addr.{$addrType}.first_name"   => ['required', 'string', 'max:255'],
                 "addr.{$addrType}.last_name"    => ['required', 'string', 'max:255'],
-                "addr.{$addrType}.phone_number" => ['required', 'string', 'regex:/^[0-9+\s\-]{7,20}$/', 'max:20'],
+                "addr.{$addrType}.phone_number" => ['required', 'string', new EgyptianMobileNumber, 'max:20'],
                 "addr.{$addrType}.address"      => ['required', 'string', 'max:255'],
                 "addr.{$addrType}.country_id"   => ['required', 'exists:countries,id'],
                 "addr.{$addrType}.city_id"      => ['required', 'exists:cities,id'],
@@ -157,7 +159,6 @@ class CheckoutController extends Controller
                 "addr.{$addrType}.first_name.required"   => 'الاسم الأول مطلوب',
                 "addr.{$addrType}.last_name.required"    => 'اسم العائلة مطلوب',
                 "addr.{$addrType}.phone_number.required" => 'رقم الجوال مطلوب',
-                "addr.{$addrType}.phone_number.regex"    => 'رقم الجوال غير صحيح',
                 "addr.{$addrType}.address.required"      => 'العنوان التفصيلي مطلوب',
                 "addr.{$addrType}.country_id.required"   => 'الدولة مطلوبة',
                 "addr.{$addrType}.country_id.exists"     => 'الدولة المحددة غير صحيحة',
