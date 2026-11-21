@@ -166,8 +166,6 @@ Route::middleware('auth:web')->group(function () {
 
     Route::put('/user_update_info/update', [UserProfileController::class, 'updatePassword'])->name('update_password');
     Route::put('/user_normal_info/update', [UserProfileController::class, 'updateUserInfo'])->name('update_user_info');
-    Route::post('/user_normal_info/verify_to_update', [UserProfileController::class, 'verify_to_update'])->name('verify_to_update');
-    Route::post('/user_normal_info/resendVerifyCode_to_update', [UserProfileController::class, 'resendVerifyCodeToupdate'])->name('resendVerifyCode_to_update');
 
 
     // /* المرتجعات */

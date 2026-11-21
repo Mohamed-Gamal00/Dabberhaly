@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User_verfication;
 use App\Services\SMSGateways\moraSms;
 use App\Services\VerificationServices;
 use Closure;
@@ -29,6 +30,26 @@ class CheckUserVerification
         $user = $request->user();
 
         if ($user && $user->verificationCode && !$user->verificationCode->is_verified) {
+            // Only send a fresh code when the user has no live one:
+            // the code lives 60 seconds, and regenerating it on every
+            // request spams the user with SMS and resets the
+            // wrong-attempt counter each time. A live code is still
+            // usable, so just block with the same 403 and let the
+            // user enter the code they already received.
+            $liveCode = User_verfication::where('user_id', $user->id)
+                ->where('is_reset_password', false)
+                ->whereNotNull('verification_code_expires_at')
+                ->where('verification_code_expires_at', '>', now())
+                ->exists();
+
+            if ($liveCode) {
+                return response()->json([
+                    'message' => "Your account is not verified. A verification code has already been sent to your phone number.",
+                    'verification_required' => true,
+                    'user_id' => $user->id,
+                ], 403);
+            }
+
             // Generate the verification code and SMS
             $verificationData = $this->sms_service->setVerificationCode($user->id);
             $message = $this->sms_service->getSMSVerifyMessageByAppName($verificationData->code);

@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Guest;
 use App\Models\Order;
-use App\Models\OrderItem;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -26,26 +25,6 @@ class GuestOrdersController extends Controller
             ->first();
 
         return view('front.guest_orders.orders', compact('order'));
-    }
-
-    /* حذف الطلب */
-    public function guestOrderDelete(Request $request)
-    {
-        $orderItem = OrderItem::where('product_id', $request->product_id)->first();
-        $order = OrderItem::findOrFail($orderItem->id);
-        $order->delete();
-
-        $currenctOrder = Order::where('number', $request->order_number)
-            ->has('orderItems')
-            ->first();
-
-        if (is_null($currenctOrder)) {
-            $order = Order::where('number', $request->order_number)->first();
-            $order->delete();
-        }
-
-
-        return back()->with('danger', 'تم مسح الطلب ');
     }
 
     /* مرتجعات */

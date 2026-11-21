@@ -51,10 +51,7 @@ class ProductController extends Controller
             ->withIsInWishlist($user);
 
         if ($q) {
-            $query->where(fn($q2) =>
-                $q2->where('name', 'LIKE', "%{$q}%")
-                   ->orWhere('name_en', 'LIKE', "%{$q}%")
-            );
+            $query->searchText($q);
         }
 
         if ($min) $query->where('price', '>=', $min);

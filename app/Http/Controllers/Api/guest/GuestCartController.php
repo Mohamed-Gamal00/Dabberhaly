@@ -129,6 +129,18 @@ class GuestCartController extends Controller
             'quantity' => ['required', 'int', 'min:1'],
         ]);
 
+        // Same stock cap as guestStore(): never let the cart hold
+        // more than the product has in stock.
+        $item = Cart::where('id', $id)->withoutGlobalScope('cookie_id')
+            ->where('cookie_id', $request->header('guest-id'))
+            ->first();
+
+        if ($item && $item->product && $request->post('quantity') > $item->product->quantity) {
+            return response()->json([
+                'message' => 'Sorry, the requested quantity is not available.',
+            ], 400);
+        }
+
         Cart::where('id', $id)->withoutGlobalScope('cookie_id')
             ->where('cookie_id', $request->header('guest-id'))
             ->update(['quantity' => $request->post('quantity')]);

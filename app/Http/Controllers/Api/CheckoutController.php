@@ -80,6 +80,13 @@ class CheckoutController extends Controller
             event(new UserOrder($order));
 
             return $this->checkOutservice->checkPaymentMethod($request, $order);
+        } catch (CheckoutException $e) {
+            DB::rollBack();
+            // A deliberate, user-facing error (e.g. a soft-deleted
+            // product surfacing in createOrder's totals): its message
+            // is safe to show, like in the pre-check above — not the
+            // generic "Order creation failed".
+            return ApiResponse::sendResponse(400, $e->getMessage());
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error('API user checkout failed', ['exception' => $e]);

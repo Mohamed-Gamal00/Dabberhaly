@@ -79,6 +79,7 @@ Route::middleware(['changeLanguage'])->group(function () {
 
         #-------------------------------------- Check-Discount --------------------------------------------
         Route::post('/check-discount', CheckDiscountController::class);
+        Route::post('/remove-discount', [CheckDiscountController::class, 'removeDiscount']);
 
 
         #-------------------------------------- user-orders --------------------------------------------
@@ -192,6 +193,7 @@ Route::middleware(['changeLanguage'])->group(function () {
         Route::post('/guest-checkout', [\App\Http\Controllers\Api\guest\CheckoutController::class, 'guestCheckout']);
         Route::post('guest-fav-product-add-or-delete', [AddToFavProductsController::class, 'guestAddFavProducts']);
         Route::post('/guest-check-discount', \App\Http\Controllers\Api\guest\GuestCheckDiscountController::class);
+        Route::post('/guest-remove-discount', [\App\Http\Controllers\Api\guest\GuestCheckDiscountController::class, 'removeDiscount']);
 
         #-------------------------------------- guest-orders --------------------------------------------
         Route::get('/guest-orders', [\App\Http\Controllers\Api\guest\GuestOrdersController::class, 'mainOrders']);

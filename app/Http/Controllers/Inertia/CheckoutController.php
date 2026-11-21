@@ -226,6 +226,13 @@ class CheckoutController extends Controller
             session()->forget('applied_discount_code_id');
 
             DB::commit();
+        } catch (CheckoutException $e) {
+            DB::rollBack();
+            // A deliberate, user-facing error (e.g. a soft-deleted
+            // product surfacing in createOrder's totals): its message
+            // is safe to show, like in the pre-check above — not the
+            // generic "order creation failed".
+            return response()->json(['message' => $e->getMessage()], 400);
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error('Web checkout failed', ['exception' => $e]);

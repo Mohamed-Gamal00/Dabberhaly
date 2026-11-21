@@ -1,5 +1,5 @@
 <template>
-    <div class="auth-page">
+    <div class="auth-page" :dir="dir">
         <SeoHead :title="t('login_btn')" noindex />
         <!-- Left panel: branding -->
         <div class="auth-left d-none d-md-flex">
@@ -72,7 +72,7 @@ import { useLocale } from '../../composables/useLocale';
 defineOptions({ layout: null });
 
 const siteName = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
-const { t } = useLocale();
+const { t, dir } = useLocale();
 
 const form = useForm({ email: '', password: '' });
 const loading = ref(false);
@@ -105,7 +105,6 @@ const submit = () => {
 .auth-page {
     display: flex;
     min-height: 100vh;
-    direction: rtl;
 }
 
 .auth-left {

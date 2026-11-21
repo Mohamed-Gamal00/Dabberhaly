@@ -18,12 +18,12 @@ class CartResource extends JsonResource
             'id' => $this->id,
             'name' => $this->product->getCurrentNameLangAttribute(),
             'image' => $this->product->image_url,
-            'category' => $this->product->parent->getCurrentNameLangAttribute(),
+            'category' => $this->product->parent?->getCurrentNameLangAttribute(),
             'price' => $this->product->price,
             'quantity' => $this->quantity,
             'weight' => $this->product->weight,
             'discount_price' => $this->product->discount_price ?? 0,
-            'product_status' => $this->product->availability->getCurrentNameLangAttribute(),
+            'product_status' => $this->product->availability?->getCurrentNameLangAttribute(),
         ];
     }
 }

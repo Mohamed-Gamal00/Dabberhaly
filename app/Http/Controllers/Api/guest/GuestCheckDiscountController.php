@@ -8,6 +8,7 @@ use App\Models\Cart;
 use App\Models\DiscountCode;
 use App\Models\AppliedDiscountCode;
 use App\Repositories\Cart\CartRepository;
+use App\Services\CheckOut\CheckoutServices;
 use App\Services\Discount\CheckDiscountService;
 use Illuminate\Http\Request;
 
@@ -83,6 +84,40 @@ class GuestCheckDiscountController extends Controller
             'discount_code' => $discountCode->code,
             'cart' => $cartItems
         ], 200);
+    }
+
+    /**
+     * Remove an applied discount code — the API mirror of the web
+     * POST /checkout/remove-discount for guest carts: reset
+     * discounted_price on the guest's cart rows and delete the
+     * AppliedDiscountCode row, so a later checkout is charged the
+     * full price and the code is not consumed.
+     */
+    public function removeDiscount(Request $request)
+    {
+        $guestId = $request->header('guest-id');
+
+        if (! $guestId) {
+            return response()->json(['error' => 'not found'], 401);
+        }
+
+        $cartItems = Cart::withoutGlobalScope('cookie_id')
+            ->where('cookie_id', $guestId)
+            ->where('status', 0)->get();
+
+        $cartItems->each(fn ($item) => $item->update(['discounted_price' => null]));
+
+        AppliedDiscountCode::where('cookie_id', $guestId)->delete();
+
+        // No discount is active anymore, so the totals are the plain
+        // per-product offer prices — the full price.
+        $total = $cartItems->sum(
+            fn ($item) => $item->quantity * CheckoutServices::chargedUnitPrice($item, false)
+        );
+
+        return ApiResponse::sendResponse(200, __('flash.discount_removed'), [
+            'new_total' => (float) $total,
+        ]);
     }
 
 }
