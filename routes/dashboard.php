@@ -193,7 +193,6 @@ Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function () {
 
     //----------------------------------------------/ Reports Routes
     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
-    Route::post('/searchReport', [ReportsController::class, 'searchReport'])->name('search_report');
 });
 
 //----------------------------------------------/Admin login

@@ -228,37 +228,45 @@ class AdminFormValidationTest extends TestCase
         $response->assertSessionHasErrors('product_ids.0');
     }
 
-    // ===== Reports (ReportsController) =====
+    // ===== Reports (ReportsController::index — GET with period filter) =====
 
     public function test_report_dates_must_be_dates_and_end_after_start(): void
     {
-        $response = $this->asAdmin()->post(route('search_report'), [
-            'report_type' => 'products-report',
+        $response = $this->asAdmin()->get(route('reports.index', [
+            'period' => 'custom',
             'start_at' => 'not-a-date',
             'end_at' => '2026-01-02',
-        ]);
+        ]));
         $response->assertSessionHasErrors('start_at');
 
-        $response = $this->asAdmin()->post(route('search_report'), [
-            'report_type' => 'products-report',
+        $response = $this->asAdmin()->get(route('reports.index', [
+            'period' => 'custom',
             'start_at' => '2026-01-10',
             'end_at' => '2026-01-02',
-        ]);
+        ]));
         $response->assertSessionHasErrors('end_at');
     }
 
-    public function test_report_type_must_be_a_known_report(): void
+    public function test_report_period_must_be_a_known_preset_and_custom_range_is_capped(): void
     {
-        $response = $this->asAdmin()->post(route('search_report'), [
-            'report_type' => 'bogus-report',
-        ]);
-        $response->assertSessionHasErrors('report_type');
+        $response = $this->asAdmin()->get(route('reports.index', [
+            'period' => 'bogus',
+        ]));
+        $response->assertSessionHasErrors('period');
 
-        $response = $this->asAdmin()->post(route('search_report'), [
-            'report_type' => 'products-report',
+        // A custom range over 92 days is rejected.
+        $response = $this->asAdmin()->get(route('reports.index', [
+            'period' => 'custom',
+            'start_at' => '2026-01-01',
+            'end_at' => '2026-04-15',
+        ]));
+        $response->assertSessionHasErrors('end_at');
+
+        $response = $this->asAdmin()->get(route('reports.index', [
+            'period' => 'custom',
             'start_at' => '2026-01-01',
             'end_at' => '2026-01-02',
-        ]);
+        ]));
         $response->assertOk();
     }
 
