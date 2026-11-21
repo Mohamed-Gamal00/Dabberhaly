@@ -20,6 +20,25 @@ class Country extends Model
     {
         return $this->hasMany(City::class);
     }
+
+    /**
+     * The store is Egypt-only: the id of the Egypt country row.
+     * Falls back to the sole country row when exactly one exists
+     * (e.g. a seed without the EG code); null when it cannot be
+     * determined. Never hardcode a country id.
+     */
+    public static function egyptId(): ?int
+    {
+        $egyptId = static::where('code', 'EG')->value('id');
+
+        if ($egyptId) {
+            return (int) $egyptId;
+        }
+
+        $ids = static::pluck('id');
+
+        return $ids->count() === 1 ? (int) $ids->first() : null;
+    }
     public $timestamps = false;
     
     protected $appends = ['name'];

@@ -8,6 +8,8 @@ use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\UserCheckoutRequest;
 use App\Http\Resources\ShippingResource;
+use App\Models\City;
+use App\Models\Country;
 use App\Models\Order;
 use App\Models\ShippingTypesAndPrice;
 use App\Services\CheckOut\CheckoutServices;
@@ -32,6 +34,16 @@ class CheckoutController extends Controller
     {
 
         $user = $request->user();
+
+        // The store is Egypt-only and the mobile app never sends a
+        // country: when a new address is being added and no country
+        // was supplied, default it to Egypt (derived from the city
+        // when possible). Merged into the request so CheckoutServices
+        // sees it too — isAddingNewAddress only stores a flat-fields
+        // address when country_id is present.
+        if (! $request->has('user_address') && ! $request->filled('country_id')) {
+            $request->merge(['country_id' => City::find($request->city_id)?->country_id ?? Country::egyptId()]);
+        }
 
         // handle requests
         try {

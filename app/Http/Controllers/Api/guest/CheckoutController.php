@@ -12,6 +12,7 @@ use App\Models\Admin;
 use App\Models\Cart;
 use App\Models\Guest;
 use App\Models\City;
+use App\Models\Country;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -55,7 +56,7 @@ class CheckoutController extends Controller
                 'first_name' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
                 'last_name' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
                 'phone_number' => $isAddingNewAddress ? ['required', new EgyptianMobileNumber] : 'nullable',
-                'country_id' => $isAddingNewAddress ? ['required', 'exists:countries,id'] : 'nullable',
+                'country_id' => ['nullable', 'exists:countries,id'],
                 'city_id' => $isAddingNewAddress ? 'required|exists:cities,id' : 'nullable',
                 'address' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
             ], [
@@ -63,7 +64,6 @@ class CheckoutController extends Controller
                 'first_name.required' => 'First name is required for the new address',
                 'last_name.required' => 'Last name is required for the new address',
                 'phone_number.required' => 'Phone number is required for the new address',
-                'country_id.required' => 'Country is required for the new address',
                 'city_id.required' => 'City is required for the new address',
                 'address.required' => 'Address is required for the new address',
             ]);
@@ -276,7 +276,12 @@ class CheckoutController extends Controller
                 $addressData['first_name'] = $request->first_name;
                 $addressData['last_name'] = $request->last_name;
                 $addressData['phone_number'] = $request->phone_number;
-                $addressData['country_id'] = $request->country_id;
+                // The store is Egypt-only and the guest client never
+                // sends a country: default it to Egypt (derived from
+                // the city when possible).
+                $addressData['country_id'] = $request->country_id
+                    ?? City::find($request->city_id)?->country_id
+                    ?? Country::egyptId();
                 $addressData['city_id'] = $request->city_id;
                 $addressData['address'] = $request->address;
                 $order->addresses()->create($addressData);

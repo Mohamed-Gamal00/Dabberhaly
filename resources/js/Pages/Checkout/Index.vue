@@ -133,11 +133,14 @@
                                     </div>
                                     <div class="co-field co-field--full">
                                         <label class="co-label">{{ t('country') }}</label>
-                                        <v-select v-model="addrForm.country_id" :items="countries" :item-title="isEn ? 'name_en' : 'name_ar'" item-value="id" :placeholder="t('select_country')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" :error-messages="errors['addr.shipping.country_id'] || errors['addr.billing.country_id']" @update:model-value="addrForm.city_id = null" />
+                                        <div class="co-fixed-value mt-1">
+                                            <v-icon size="18" color="#76543D">mdi-map-marker-outline</v-icon>
+                                            <span>{{ t('egypt') }}</span>
+                                        </div>
                                     </div>
                                     <div class="co-field co-field--full">
                                         <label class="co-label">{{ t('city') }}</label>
-                                        <v-select v-model="addrForm.city_id" :items="filteredCities" :item-title="isEn ? 'name_en' : 'name_ar'" item-value="id" :placeholder="t('select_city')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" :error-messages="errors['addr.shipping.city_id'] || errors['addr.billing.city_id']" />
+                                        <v-select v-model="addrForm.city_id" :items="cities" :item-title="isEn ? 'name_en' : 'name_ar'" item-value="id" :placeholder="t('select_city')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" :error-messages="errors['addr.shipping.city_id'] || errors['addr.billing.city_id']" />
                                     </div>
                                     <div class="co-field co-field--full">
                                         <label class="co-label">{{ t('address') }}</label>
@@ -366,7 +369,6 @@ const cartTotal = computed(() =>
         return sum + price * qty;
     }, 0)
 );
-const countries     = ref(props.countries || []);
 const cities        = ref(props.cities || []);
 const shipping      = ref(props.shipping);
 const vatRate       = ref(Number(props.vatRate) || 0);
@@ -413,17 +415,9 @@ const addrForm = ref({
     last_name:    '',
     email:        user.value?.email || '',
     phone_number: '',
-    country_id:   null,
     city_id:      null,
     address:      '',
 });
-
-const filteredCities = computed(() =>
-    addrForm.value.country_id
-        // eslint-disable-next-line eqeqeq
-        ? cities.value.filter(c => c.country_id == addrForm.value.country_id)
-        : cities.value
-);
 
 const cityShippingPrice = computed(() => {
     // For saved address: look up city_id from the selected user address
@@ -549,7 +543,6 @@ async function submit() {
         if (!addrForm.value.last_name?.trim())    fieldErrors['addr.billing.last_name']    = [t('last_name_required')];
         if (!addrForm.value.phone_number?.trim()) fieldErrors['addr.billing.phone_number'] = [t('phone_required')];
         if (!addrForm.value.address?.trim())      fieldErrors['addr.billing.address']      = [t('address_required')];
-        if (!addrForm.value.country_id)           fieldErrors['addr.billing.country_id']   = [t('country_required')];
         if (!addrForm.value.city_id)              fieldErrors['addr.billing.city_id']      = [t('city_required')];
         if (isGuest && !addrForm.value.email?.trim()) fieldErrors['guest_email'] = [t('email_required')];
 
@@ -591,7 +584,6 @@ async function submit() {
                 first_name:   addrForm.value.first_name,
                 last_name:    addrForm.value.last_name,
                 phone_number: addrForm.value.phone_number,
-                country_id:   addrForm.value.country_id,
                 city_id:      addrForm.value.city_id,
                 address:      addrForm.value.address,
             }
@@ -819,6 +811,14 @@ async function submit() {
 .co-field { display: flex; flex-direction: column; }
 .co-field--full { grid-column: 1 / -1; }
 .co-label { font-size: 12px; font-weight: 600; color: #302F2B; }
+
+/* Fixed country (Egypt only) — static text styled like a field */
+.co-fixed-value {
+    display: flex; align-items: center; gap: 8px;
+    background: white; border: 1px solid #E6DCCB; border-radius: 12px;
+    min-height: 40px; padding: 0 12px;
+    font-size: 14px; font-weight: 600; color: #302F2B;
+}
 
 /* Checkbox */
 .co-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #302F2B; cursor: pointer; }

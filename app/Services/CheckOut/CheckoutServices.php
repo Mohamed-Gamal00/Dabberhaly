@@ -7,6 +7,7 @@ use App\Exceptions\CheckoutException;
 use App\Models\Admin;
 use App\Models\Cart;
 use App\Models\City;
+use App\Models\Country;
 use App\Models\DiscountCode;
 use App\Models\Guest;
 use App\Models\Order;
@@ -409,6 +410,10 @@ class CheckoutServices
 
     public function isAddingNewAddress($order, $request, $user)
     {
+        // The store is Egypt-only: any new address defaults to Egypt
+        // when the request carries no country.
+        $egyptId = Country::egyptId();
+
         // الحالة الأولى: اليوزر اختار عنوان محفوظ — لازم يكون عنوانه هو
         if ($request->has('user_address') && $request->user_address !== 'add_address') {
             $UserAddress = $user ? $user->addresses()->find($request->user_address) : null;
@@ -440,7 +445,7 @@ class CheckoutServices
                 'first_name'   => $addr['first_name'] ?? null,
                 'last_name'    => $addr['last_name'] ?? null,
                 'phone_number' => $addr['phone_number'] ?? null,
-                'country_id'   => $addr['country_id'] ?? null,
+                'country_id'   => $addr['country_id'] ?? $egyptId,
                 'city_id'      => $addr['city_id'] ?? null,
                 'address'      => $addr['address'] ?? null,
                 'email'        => $user?->email,
@@ -454,7 +459,7 @@ class CheckoutServices
                     'first_name'    => $addr['first_name'] ?? null,
                     'family_name'   => $addr['last_name'] ?? null,
                     'phone_number'  => $addr['phone_number'] ?? null,
-                    'country_id'    => $addr['country_id'] ?? null,
+                    'country_id'    => $addr['country_id'] ?? $egyptId,
                     'city_id'       => $addr['city_id'] ?? null,
                     'address'       => $addr['address'] ?? null,
                     'main_address'  => false,
@@ -471,7 +476,7 @@ class CheckoutServices
                 'first_name'   => $addr['first_name'] ?? null,
                 'last_name'    => $addr['last_name'] ?? null,
                 'phone_number' => $addr['phone_number'] ?? null,
-                'country_id'   => $addr['country_id'] ?? null,
+                'country_id'   => $addr['country_id'] ?? $egyptId,
                 'city_id'      => $addr['city_id'] ?? null,
                 'address'      => $addr['address'] ?? null,
                 'email'        => $request->guest_email,
@@ -490,7 +495,7 @@ class CheckoutServices
                 'first_name'   => $request->first_name,
                 'last_name'    => $request->last_name,
                 'phone_number' => $request->phone_number,
-                'country_id'   => $request->country_id ?? $fallback['country_id'] ?? null,
+                'country_id'   => $request->country_id ?? $fallback['country_id'] ?? $egyptId,
                 'city_id'      => $request->city_id ?? $fallback['city_id'] ?? null,
                 'address'      => $request->address,
                 'email'        => $user->email,
@@ -503,7 +508,7 @@ class CheckoutServices
                 'first_name'    => $request->first_name,
                 'family_name'   => $request->last_name,
                 'phone_number'  => $request->phone_number,
-                'country_id'    => $request->country_id ?? $fallback['country_id'] ?? null,
+                'country_id'    => $request->country_id ?? $fallback['country_id'] ?? $egyptId,
                 'city_id'       => $request->city_id ?? $fallback['city_id'] ?? null,
                 'address'       => $request->address,
                 'main_address'  => false,

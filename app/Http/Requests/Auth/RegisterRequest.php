@@ -25,7 +25,6 @@ class RegisterRequest extends FormRequest
             'email'        => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
             'phone_number' => ['required', 'string', new EgyptianMobileNumber, 'unique:users,phone_number'],
             'address'      => ['required', 'string', 'min:5', 'max:255'],
-            'country_id'   => ['required', 'integer', 'exists:countries,id'],
             'city_id'      => ['required', 'integer', 'exists:cities,id'],
             'password'     => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
         ];
@@ -53,9 +52,6 @@ class RegisterRequest extends FormRequest
 
             'address.required'      => __('validation.register.address_required'),
             'address.min'           => __('validation.register.address_min'),
-
-            'country_id.required'   => __('validation.register.country_required'),
-            'country_id.exists'     => __('validation.register.country_invalid'),
 
             'city_id.required'      => __('validation.register.city_required'),
             'city_id.exists'        => __('validation.register.city_invalid'),
