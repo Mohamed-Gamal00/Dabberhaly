@@ -31,13 +31,21 @@ class ReportsController extends Controller
                 'required_if:period,custom',
                 'after_or_equal:start_at',
                 function (string $attribute, mixed $value, Closure $fail) use ($request) {
-                    if ($request->input('period') === 'custom' && $request->filled('start_at') && $value) {
+                    if ($request->input('period') !== 'custom' || ! $request->filled('start_at') || ! $value) {
+                        return;
+                    }
+                    try {
                         $start = Carbon::createFromFormat('Y-m-d', $request->input('start_at'), 'Africa/Cairo');
                         $end = Carbon::createFromFormat('Y-m-d', $value, 'Africa/Cairo');
-                        // 92 days inclusive = 91 days apart at most.
-                        if ($start && $end && $start->diffInDays($end) > 91) {
-                            $fail('النطاق المخصص لا يمكن أن يتجاوز 92 يوماً.');
-                        }
+                    } catch (\Throwable) {
+                        // An unparseable date is reported by the
+                        // date_format rules; this closure only caps
+                        // the range, so it must never 500 on bad input.
+                        return;
+                    }
+                    // 92 days inclusive = 91 days apart at most.
+                    if ($start->diffInDays($end) > 91) {
+                        $fail('النطاق المخصص لا يمكن أن يتجاوز 92 يوماً.');
                     }
                 },
             ],
