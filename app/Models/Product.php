@@ -39,10 +39,15 @@ class Product extends Model
 
     protected static function booted()
     {
+        // Only generate a slug when none was given: an explicitly set
+        // slug (the seeder's English slug, the admin form's slug) must
+        // survive — overwriting it here made ProductSeeder::updateOrCreate
+        // (which matches by slug) never find its rows, so every re-seed
+        // duplicated all demo products. Uniqueness is still enforced.
         static::creating(function ($product) {
             $product->slug = SlugHelper::unique(
                 'products',
-                str_replace(' ', '-', $product->name)
+                $product->slug ?: str_replace(' ', '-', $product->name)
             );
         });
     }
