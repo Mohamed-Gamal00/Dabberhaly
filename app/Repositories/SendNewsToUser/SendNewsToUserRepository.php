@@ -5,6 +5,7 @@ namespace App\Repositories\SendNewsToUser;
 use App\Helper\Helper;
 use App\Models\SendNewsToUser;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 
 class SendNewsToUserRepository implements SendNewsToUserInterface
@@ -17,17 +18,22 @@ class SendNewsToUserRepository implements SendNewsToUserInterface
     $this->sendNewsToUser = $sendNewsToUser;
   }
 
-  public function create()
+  /**
+   * Subscribers, optionally filtered by email, 50 per page (the
+   * admin list is searchable and paginated).
+   */
+  public function paginatedSubscribers(string $search = ''): LengthAwarePaginator
   {
-    return $this->sendNewsToUser->all();
+    return SendNewsToUser::query()
+      ->when($search !== '', fn ($query) => $query->where('subscription_email', 'like', '%' . $search . '%'))
+      ->orderBy('id')
+      ->paginate(50);
   }
 
-  public function paginateSubscribers(?string $search = null, int $perPage = 50)
+  /** Overall subscriber total, even while a search is active. */
+  public function totalSubscribers(): int
   {
-    return $this->sendNewsToUser
-      ->when($search, fn ($query) => $query->where('subscription_email', 'like', '%' . $search . '%'))
-      ->orderBy('id')
-      ->paginate($perPage);
+    return (int) SendNewsToUser::count();
   }
 
   public function sendNewsMail($data)

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Dashboard\Notifications\SendNewsToUserRequest;
 use App\Models\SendNewsToUser;
 use App\Repositories\SendNewsToUser\SendNewsToUserRepository;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class SendNewsToUsersController extends Controller
@@ -18,16 +19,17 @@ class SendNewsToUsersController extends Controller
         $this->SendNewsToUser = $repo;
     }
 
-    public function create()
+    public function create(Request $request)
     {
         Gate::authorize('news.view');
-        $users = $this->SendNewsToUser->create();
+        $search = trim((string) $request->query('search', ''));
+        $users = $this->SendNewsToUser->paginatedSubscribers($search);
 
-        // The stats card shows the total explicitly; passing it as a
-        // named variable keeps the view from recomputing it.
-        $totalSubscribers = $users->count();
+        // The stats card shows the overall total, even while a search
+        // is active; the list itself is the (possibly filtered) page.
+        $totalSubscribers = $this->SendNewsToUser->totalSubscribers();
 
-        return view('dashboard.send_news_to_users.create', compact('users', 'totalSubscribers'));
+        return view('dashboard.send_news_to_users.create', compact('users', 'totalSubscribers', 'search'));
     }
 
     public function sendNewsMail(SendNewsToUserRequest $request)
