@@ -1,5 +1,6 @@
 <template>
     <div class="auth-page">
+        <SeoHead :title="t('register_title')" noindex />
         <!-- Left panel: branding -->
         <div class="auth-left d-none d-md-flex">
             <div class="auth-left-content">
@@ -266,6 +267,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 
 defineOptions({ layout: null });

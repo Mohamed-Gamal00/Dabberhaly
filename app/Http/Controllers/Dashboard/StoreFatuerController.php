@@ -36,7 +36,7 @@ class StoreFatuerController extends Controller
   {
     Gate::authorize('store_feature.create');
     $data = $request->validate([
-      'image' => 'required|image|max:2048',
+      'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
       'title' => 'required|string|max:255',
       'title_en' => 'nullable|string|max:255',
       'description' => 'nullable|string|max:255',

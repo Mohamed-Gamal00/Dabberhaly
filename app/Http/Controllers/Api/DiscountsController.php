@@ -18,7 +18,7 @@ class DiscountsController extends Controller
             return ApiResponse::sendResponse(200, 'you must determind if you guest or user');
         }
 
-        $discounts = Product::latest()->where('discount_price', '!=', null)
+        $discounts = Product::with('parent', 'availability')->latest()->where('discount_price', '!=', null)
             ->orderBy('discount_price', 'desc')
             ->take(20)->get();
 
@@ -35,7 +35,7 @@ class DiscountsController extends Controller
         }
 
 
-        $discounts = Product::where('discount_price', '!=', null)
+        $discounts = Product::with('parent', 'availability')->where('discount_price', '!=', null)
             ->orderBy('discount_price', 'desc')
             ->paginate(10);
 

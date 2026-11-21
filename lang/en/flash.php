@@ -43,6 +43,8 @@ return [
     'newsletter_subscribed_success' => '✓ Successfully subscribed!',
     'return_request_success' => 'Return request submitted successfully.',
     'return_not_allowed' => 'This order can no longer be returned.',
+    'order_cancel_success' => 'Order cancelled successfully.',
+    'order_cancel_not_allowed' => 'This order can no longer be cancelled.',
     'product_already_reviewed' => 'You have already reviewed this product.',
     'review_added_success' => 'Your review has been added successfully.',
     'multiple_shipping_error' => 'Cannot select more than one shipping type together.',

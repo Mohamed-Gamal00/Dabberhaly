@@ -1,5 +1,6 @@
 <template>
     <div class="auth-page">
+        <SeoHead :title="t('login_btn')" noindex />
         <!-- Left panel: branding -->
         <div class="auth-left d-none d-md-flex">
             <div class="auth-left-content">
@@ -65,6 +66,7 @@
 import { ref, computed } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 
 defineOptions({ layout: null });

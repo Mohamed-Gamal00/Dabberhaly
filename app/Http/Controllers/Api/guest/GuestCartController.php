@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api\guest;
 use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CartResource;
+use App\Models\AppliedDiscountCode;
 use App\Models\Cart;
 use App\Models\Product;
+use App\Services\CheckOut\CheckoutServices;
 use Illuminate\Http\Request;
 
 class GuestCartController extends Controller
@@ -28,8 +30,21 @@ class GuestCartController extends Controller
             ->where('status', 0)
             ->count();
 
-        $TotalPrice = $cartItems->sum(function ($item) {
-            return $item->quantity * ($item->discounted_price ?? $item->product->price);
+        // A soft-deleted product leaves product null: a clean
+        // "product unavailable" error, not a 500 (this also guards
+        // CartResource below, which dereferences ->product).
+        if ($cartItems->contains(fn ($item) => ! $item->product)) {
+            return ApiResponse::sendResponse(422, 'المنتج غير متاح');
+        }
+
+        // Same formula as checkout: per-product offers via
+        // baseUnitPrice, and the coupon discounted_price only when a
+        // discount code is actually active for this guest — a stale
+        // leftover from an abandoned checkout must be ignored.
+        $hasActiveDiscount = AppliedDiscountCode::where('cookie_id', $cookieId)->exists();
+
+        $TotalPrice = $cartItems->sum(function ($item) use ($hasActiveDiscount) {
+            return $item->quantity * CheckoutServices::chargedUnitPrice($item, $hasActiveDiscount);
         });
 
         $totalQuantity = $cartItems->sum('quantity');
@@ -38,6 +53,8 @@ class GuestCartController extends Controller
             'total_count'    => $totalCount,
             'total_price'    => $TotalPrice,
             'total_quantity' => $totalQuantity,
+            // Same source of truth as the web cart (GET /cart).
+            'free_shipping_threshold' => CheckoutServices::freeShippingThreshold(),
             'items'          => CartResource::collection($cartItems),
         ];
 

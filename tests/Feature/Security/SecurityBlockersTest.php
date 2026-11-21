@@ -329,7 +329,7 @@ class SecurityBlockersTest extends TestCase
 
     public function test_newsletter_send_with_ability_uses_honest_flash_message(): void
     {
-        $staff = $this->staffAdmin(['news.view']);
+        $staff = $this->staffAdmin(['news.send']);
         $subscriber = SendNewsToUser::create(['subscription_email' => 'sub@example.com']);
 
         $this->actingAs($staff, 'admin')

@@ -4,7 +4,7 @@
             <div class="compare-bar-inner">
                 <div class="compare-items">
                     <div v-for="item in compareList" :key="item.id" class="compare-item">
-                        <img :src="item.image_url" :alt="pick(item,'name')" class="compare-item-img" />
+                        <img :src="item.image_url" :alt="pick(item,'name')" class="compare-item-img" @error="onImgError" />
                         <div class="compare-item-name">{{ pick(item, 'name') }}</div>
                         <button class="compare-item-remove" @click="toggle(item)">×</button>
                     </div>
@@ -30,6 +30,15 @@ import { useCompare } from '../../composables/useCompare';
 import { useLocale } from '../../composables/useLocale';
 const { compareList, toggle, clear, MAX } = useCompare();
 const { t, pick } = useLocale();
+
+// Local placeholder (Vanilla Latte) shown when a compared product image fails to load.
+const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="#F7F0E5"/><g fill="none" stroke="#76543D" stroke-width="6"><path d="M55 75 L100 55 L145 75 L145 130 L100 150 L55 130 Z"/><path d="M55 75 L100 95 L145 75 M100 95 L100 150"/></g></svg>`
+);
+
+function onImgError(e) {
+    if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
+}
 </script>
 
 <style scoped>

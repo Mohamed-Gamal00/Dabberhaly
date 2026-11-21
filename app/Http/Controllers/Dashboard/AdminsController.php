@@ -26,12 +26,22 @@ class AdminsController extends Controller
      * A non-super-admin must never be able to touch a super_admin account
      * (change its password, edit it or delete it) — otherwise any staff
      * admin with the matching ability could take over the super admin.
+     *
+     * They must also never touch their OWN record: a staff admin with
+     * admin.edit could otherwise sync any rules onto themselves and
+     * escalate to full access, and one with admin.delete could delete
+     * themselves. A super admin already holds every ability, so there
+     * is nothing to escalate to — only staff admins are blocked here.
      */
     private function ensureTargetIsNotProtected(Admin $target): void
     {
         $actor = Auth::guard('admin')->user();
 
         if ($target->super_admin && ! $actor?->super_admin) {
+            abort(403);
+        }
+
+        if ($actor && ! $actor->super_admin && (int) $target->id === (int) $actor->id) {
             abort(403);
         }
     }

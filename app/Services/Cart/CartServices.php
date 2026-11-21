@@ -6,6 +6,7 @@ use App\Helper\ApiResponse;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use App\Models\Product;
+use App\Services\CheckOut\CheckoutServices;
 
 class CartServices
 {
@@ -16,15 +17,34 @@ class CartServices
                 ->where('user_id', $user->id)
                 ->where('status', 0)->get();
 
+            // A soft-deleted product leaves product null: a clean
+            // "product unavailable" error, not a 500 (this also guards
+            // CartResource below, which dereferences ->product).
+            if ($cartItems->contains(fn ($item) => ! $item->product)) {
+                return ApiResponse::sendResponse(422, 'المنتج غير متاح');
+            }
+
             $totalCount = $cartItems->count();
 
             $totalQuantity = $cartItems->sum('quantity');
 
-            $TotalPrice = $cartItems->sum(function ($item) {
-                return $item->quantity * ($item->product->discount_price ?? $item->product->price);
+            // Same formula as checkout: per-product offers via
+            // baseUnitPrice, and the coupon discounted_price only when
+            // a discount code is actually active for this user — a
+            // stale leftover from an abandoned checkout is ignored.
+            $hasActiveDiscount = (new CheckoutServices)->hasActiveCouponDiscount($user);
+
+            $totalBeforeDiscount = $cartItems->sum(function ($item) {
+                return $item->quantity * CheckoutServices::baseUnitPrice($item->product);
             });
 
-            $discounted_price = $cartItems->first()->discounted_price ?? 0;
+            $TotalPrice = $cartItems->sum(function ($item) use ($hasActiveDiscount) {
+                return $item->quantity * CheckoutServices::chargedUnitPrice($item, $hasActiveDiscount);
+            });
+
+            // The actual discount amount on the whole cart — not the
+            // first product's discounted_price (the old value).
+            $discounted_price = $totalBeforeDiscount - $TotalPrice;
         }
 
         $data = [
@@ -32,6 +52,8 @@ class CartServices
             'discounted_price' => $discounted_price,  //  قيمة الخصم علي المنتج الواحد
             'total_price' => $TotalPrice,
             'total_quantity' => $totalQuantity,
+            // Same source of truth as the web cart (GET /cart).
+            'free_shipping_threshold' => CheckoutServices::freeShippingThreshold(),
             'items' => CartResource::collection($cartItems),
         ];
         return ApiResponse::sendResponse(200, '', $data);

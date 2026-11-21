@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class CheckoutController extends Controller
@@ -31,15 +32,18 @@ class CheckoutController extends Controller
     {
         $guestId = $request->headers->get('guest-id');
 
-        // Unknown payment methods must not silently become cash on
-        // delivery: only the values the admin enabled in settings.
-        if ($request->filled('payment_method')
-            && ! in_array($request->payment_method, Setting::allowedPaymentMethodValues(), true)) {
-            return response()->json([
-                'message' => 'طريقة الدفع غير صحيحة',
-                'errors' => ['payment_method' => ['طريقة الدفع غير صحيحة']],
-            ], 422);
-        }
+        // Payment method is required and must be one the admin enabled
+        // in settings: an absent value must never silently become cash
+        // on delivery (Order::isCashPayment() is false for NULL, so a
+        // delivered order would never be marked paid), and a disabled
+        // method must never be orderable. Same rule as the registered
+        // user checkout (UserCheckoutRequest).
+        $request->validate([
+            'payment_method' => ['required', Rule::in(Setting::allowedPaymentMethodValues())],
+        ], [
+            'payment_method.required' => 'طريقة الدفع مطلوبة',
+            'payment_method.in' => 'طريقة الدفع غير صحيحة',
+        ]);
 
         $isAddingNewAddress = !$request->has('user_address');
         if ($guestId) {
@@ -50,7 +54,7 @@ class CheckoutController extends Controller
                 'last_name' => $isAddingNewAddress ? 'required' : 'nullable',
                 'phone_number' => $isAddingNewAddress ? 'required' : 'nullable',
                 'country_id' => $isAddingNewAddress ? 'required' : 'nullable',
-                'city_id' => $isAddingNewAddress ? 'required' : 'nullable',
+                'city_id' => $isAddingNewAddress ? 'required|exists:cities,id' : 'nullable',
                 'address' => $isAddingNewAddress ? 'required' : 'nullable',
             ], [
                 'user_address.required' => 'Please select or add a new address',
@@ -119,6 +123,14 @@ class CheckoutController extends Controller
             $productWeight = [];
 
             foreach ($Cartitems as $item) {
+                // A soft-deleted product leaves product null — a clean
+                // "product unavailable" error, not a 500 on ->weight.
+                if (! $item->product) {
+                    return response()->json([
+                        'message' => 'المنتج غير متاح',
+                        'errors' => ['product' => ['المنتج غير متاح']],
+                    ], 422);
+                }
                 // Calculate the weight of each product multiplied by its quantity
                 $productWeight[] = $item->product->weight * $item->quantity;
             }
@@ -130,13 +142,33 @@ class CheckoutController extends Controller
             if ($isAddingNewAddress) {
                 $city_id = $request->city_id;
                 $city = City::where('id', $city_id)->first();
+                // Unknown city (no exists rule ran, e.g. no guest-id
+                // header): a clean error, not a 500 on ->shipping_price.
+                if (! $city) {
+                    return response()->json([
+                        'message' => 'المدينة المحددة غير صحيحة',
+                        'errors' => ['city_id' => ['المدينة المحددة غير صحيحة']],
+                    ], 422);
+                }
                 $shipping_price = $city->shipping_price;
             } else {
                 $UserAddress = UserAddress::where('id', $request->user_address)->first();
-                if ($UserAddress) {
-                    $shipping_price = $UserAddress->city->shipping_price;
-//                    return $city;
+                // A missing saved address must never fall through with
+                // shipping silently 0 (free shipping by mistake).
+                if (! $UserAddress) {
+                    return response()->json([
+                        'message' => 'العنوان المحدد غير موجود',
+                        'errors' => ['user_address' => ['العنوان المحدد غير موجود']],
+                    ], 422);
                 }
+                $city = $UserAddress->city;
+                if (! $city) {
+                    return response()->json([
+                        'message' => 'مدينة العنوان غير صحيحة',
+                        'errors' => ['user_address' => ['مدينة العنوان غير صحيحة']],
+                    ], 422);
+                }
+                $shipping_price = $city->shipping_price;
             }
         } ///
         else {
@@ -152,6 +184,16 @@ class CheckoutController extends Controller
 
         if ($items->isEmpty()) {
             return ApiResponse::sendResponse(200, 'لا يمكن اتمام الطلب والسلة فارغة');
+        }
+
+        // A soft-deleted product leaves product null: fail cleanly
+        // before totals/stock touch it (total()/totalBeforeDiscount()
+        // and $item->product->name below would 500 on null).
+        if ($items->contains(fn ($item) => ! $item->product)) {
+            return response()->json([
+                'message' => 'المنتج غير متاح',
+                'errors' => ['product' => ['المنتج غير متاح']],
+            ], 422);
         }
 //        return $guestId;
 
@@ -181,6 +223,7 @@ class CheckoutController extends Controller
             $order = Order::createWithUniqueNumber([
                 'guest_id' => $guest?->id,
                 'payment_method' => $request->payment_method, // cash on deleviry
+                'discount_code_id' => $this->appliedDiscountCodeId($items, $guestId),
                 'status' => OrderStatus::Pending,
                 'note' => $request->note,
                 'shipping_price' => request()->pickup_from_store == '1' ? null : $shippingPrice,
@@ -222,17 +265,19 @@ class CheckoutController extends Controller
                 ]);
 //                return $request->all();
                 # TODO:: make sure that user will use one option for address
+            }
 
-                if ($isAddingNewAddress) {
-                    $addressData['type'] = 'shipping';
-                    $addressData['first_name'] = $request->first_name;
-                    $addressData['last_name'] = $request->last_name;
-                    $addressData['phone_number'] = $request->phone_number;
-                    $addressData['country_id'] = $request->country_id;
-                    $addressData['city_id'] = $request->city_id;
-                    $addressData['address'] = $request->address;
-                    $order->addresses()->create($addressData);
-                }
+            // One order_addresses row per order — not one per cart item
+            // (this block used to live inside the items loop above).
+            if ($isAddingNewAddress) {
+                $addressData['type'] = 'shipping';
+                $addressData['first_name'] = $request->first_name;
+                $addressData['last_name'] = $request->last_name;
+                $addressData['phone_number'] = $request->phone_number;
+                $addressData['country_id'] = $request->country_id;
+                $addressData['city_id'] = $request->city_id;
+                $addressData['address'] = $request->address;
+                $order->addresses()->create($addressData);
             }
 
             foreach ($items as $item) {
@@ -308,5 +353,21 @@ class CheckoutController extends Controller
             : false;
 
         return CheckoutServices::chargedUnitPrice($cartItem, $hasActiveDiscount);
+    }
+
+    /**
+     * The discount code actually applied to this guest cart, if any.
+     * The AppliedDiscountCode row is keyed by the guest cookie_id, but
+     * rows are never deleted, so a stale row from an earlier order
+     * must not attach to a later undiscounted one — only attach when
+     * a live cart row carries a discounted_price.
+     */
+    private function appliedDiscountCodeId($items, ?string $guestId): ?int
+    {
+        if (! $guestId || ! $items->contains(fn ($item) => $item->discounted_price !== null)) {
+            return null;
+        }
+
+        return AppliedDiscountCode::where('cookie_id', $guestId)->latest('id')->value('discount_id');
     }
 }

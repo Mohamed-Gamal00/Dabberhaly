@@ -34,6 +34,17 @@ class UserAuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
+        // SMS-flood guard: at most 5 registrations per IP per minute —
+        // every call creates a user and sends an SMS. Keyed by IP (not
+        // phone): the unique-phone validation rejects a repeated phone
+        // before the controller runs, so a per-phone key could never
+        // trip, while many fresh phones from one IP is the real flood.
+        $throttleKey = 'api-register:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            return ApiResponse::sendResponse(429, 'Too many attempts. Please try again later.');
+        }
+        RateLimiter::hit($throttleKey, 60);
+
         $user = null;
 
         $user = $this->userService->createUser($request);
@@ -139,9 +150,20 @@ class UserAuthController extends Controller
 
     public function forgetPassword(Request $request)
     {
+        // SMS-flood guard: at most 5 code requests per phone + IP per
+        // minute, like the other OTP endpoints.
+        $throttleKey = 'api-forget-password:' . $request->phone_number . '|' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            return ApiResponse::sendResponse(429, 'Too many attempts. Please try again later.');
+        }
+        RateLimiter::hit($throttleKey, 60);
+
         $user = User::where('phone_number', $request->phone_number)->first();
         if (!$user) {
-            return ApiResponse::sendResponse(200, 'this phone_number not exist');
+            // Uniform response whether the phone exists or not, so the
+            // endpoint cannot be used to enumerate registered numbers
+            // (and no SMS is sent for an unknown number).
+            return ApiResponse::sendResponse(200, __('flash.otp_sent'));
         }
         $data = [
             'verification_required' => true,

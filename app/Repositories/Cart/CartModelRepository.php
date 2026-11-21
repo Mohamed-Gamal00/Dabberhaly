@@ -2,8 +2,10 @@
 
 namespace App\Repositories\Cart;
 
+use App\Models\AppliedDiscountCode;
 use App\Models\Cart;
 use App\Models\Product;
+use App\Services\CheckOut\CheckoutServices;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
@@ -119,19 +121,31 @@ class CartModelRepository implements CartRepository
     }
 
     /**
-     * Final total — prefers the per-row discounted_price snapshot (set when a
-     * discount code is applied) and falls back to the product's live price.
+     * Final total — the same formula as checkout
+     * (CheckoutServices::chargedUnitPrice): per-product offers via
+     * baseUnitPrice, and the per-row discounted_price snapshot only
+     * when a discount code is actually active — a stale leftover
+     * from an abandoned checkout must be ignored.
      */
     public function total(): float
     {
-        return $this->get()->sum(function ($item) {
-            // Soft-deleted product: product is null — the line contributes
-            // only its stored discounted_price snapshot, if any.
-            if ($item->product?->discount_price) {
-                return $item->quantity * ($item->discounted_price ?? $item->product->discount_price);
+        $items = $this->get();
+
+        $hasActiveDiscount = (bool) session('applied_discount_code_id')
+            || AppliedDiscountCode::whereIn(
+                'cookie_id',
+                $items->pluck('cookie_id')->filter()->unique()
+            )->exists();
+
+        return $items->sum(function ($item) use ($hasActiveDiscount) {
+            // Soft-deleted product: product is null — the line
+            // contributes only its stored discounted_price snapshot
+            // when a discount is active, else 0 (as before).
+            if (! $item->product) {
+                return $item->quantity * ($hasActiveDiscount ? (float) ($item->discounted_price ?? 0) : 0);
             }
 
-            return $item->quantity * ($item->discounted_price ?? $item->product?->price ?? 0);
+            return $item->quantity * CheckoutServices::chargedUnitPrice($item, $hasActiveDiscount);
         });
     }
 }

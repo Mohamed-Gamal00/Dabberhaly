@@ -1,5 +1,6 @@
 <template>
     <div class="auth-page">
+        <SeoHead :title="t('reset_title')" noindex />
         <div class="auth-left d-none d-md-flex">
             <div class="auth-left-content">
                 <v-icon size="56" color="white" class="mb-4">mdi-storefront</v-icon>
@@ -101,6 +102,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 
 defineOptions({ layout: null });

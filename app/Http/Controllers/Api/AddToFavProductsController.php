@@ -35,7 +35,9 @@ class AddToFavProductsController extends Controller
     public function guestAddFavProducts(Request $request)
     {
         $guestId = $request->header('guest-id');
-        $guest = Guest::where('id', $guestId)->first();
+        // The header carries the guest's cookie_id (the mobile guest
+        // identity) — never the numeric guest id.
+        $guest = Guest::where('cookie_id', $guestId)->first();
 
         if (!$guest) {
             return ApiResponse::sendResponse(401, 'Guest not found', []);

@@ -85,6 +85,7 @@ Route::middleware(['changeLanguage'])->group(function () {
         Route::get('/user_show_order/{number}', [\App\Http\Controllers\Api\UserOrdersController::class, 'showOrder']);
         Route::get('/user_orders', [\App\Http\Controllers\Api\UserOrdersController::class, 'mainOrders']);
         Route::post('/user-orders/delete', [\App\Http\Controllers\Api\UserOrdersController::class, 'destroy']);
+        Route::post('/user-orders/cancel', [\App\Http\Controllers\Api\UserOrdersController::class, 'cancel']);
         /* المرتجعات */
         Route::get('/user-return-orders', [\App\Http\Controllers\Api\UserOrdersController::class, 'returns']);
         Route::post('/user-return-orders/store', [\App\Http\Controllers\Api\UserOrdersController::class, 'store']);
@@ -196,6 +197,7 @@ Route::middleware(['changeLanguage'])->group(function () {
         Route::get('/guest-orders', [\App\Http\Controllers\Api\guest\GuestOrdersController::class, 'mainOrders']);
         Route::get('/guest-order/{number}', [\App\Http\Controllers\Api\guest\GuestOrdersController::class, 'showOrder']);
         Route::post('/guest-order/delete', [\App\Http\Controllers\Api\guest\GuestOrdersController::class, 'destroy']);
+        Route::post('/guest-order/cancel', [\App\Http\Controllers\Api\guest\GuestOrdersController::class, 'cancel']);
 
         /* المرتجعات */
         Route::get('/guest-return-orders', [\App\Http\Controllers\Api\guest\GuestOrdersController::class, 'returns']);

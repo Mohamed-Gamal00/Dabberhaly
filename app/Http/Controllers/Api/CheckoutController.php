@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\UserOrder;
+use App\Exceptions\CheckoutException;
 use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\UserCheckoutRequest;
@@ -46,8 +47,14 @@ class CheckoutController extends Controller
             if ($cartItems->isEmpty()) {
                 return ApiResponse::sendResponse(200, 'لا يمكن اتمام الطلب والسلة فارغة');
             }
-        } catch (\Exception $e) {
+        } catch (CheckoutException $e) {
+            // A deliberate, user-facing error (bad shipping/address
+            // choice, missing shipping setup, unavailable product):
+            // its message is safe to show to the customer.
             return ApiResponse::sendResponse(400, $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('API user checkout pre-check failed', ['exception' => $e]);
+            return ApiResponse::sendResponse(400, 'Order creation failed');
         }
 
 

@@ -146,6 +146,19 @@ class UserAuthController extends Controller
         $otpData = session('pending_otp');
 
         if (! $otpData || $otpData['code'] !== $request->code) {
+            // Wrong-code attempts invalidate the code after the limit,
+            // like the API and web-reset paths — a 4-digit code must
+            // not be brute-forceable for its whole 10-minute life.
+            $attempts = (int) session('pending_otp_attempts', 0) + 1;
+
+            if ($attempts >= VerificationServices::MAX_OTP_ATTEMPTS) {
+                session()->forget(['pending_otp', 'pending_otp_attempts']);
+
+                return back()->with('error', __('flash.code_expired'));
+            }
+
+            session(['pending_otp_attempts' => $attempts]);
+
             return back()->with('error', __('flash.invalid_code'));
         }
 
@@ -291,6 +304,9 @@ class UserAuthController extends Controller
                 'expires_at' => now()->addMinutes(10),
             ],
         ]);
+
+        // A fresh code resets the wrong-attempt counter.
+        session()->forget('pending_otp_attempts');
 
         Notification::route('mail', $email)
             ->notify(new EmailVerificationCodeNotification($code, $name));

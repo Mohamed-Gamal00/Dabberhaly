@@ -3,6 +3,7 @@
 namespace App\Services\CheckOut;
 
 use App\Enums\OrderStatus;
+use App\Exceptions\CheckoutException;
 use App\Models\Admin;
 use App\Models\Cart;
 use App\Models\City;
@@ -38,7 +39,7 @@ class CheckoutServices
         if ($request->has('user_address')
             && $request->user_address !== 'add_address'
             && (isset($request->addr['shipping']) || isset($request->addr['billing']))) {
-            throw new \Exception('الرجاء اختيار خيار واحد فقط: إما عنوان محفوظ أو إضافة عنوان جديد.', 400);
+            throw new CheckoutException('الرجاء اختيار خيار واحد فقط: إما عنوان محفوظ أو إضافة عنوان جديد.', 400);
         }
     }
 
@@ -51,7 +52,7 @@ class CheckoutServices
         if ($request->has('shipping_based_on_city'))   $selectedShippingOptions++;
 
         if ($selectedShippingOptions > 1) {
-            throw new \Exception('لا يمكن اختيار اكثر من طريقة شحن في اّن واحد', 400);
+            throw new CheckoutException('لا يمكن اختيار اكثر من طريقة شحن في اّن واحد', 400);
         }
     }
 
@@ -82,6 +83,57 @@ class CheckoutServices
     public static function taxFor(float $subtotal): float
     {
         return round($subtotal * self::vatRate() / 100, 2);
+    }
+
+    /**
+     * The order summary the checkout page displays, computed
+     * server-side with the exact formulas the order is charged with
+     * (calculateTotal / taxFor) — the page must not recompute totals
+     * from the discount code's face value, which diverges for fixed
+     * amounts capped at eligible lines and product-specific codes.
+     * All amounts are exact (no rounding up); shipping is NOT in
+     * here — it depends on the shipping option the customer picks
+     * on the page, so the page adds its (exact) shipping cost.
+     */
+    public function checkoutSummary($user): array
+    {
+        $subtotalBeforeDiscount = $this->calculateTotalBeforeDiscount($user);
+        $subtotal = $this->calculateTotal($user);
+
+        return [
+            'subtotal_before_discount' => round($subtotalBeforeDiscount, 2),
+            'subtotal' => round($subtotal, 2),
+            'discount' => round(max(0, $subtotalBeforeDiscount - $subtotal), 2),
+            'tax_amount' => self::taxFor($subtotal),
+            'vat_rate' => self::vatRate(),
+            'free_shipping_threshold' => self::freeShippingThreshold(),
+        ];
+    }
+
+    /**
+     * The discount code applied to this checkout, if any — from the
+     * web session first (set when the code is applied, before any
+     * usage row exists), falling back to an API usage row for the
+     * cart's cookie id. Used so a page reload with an applied code
+     * still shows the discounted summary instead of the full price.
+     */
+    public function appliedDiscountCode($user): ?DiscountCode
+    {
+        if ($id = session('applied_discount_code_id')) {
+            if ($code = DiscountCode::find($id)) {
+                return $code;
+            }
+        }
+
+        $cookieIds = $this->getCartItems($user)->pluck('cookie_id')->filter()->unique();
+
+        if ($cookieIds->isEmpty()) {
+            return null;
+        }
+
+        $applied = AppliedDiscountCode::whereIn('cookie_id', $cookieIds)->latest('id')->first();
+
+        return $applied ? DiscountCode::find($applied->discount_id) : null;
     }
 
     /**
@@ -145,7 +197,7 @@ class CheckoutServices
 
         // No shipping row configured — a clean error, not a 500 on null.
         if (! $shipping) {
-            throw new \Exception('طريقة الشحن غير مُعدّة في المتجر بعد. يرجى التواصل مع الدعم.', 400);
+            throw new CheckoutException('طريقة الشحن غير مُعدّة في المتجر بعد. يرجى التواصل مع الدعم.', 400);
         }
 
         $shippingPrice = 0;
@@ -171,7 +223,7 @@ class CheckoutServices
             if ($request->has('user_address') && $request->user_address !== 'add_address') {
                 $userAddress = $user ? $user->addresses()->find($request->user_address) : null;
                 if (!$userAddress) {
-                    throw new \Exception('العنوان المحدد غير موجود. يرجى التحقق من صحة العنوان.', 400);
+                    throw new CheckoutException('العنوان المحدد غير موجود. يرجى التحقق من صحة العنوان.', 400);
                 }
                 $cityId = $userAddress->city_id;
             } else {
@@ -183,7 +235,7 @@ class CheckoutServices
             $city = City::find($cityId);
             $shippingPrice = $city ? $city->shipping_price : 0;
         } else {
-            throw new \Exception('تأكد من اختيارك طريقة شحن متاحة', 200);
+            throw new CheckoutException('تأكد من اختيارك طريقة شحن متاحة', 200);
         }
 
         // Free shipping: waived when the items subtotal (after
@@ -199,28 +251,49 @@ class CheckoutServices
      * Record a discount code's use, exactly once, when the order is
      * created (inside the checkout transaction). Applying a code only
      * discounts the cart — abandoning checkout must not burn a use.
+     *
+     * Web checkouts carry the applied code in the session. Stateless
+     * API checkouts have no session, but the code was already consumed
+     * at apply time (usage row + number_of_used decremented — see
+     * Api\CheckDiscountController), so the fallback below only
+     * attaches that code to the order; it never consumes anything.
      */
-    protected function consumeDiscountCode(): ?int
+    protected function consumeDiscountCode($user = null): ?int
     {
         $discountCodeId = session('applied_discount_code_id');
 
-        if (! $discountCodeId) {
+        if ($discountCodeId) {
+            $code = DiscountCode::where('id', $discountCodeId)->lockForUpdate()->first();
+
+            if (! $code || $code->status !== 'active' || $code->number_of_used <= 0) {
+                throw new \Exception('كود الخصم غير متاح', 400);
+            }
+
+            AppliedDiscountCode::create([
+                'cookie_id' => Cart::getCookieId(),
+                'discount_id' => $code->id,
+            ]);
+            $code->decrement('number_of_used');
+
+            return $code->id;
+        }
+
+        // API fallback: attach the code already applied to this cart.
+        // Only when it is actively discounting the current cart (a
+        // discounted_price on a live cart row): usage rows are never
+        // deleted, so a bare cookie lookup could attach a leftover
+        // row from an earlier order to a later, undiscounted one.
+        $cartItems = $this->getCartItems($user);
+
+        if (! $cartItems->contains(fn ($item) => $item->discounted_price !== null)) {
             return null;
         }
 
-        $code = DiscountCode::where('id', $discountCodeId)->lockForUpdate()->first();
+        $cookieIds = $cartItems->pluck('cookie_id')->filter()->unique();
 
-        if (! $code || $code->status !== 'active' || $code->number_of_used <= 0) {
-            throw new \Exception('كود الخصم غير متاح', 400);
-        }
-
-        AppliedDiscountCode::create([
-            'cookie_id' => Cart::getCookieId(),
-            'discount_id' => $code->id,
-        ]);
-        $code->decrement('number_of_used');
-
-        return $code->id;
+        return AppliedDiscountCode::whereIn('cookie_id', $cookieIds)
+            ->orderByDesc('id')
+            ->value('discount_id');
     }
 
     public function createOrder($request, $user, $shippingPrice): Order
@@ -233,7 +306,7 @@ class CheckoutServices
 
         // Consume the applied discount code now (not at apply time),
         // so an abandoned checkout never burns a use.
-        $discountCodeId = $this->consumeDiscountCode();
+        $discountCodeId = $this->consumeDiscountCode($user);
 
         // For guest checkout: create or update a Guest record
         $guestId = null;
@@ -304,14 +377,34 @@ class CheckoutServices
         // أي discounted_price عالق في صفوف السلة.
         $hasActiveDiscount = $this->hasActiveCouponDiscount($user);
 
-        return $this->getCartItems($user)
+        $items = $this->getCartItems($user);
+        $this->assertProductsAvailable($items);
+
+        return $items
             ->sum(fn ($item) => $item->quantity * self::chargedUnitPrice($item, $hasActiveDiscount));
     }
 
     public function calculateTotalBeforeDiscount($user): float
     {
-        return $this->getCartItems($user)
+        $items = $this->getCartItems($user);
+        $this->assertProductsAvailable($items);
+
+        return $items
             ->sum(fn ($item) => $item->quantity * self::baseUnitPrice($item->product));
+    }
+
+    /**
+     * A soft-deleted product leaves product null on its cart rows —
+     * fail with a clean "product unavailable" error instead of a
+     * 500 on ->price/->discount_price inside the totals.
+     */
+    protected function assertProductsAvailable($cartItems): void
+    {
+        foreach ($cartItems as $item) {
+            if (! $item->product) {
+                throw new CheckoutException('المنتج غير متاح', 400);
+            }
+        }
     }
 
     public function isAddingNewAddress($order, $request, $user)
