@@ -176,7 +176,7 @@
                                     class="form-control" value="{{ old('free_shipping_threshold', $setting->free_shipping_threshold) }}" />
                                 <span class="input-group-text">ر.س</span>
                             </div>
-                            <small class="text-muted">إجمالي السلة الذي عنده يصبح الشحن مجانياً ويكتمل شريط التقدم في السلة.</small>
+                            <small class="text-muted">إجمالي السلة الذي عنده يصبح الشحن مجانياً ويكتمل شريط التقدم في السلة. اكتب 0 لإيقاف الشحن المجاني تماماً.</small>
                         </div>
                     </div>
                 </div>
@@ -319,6 +319,23 @@
                                     <i class="mdi mdi-eye-outline" id="secretEyeIcon"></i>
                                 </button>
                             </div>
+                        </div>
+                        <div>
+                            <label class="form-label fw-semibold">قنوات الدفع الظاهرة للعميل</label>
+                            <div class="form-check">
+                                <input type="hidden" name="payment_cod_enabled" value="0" />
+                                <input type="checkbox" name="payment_cod_enabled" value="1" class="form-check-input" id="codEnabled"
+                                    @checked(old('payment_cod_enabled', $setting->payment_cod_enabled ?? true)) />
+                                <label class="form-check-label" for="codEnabled">الدفع عند الاستلام (كاش)</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="hidden" name="payment_card_enabled" value="0" />
+                                <input type="checkbox" name="payment_card_enabled" value="1" class="form-check-input" id="cardEnabled"
+                                    @checked(old('payment_card_enabled', $setting->payment_card_enabled ?? true)) />
+                                <label class="form-check-label" for="cardEnabled">الدفع بالبطاقة (Moyasar)</label>
+                            </div>
+                            <small class="text-muted">أخفي البطاقة لحد ما تجهز الدفع الإلكتروني — العميل مش هيشوفها في الـ checkout. لازم طريقة واحدة على الأقل تفضل ظاهرة.</small>
+                            @error('payment_card_enabled')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>

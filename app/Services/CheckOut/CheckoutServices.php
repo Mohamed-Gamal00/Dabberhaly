@@ -66,7 +66,14 @@ class CheckoutServices
     /** Free-shipping threshold from settings (null = never free). */
     public static function freeShippingThreshold(): ?float
     {
-        $threshold = Setting::first()?->free_shipping_threshold;
+        $settings = Setting::first();
+
+        // Fresh install with no settings row yet: the 500 default.
+        if (! $settings) {
+            return 500.0;
+        }
+
+        $threshold = $settings->free_shipping_threshold;
 
         return $threshold === null ? null : (float) $threshold;
     }
@@ -80,12 +87,15 @@ class CheckoutServices
     /**
      * Free shipping applies when the items subtotal (after per-product
      * offers, before any coupon) reaches the configured threshold.
+     * A threshold of 0 (or null) means free shipping is DISABLED —
+     * it must not read as "every cart qualifies" (subtotal >= 0 is
+     * always true), which used to waive shipping on all orders.
      */
     public static function freeShippingApplies(float $subtotalBeforeCoupon): bool
     {
         $threshold = self::freeShippingThreshold();
 
-        return $threshold !== null && $subtotalBeforeCoupon >= $threshold;
+        return $threshold !== null && $threshold > 0 && $subtotalBeforeCoupon >= $threshold;
     }
 
     /**

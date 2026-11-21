@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\DiscountCode;
 use App\Models\Order;
+use App\Models\Setting;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\AppliedDiscountCode;
 use App\Repositories\Cart\CartRepository;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Throwable;
 
@@ -90,6 +92,8 @@ class CheckoutController extends Controller
             // waive shipping at the free-shipping threshold.
             'vatRate'             => CheckoutServices::vatRate(),
             'freeShippingThreshold' => CheckoutServices::freeShippingThreshold(),
+            // Only the payment methods the admin enabled in settings.
+            'paymentMethods'    => Setting::enabledPaymentMethods(),
         ]);
     }
 
@@ -149,12 +153,14 @@ class CheckoutController extends Controller
             }
         }
 
-        // Payment method
+        // Payment method — only the methods the admin enabled in
+        // settings (a disabled method must not be orderable, even
+        // by posting it directly).
         $request->validate([
-            'payment_method' => ['required', 'in:cash_on_delivery,card_payment'],
+            'payment_method' => ['required', Rule::in(Setting::allowedPaymentMethodValues())],
         ], [
             'payment_method.required' => 'طريقة الدفع مطلوبة',
-            'payment_method.in'       => 'طريقة الدفع غير صحيحة',
+            'payment_method.in'       => 'طريقة الدفع غير متاحة حالياً',
         ]);
 
         // handle requests

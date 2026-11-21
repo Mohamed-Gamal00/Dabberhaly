@@ -203,7 +203,7 @@
                         </div>
                         <v-divider class="my-4" />
                         <div class="co-opt-grid">
-                            <label class="co-opt" :class="{ active: form.payment_method === 'cash_on_delivery' }">
+                            <label v-if="paymentMethods.includes('cash_on_delivery')" class="co-opt" :class="{ active: form.payment_method === 'cash_on_delivery' }">
                                 <input type="radio" v-model="form.payment_method" value="cash_on_delivery" class="co-opt-radio" />
                                 <v-icon size="22" color="#76543D">mdi-cash</v-icon>
                                 <div class="co-opt-body">
@@ -211,7 +211,7 @@
                                     <div class="co-opt-desc">{{ t('cod_desc') }}</div>
                                 </div>
                             </label>
-                            <label class="co-opt" :class="{ active: form.payment_method === 'card_payment' }">
+                            <label v-if="paymentMethods.includes('card_payment')" class="co-opt" :class="{ active: form.payment_method === 'card_payment' }">
                                 <input type="radio" v-model="form.payment_method" value="card_payment" class="co-opt-radio" />
                                 <v-icon size="22" color="#76543D">mdi-credit-card-outline</v-icon>
                                 <div class="co-opt-body">
@@ -362,6 +362,7 @@ const cities        = ref(props.cities || []);
 const shipping      = ref(props.shipping);
 const vatRate       = ref(Number(props.vatRate) || 0);
 const freeShippingThreshold = ref(props.freeShippingThreshold ? Number(props.freeShippingThreshold) : null);
+const paymentMethods = ref(props.paymentMethods || ['cash_on_delivery', 'card_payment']);
 const discountPrice = ref(props.discountPrice || 0);
 const userAddresses = ref(props.userAddresses || []);
 
@@ -385,7 +386,7 @@ const shippingOption = ref(
 );
 
 const form = ref({
-    payment_method: 'cash_on_delivery',
+    payment_method: paymentMethods.value[0] || 'cash_on_delivery',
     user_address: userAddresses.value.find(a => a.main_address)
         ? String(userAddresses.value.find(a => a.main_address).id)
         : (userAddresses.value.length ? String(userAddresses.value[0].id) : 'add_address'),

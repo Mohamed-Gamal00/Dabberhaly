@@ -14,6 +14,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\SendNewsToUser;
+use App\Models\Setting;
 use App\Models\ShippingTypesAndPrice;
 use App\Models\UserAddress;
 use App\Models\AppliedDiscountCode;
@@ -31,9 +32,9 @@ class CheckoutController extends Controller
         $guestId = $request->headers->get('guest-id');
 
         // Unknown payment methods must not silently become cash on
-        // delivery: only the values the store actually supports.
+        // delivery: only the values the admin enabled in settings.
         if ($request->filled('payment_method')
-            && ! in_array($request->payment_method, ['cash_on_delivery', 'cash', 'card_payment'], true)) {
+            && ! in_array($request->payment_method, Setting::allowedPaymentMethodValues(), true)) {
             return response()->json([
                 'message' => 'طريقة الدفع غير صحيحة',
                 'errors' => ['payment_method' => ['طريقة الدفع غير صحيحة']],
