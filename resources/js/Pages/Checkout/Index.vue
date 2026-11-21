@@ -172,7 +172,7 @@
                                     <div class="co-opt-title">{{ t('fixed_shipping') }}</div>
                                     <div class="co-opt-desc">{{ t('shipping_cost') }}</div>
                                 </div>
-                                <span class="co-opt-price">{{ shipping.normal_shipping_price }} {{ t('currency_sar') }}</span>
+                                <span class="co-opt-price">{{ shipping.normal_shipping_price }} {{ t('currency_egp') }}</span>
                             </label>
                             <label v-if="shipping?.add_wight_price" class="co-opt" :class="{ active: shippingOption === 'shipping_based_on_weight' }">
                                 <input type="radio" v-model="shippingOption" value="shipping_based_on_weight" class="co-opt-radio" />
@@ -181,7 +181,7 @@
                                     <div class="co-opt-title">{{ t('weight_shipping') }}</div>
                                     <div class="co-opt-desc">{{ t('weight_shipping_desc') }}</div>
                                 </div>
-                                <span class="co-opt-price">{{ weightShippingCost ? weightShippingCost + ' ' + t('currency_sar') : '—' }}</span>
+                                <span class="co-opt-price">{{ weightShippingCost ? weightShippingCost + ' ' + t('currency_egp') : '—' }}</span>
                             </label>
                             <label v-if="shipping?.add_price_based_on_city" class="co-opt" :class="{ active: shippingOption === 'shipping_based_on_city' }">
                                 <input type="radio" v-model="shippingOption" value="shipping_based_on_city" class="co-opt-radio" />
@@ -190,7 +190,7 @@
                                     <div class="co-opt-title">{{ t('city_shipping') }}</div>
                                     <div class="co-opt-desc">{{ t('city_shipping_desc') }}</div>
                                 </div>
-                                <span class="co-opt-price">{{ cityShippingPrice ? cityShippingPrice + ' ' + t('currency_sar') : '—' }}</span>
+                                <span class="co-opt-price">{{ cityShippingPrice ? cityShippingPrice + ' ' + t('currency_egp') : '—' }}</span>
                             </label>
                         </div>
                     </div>
@@ -247,10 +247,10 @@
                                     <img :src="item.image" class="co-item-img" alt="product" @error="onImgError" />
                                     <div class="co-item-info">
                                         <div class="co-item-name">{{ pick(item, 'name') }}</div>
-                                        <div class="co-item-meta">{{ item.quantity }} × {{ money(unitPrice(item)) }} {{ t('currency_sar') }}</div>
+                                        <div class="co-item-meta">{{ item.quantity }} × {{ money(unitPrice(item)) }} {{ t('currency_egp') }}</div>
                                     </div>
                                     <div class="co-item-total">
-                                        {{ money(unitPrice(item) * Number(item.quantity)) }} {{ t('currency_sar') }}
+                                        {{ money(unitPrice(item) * Number(item.quantity)) }} {{ t('currency_egp') }}
                                     </div>
                                 </div>
                             </div>
@@ -262,7 +262,7 @@
                                 <div class="co-card-title mb-3" style="font-size:13px">{{ t('discount_code') }}</div>
                                 <div v-if="appliedDiscount" class="co-discount-applied">
                                     <v-icon size="18" color="success" class="me-1">mdi-check-circle</v-icon>
-                                    <span>{{ t('discount_applied') }} <strong>{{ appliedDiscount.code }}</strong> — {{ appliedDiscount.type === 'percentage' ? appliedDiscount.value + '%' : appliedDiscount.value + ' ' + t('currency_sar') }}</span>
+                                    <span>{{ t('discount_applied') }} <strong>{{ appliedDiscount.code }}</strong> — {{ appliedDiscount.type === 'percentage' ? appliedDiscount.value + '%' : appliedDiscount.value + ' ' + t('currency_egp') }}</span>
                                     <button class="co-discount-remove" @click="removeDiscount">
                                         <v-icon size="14">mdi-close</v-icon>
                                     </button>
@@ -288,17 +288,17 @@
 
                             <!-- Totals -->
                             <div class="co-sum-row"><span>{{ t('cart_items_count') }}</span><span>{{ totalItemsCount }} {{ t('pieces') }}</span></div>
-                            <div class="co-sum-row"><span>{{ t('order_subtotal') }}</span><span>{{ money(summary.subtotal_before_discount) }} {{ t('currency_sar') }}</span></div>
+                            <div class="co-sum-row"><span>{{ t('order_subtotal') }}</span><span>{{ money(summary.subtotal_before_discount) }} {{ t('currency_egp') }}</span></div>
                             <div v-if="appliedDiscount" class="co-sum-row co-sum-discount">
                                 <span>
                                     <v-icon size="14" color="success" class="me-1">mdi-tag-outline</v-icon>
                                     {{ t('discount_applied') }} ({{ appliedDiscount.code }})
                                 </span>
-                                <span>- {{ money(discountSaving) }} {{ t('currency_sar') }}</span>
+                                <span>- {{ money(discountSaving) }} {{ t('currency_egp') }}</span>
                             </div>
-                            <div class="co-sum-row"><span>{{ t('shipping_cost') }}</span><span>{{ shippingCost ? money(shippingCost) + ' ' + t('currency_sar') : t('free_shipping') }}</span></div>
-                            <div v-if="vatRate > 0" class="co-sum-row"><span>{{ t('tax') }}</span><span>{{ money(taxAmount) }} {{ t('currency_sar') }}</span></div>
-                            <div class="co-sum-row co-sum-total"><span>{{ t('total') }}</span><span>{{ grandTotal }} {{ t('currency_sar') }}</span></div>
+                            <div class="co-sum-row"><span>{{ t('shipping_cost') }}</span><span>{{ shippingCost ? money(shippingCost) + ' ' + t('currency_egp') : t('free_shipping') }}</span></div>
+                            <div v-if="vatRate > 0" class="co-sum-row"><span>{{ t('tax') }}</span><span>{{ money(taxAmount) }} {{ t('currency_egp') }}</span></div>
+                            <div class="co-sum-row co-sum-total"><span>{{ t('total') }}</span><span>{{ grandTotal }} {{ t('currency_egp') }}</span></div>
 
                             <div v-if="errors.general" class="text-red text-caption mt-3 text-center">{{ errors.general }}</div>
 
@@ -322,7 +322,7 @@
         <div class="co-mobile-bar d-md-none">
             <div class="co-mobile-total">
                 <span>{{ t('total') }}</span>
-                <strong>{{ grandTotal }} {{ t('currency_sar') }}</strong>
+                <strong>{{ grandTotal }} {{ t('currency_egp') }}</strong>
             </div>
             <v-btn color="primary" height="46" rounded="lg" class="co-mobile-btn" :loading="submitting" @click="submit">{{ t('place_order') }}</v-btn>
         </div>

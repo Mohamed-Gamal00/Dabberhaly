@@ -364,7 +364,7 @@
   "footer_privacy_short": "Privacy",
 
   "features_free_shipping": "Free Shipping",
-  "features_free_shipping_sub": "On orders over 200 SAR",
+  "features_free_shipping_sub": "On orders over 200 EGP",
   "features_secure_payment": "Secure Payment",
   "features_secure_payment_sub": "100% encrypted data",
   "features_free_returns": "Free Returns",
@@ -453,7 +453,7 @@
   "orders_status_shipped": "Shipped",
   "orders_status_delivered": "Delivered",
   "orders_status_cancelled": "Cancelled",
-  "currency_sar": "SAR",
+  "currency_egp": "EGP",
   "account_subtitle": "Manage your personal account and orders",
   "account_go_to_profile": "Go to My Profile",
   "account_back_home": "Back to Home",

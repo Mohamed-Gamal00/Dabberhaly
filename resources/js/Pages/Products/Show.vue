@@ -96,12 +96,12 @@
                         <!-- Price -->
                         <div class="pd-price-block">
                             <template v-if="product.discount_price && product.discount_price < product.price">
-                                <span class="pd-price-new">{{ Math.ceil(product.discount_price) }} {{ t('currency_sar') }}</span>
-                                <span class="pd-price-old">{{ product.price }} {{ t('currency_sar') }}</span>
-                                <v-chip color="red" size="x-small" variant="flat" class="ms-2">{{ t('save') }} {{ Math.ceil(product.price - product.discount_price) }} {{ t('currency_sar') }}</v-chip>
+                                <span class="pd-price-new">{{ Math.ceil(product.discount_price) }} {{ t('currency_egp') }}</span>
+                                <span class="pd-price-old">{{ product.price }} {{ t('currency_egp') }}</span>
+                                <v-chip color="red" size="x-small" variant="flat" class="ms-2">{{ t('save') }} {{ Math.ceil(product.price - product.discount_price) }} {{ t('currency_egp') }}</v-chip>
                             </template>
                             <template v-else>
-                                <span class="pd-price-new">{{ Math.ceil(product.price) }} {{ t('currency_sar') }}</span>
+                                <span class="pd-price-new">{{ Math.ceil(product.price) }} {{ t('currency_egp') }}</span>
                             </template>
                         </div>
 
@@ -134,7 +134,7 @@
                                 <span>{{ quantity }}</span>
                                 <button @click="quantity < product.quantity ? quantity++ : null"><v-icon size="16">mdi-plus</v-icon></button>
                             </div>
-                            <span class="text-grey-darken-1" style="font-size:13px">{{ t('subtotal') }}: <strong class="text-primary">{{ subtotal }} {{ t('currency_sar') }}</strong></span>
+                            <span class="text-grey-darken-1" style="font-size:13px">{{ t('subtotal') }}: <strong class="text-primary">{{ subtotal }} {{ t('currency_egp') }}</strong></span>
                         </div>
 
                         <!-- Action buttons -->
@@ -286,7 +286,7 @@ const productJsonLd = computed(() => {
         url: typeof window !== 'undefined' ? window.location.href : undefined,
         offers: {
             '@type': 'Offer',
-            priceCurrency: 'SAR',
+            priceCurrency: 'EGP',
             price: price != null ? Number(price) : undefined,
             availability: product.quantity > 0
                 ? 'https://schema.org/InStock'

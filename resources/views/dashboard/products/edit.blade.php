@@ -83,7 +83,7 @@
                             <input type="number" name="price" step="0.01" min="0"
                                 class="form-control @error('price') is-invalid @enderror"
                                 value="{{ old('price', $product->price) }}" />
-                            <span class="input-group-text">ر.س</span>
+                            <span class="input-group-text">جنيه</span>
                         </div>
                         @error('price')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                     </div>
@@ -92,7 +92,7 @@
                         <div class="input-group">
                             <input type="number" name="discount_price" step="0.01" min="0"
                                 class="form-control @error('discount_price') is-invalid @enderror" value="{{ old('discount_price', $product->discount_price) }}" />
-                            <span class="input-group-text">ر.س</span>
+                            <span class="input-group-text">جنيه</span>
                         </div>
                         @error('discount_price')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                     </div>

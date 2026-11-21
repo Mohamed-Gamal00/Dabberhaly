@@ -88,10 +88,8 @@
                         <v-list density="compact" nav>
                             <v-list-item prepend-icon="mdi-account-outline" :title="t('my_account')" rounded="lg" href="/user-profile" />
                             <v-divider class="my-1" />
-                            <v-list-item prepend-icon="mdi-logout" rounded="lg" base-color="red">
-                                <Link href="/logout" method="post" as="button" class="text-decoration-none text-red" style="font-size:14px">
-                                    {{ t('logout') }}
-                                </Link>
+                            <v-list-item prepend-icon="mdi-logout" rounded="lg" base-color="red" @click="logout">
+                                <span class="text-red" style="font-size:14px">{{ t('logout') }}</span>
                             </v-list-item>
                         </v-list>
                     </v-card>
@@ -249,6 +247,12 @@ function isActive(href) {
 
 function openCart() {
     Emitter.emit('openCart');
+}
+
+// Whole logout row (icon included) triggers the logout — the icon
+// used to sit outside the clickable Link, so clicking it did nothing.
+function logout() {
+    router.post(route('logout'));
 }
 
 // Mobile search: same destination as the desktop GlobalSearch Enter

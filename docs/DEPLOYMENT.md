@@ -78,14 +78,15 @@ php artisan db:seed --force
 
 - `AdminSeeder` — super-admin account. Email from `ADMIN_EMAIL`
   (default `admin@dabberhaly.com`); password from `ADMIN_PASSWORD`.
-  **If `ADMIN_PASSWORD` is not set, the seeder generates a random
-  password and prints it ONCE to the console — save it immediately,
-  there is no default password and it is not stored anywhere else.**
+  **If `ADMIN_PASSWORD` is not set, the default password is `12345678`.**
   Change it from the admin panel after first login.
 - `SettingsSeeder` — settings skeleton (store name دبّرهالي; phone/email/
   address left **empty** until filled in `/admin/front_settings`).
-- `CurrencySeeder` — SAR (default, because Moyasar charges SAR) + EGP.
-- `CountryCitySeeder` — Egypt (27 governorates) + Gulf countries.
+- `CurrencySeeder` — EGP only (default, rate 1). Moyasar still charges in
+  SAR — that is separate from the store currency and is hardcoded in the
+  Moyasar payment flow, not read from this table.
+- `CountryCitySeeder` — Egypt only (27 governorates); re-seeding removes
+  any non-Egyptian country.
 - `ShippingTypesAndPriceSeeder` — shipping row **id 1**. Checkout does
   `ShippingTypesAndPrice::find(1)` directly, so this row must exist or
   every checkout returns 500.

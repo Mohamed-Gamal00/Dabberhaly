@@ -174,11 +174,11 @@
                     </div>
                     <div class="card-body d-flex flex-column gap-3">
                         <div>
-                            <label class="form-label fw-semibold">حد الشحن المجاني (ر.س)</label>
+                            <label class="form-label fw-semibold">حد الشحن المجاني (جنيه)</label>
                             <div class="input-group">
                                 <input type="number" name="free_shipping_threshold" step="0.01" min="0"
                                     class="form-control @error('free_shipping_threshold') is-invalid @enderror" value="{{ old('free_shipping_threshold', $setting->free_shipping_threshold) }}" />
-                                <span class="input-group-text">ر.س</span>
+                                <span class="input-group-text">جنيه</span>
                             </div>
                             @error('free_shipping_threshold')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                             <small class="text-muted">إجمالي السلة الذي عنده يصبح الشحن مجانياً ويكتمل شريط التقدم في السلة. اكتب 0 لإيقاف الشحن المجاني تماماً.</small>

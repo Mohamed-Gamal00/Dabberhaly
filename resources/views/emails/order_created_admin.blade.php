@@ -296,7 +296,7 @@
                     <td>{{ $item->product_name }}</td>
                     <td style="text-align:center">{{ $item->quantity }}</td>
                     <td style="text-align:left; font-weight:700; color:#76543D">
-                        {{ number_format($item->price, 2) }} ر.س
+                        {{ number_format($item->price, 2) }} جنيه
                     </td>
                 </tr>
                 @endforeach
@@ -313,27 +313,27 @@
         <div class="totals">
             <div class="totals-row">
                 <span>المجموع قبل الشحن</span>
-                <span>{{ number_format($order->totalBeforeDiscount ?? $order->total_price, 2) }} ر.س</span>
+                <span>{{ number_format($order->totalBeforeDiscount ?? $order->total_price, 2) }} جنيه</span>
             </div>
             @if($emailDiscount > 0)
             <div class="totals-row">
                 <span>الخصم</span>
-                <span>− {{ number_format($emailDiscount, 2) }} ر.س</span>
+                <span>− {{ number_format($emailDiscount, 2) }} جنيه</span>
             </div>
             @endif
             <div class="totals-row">
                 <span>تكلفة الشحن</span>
-                <span>{{ number_format($order->shipping_price ?? 0, 2) }} ر.س</span>
+                <span>{{ number_format($order->shipping_price ?? 0, 2) }} جنيه</span>
             </div>
             @if($emailTax > 0)
             <div class="totals-row">
                 <span>الضريبة (القيمة المضافة)</span>
-                <span>{{ number_format($emailTax, 2) }} ر.س</span>
+                <span>{{ number_format($emailTax, 2) }} جنيه</span>
             </div>
             @endif
             <div class="totals-row total">
                 <span>الإجمالي الكلي</span>
-                <span>{{ number_format($order->total_price, 2) }} ر.س</span>
+                <span>{{ number_format($order->total_price, 2) }} جنيه</span>
             </div>
         </div>
 

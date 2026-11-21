@@ -29,8 +29,8 @@ class AdvertisementMarqueeLocaleTest extends TestCase
     public function test_marquee_switches_language_without_clearing_cache(): void
     {
         Advertisement::create([
-            'title' => 'شحن مجاني للطلبات فوق 200 ريال',
-            'title_en' => 'Free shipping on orders over 200 SAR',
+            'title' => 'شحن مجاني للطلبات فوق 200 جنيه',
+            'title_en' => 'Free shipping on orders over 200 EGP',
             'is_active' => true,
         ]);
 
@@ -38,7 +38,7 @@ class AdvertisementMarqueeLocaleTest extends TestCase
         $this->withSession(['locale' => 'ar'])->get('/contact-us')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('advertisements.0.title', 'شحن مجاني للطلبات فوق 200 ريال'));
+                ->where('advertisements.0.title', 'شحن مجاني للطلبات فوق 200 جنيه'));
 
         // Switch to English without touching the cache: the marquee
         // must follow the site language. Before the fix the cache key
@@ -46,7 +46,7 @@ class AdvertisementMarqueeLocaleTest extends TestCase
         $this->withSession(['locale' => 'en'])->get('/contact-us')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('advertisements.0.title', 'Free shipping on orders over 200 SAR'));
+                ->where('advertisements.0.title', 'Free shipping on orders over 200 EGP'));
     }
 
     public function test_updating_an_ad_clears_both_locale_caches(): void

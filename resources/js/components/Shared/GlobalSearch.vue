@@ -43,9 +43,9 @@
                         <div class="gs-item-info">
                             <div class="gs-item-name">{{ pick(item, 'name') }}</div>
                             <div class="gs-item-price">
-                                {{ Math.ceil(item.discount_price || item.price) }} {{ t('currency_sar') }}
+                                {{ Math.ceil(item.discount_price || item.price) }} {{ t('currency_egp') }}
                                 <span v-if="item.discount_price && item.discount_price < item.price" class="gs-item-old">
-                                    {{ item.price }} {{ t('currency_sar') }}
+                                    {{ item.price }} {{ t('currency_egp') }}
                                 </span>
                             </div>
                         </div>

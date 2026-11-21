@@ -88,7 +88,7 @@
                     </tr>
                     <tr>
                         <td class="text-muted fw-semibold">إجمالي الطلب</td>
-                        <td>{{ number_format($transaction->order->total_price, 2) }} ر.س</td>
+                        <td>{{ number_format($transaction->order->total_price, 2) }} جنيه</td>
                     </tr>
                     <tr>
                         <td class="text-muted fw-semibold">حالة الدفع</td>

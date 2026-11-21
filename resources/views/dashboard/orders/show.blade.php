@@ -48,7 +48,7 @@
                 </div>
                 <div>
                     <div class="text-muted small">الإجمالي</div>
-                    <div class="fw-bold">{{ $order->total_price }} ر.س</div>
+                    <div class="fw-bold">{{ $order->total_price }} جنيه</div>
                 </div>
             </div>
         </div>
@@ -160,8 +160,8 @@
                                 <td class="text-center">
                                     <span class="badge bg-light text-dark border">{{ $item->quantity }}</span>
                                 </td>
-                                <td class="text-center">{{ number_format($item->price, 2) }} ر.س</td>
-                                <td class="text-center fw-bold text-primary">{{ number_format($item->price * $item->quantity, 2) }} ر.س</td>
+                                <td class="text-center">{{ number_format($item->price, 2) }} جنيه</td>
+                                <td class="text-center fw-bold text-primary">{{ number_format($item->price * $item->quantity, 2) }} جنيه</td>
                             </tr>
                             @empty
                             <tr><td colspan="4" class="text-center text-muted py-4">لا توجد منتجات</td></tr>
@@ -170,7 +170,7 @@
                         <tfoot class="table-light">
                             <tr>
                                 <td colspan="3" class="text-end fw-bold">تكلفة الشحن</td>
-                                <td class="text-center fw-bold">{{ $order->shipping_price ?? 0 }} ر.س</td>
+                                <td class="text-center fw-bold">{{ $order->shipping_price ?? 0 }} جنيه</td>
                             </tr>
                             @if($order->discountCode)
                             <tr>
@@ -185,7 +185,7 @@
                                     @if($order->discountCode->discount_type === 'percentage')
                                         - {{ $order->discountCode->price }}%
                                     @else
-                                        - {{ $order->discountCode->price }} ر.س
+                                        - {{ $order->discountCode->price }} جنيه
                                     @endif
                                 </td>
                             </tr>
@@ -193,7 +193,7 @@
                             <tr>
                                 <td colspan="3" class="text-end fw-bold fs-6">الإجمالي الكلي</td>
                                 <td class="text-center fw-bold fs-6 text-primary">
-                                    {{ number_format($order->total_price + ($order->shipping_price ?? 0), 2) }} ر.س
+                                    {{ number_format($order->total_price + ($order->shipping_price ?? 0), 2) }} جنيه
                                 </td>
                             </tr>
                         </tfoot>
@@ -275,7 +275,7 @@
                         <div>
                             <div class="text-muted small">الشحن</div>
                             <div class="fw-semibold">
-                                {{ $order->shipping_price ? $order->shipping_price . ' ر.س' : 'استلام من المتجر' }}
+                                {{ $order->shipping_price ? $order->shipping_price . ' جنيه' : 'استلام من المتجر' }}
                             </div>
                         </div>
                     </li>
@@ -292,7 +292,7 @@
                                     @if($order->discountCode->discount_type === 'percentage')
                                         خصم {{ $order->discountCode->price }}%
                                     @else
-                                        خصم {{ $order->discountCode->price }} ر.س
+                                        خصم {{ $order->discountCode->price }} جنيه
                                     @endif
                                 </span>
                             </div>

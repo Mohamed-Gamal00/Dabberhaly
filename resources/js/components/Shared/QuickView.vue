@@ -61,11 +61,11 @@
                         <!-- Price -->
                         <div class="qv-price-row">
                             <template v-if="product.discount_price && product.discount_price < product.price">
-                                <span class="qv-price-new">{{ Math.ceil(product.discount_price) }} {{ t('currency_sar') }}</span>
-                                <span class="qv-price-old">{{ product.price }} {{ t('currency_sar') }}</span>
+                                <span class="qv-price-new">{{ Math.ceil(product.discount_price) }} {{ t('currency_egp') }}</span>
+                                <span class="qv-price-old">{{ product.price }} {{ t('currency_egp') }}</span>
                             </template>
                             <template v-else>
-                                <span class="qv-price-new">{{ Math.ceil(product.price) }} {{ t('currency_sar') }}</span>
+                                <span class="qv-price-new">{{ Math.ceil(product.price) }} {{ t('currency_egp') }}</span>
                             </template>
                         </div>
 
@@ -95,7 +95,7 @@
                                 <button @click="quantity++"><v-icon size="16">mdi-plus</v-icon></button>
                             </div>
                             <span class="text-grey" style="font-size:12px">
-                                {{ t('quickview_total') }}: <strong>{{ subtotal }} {{ t('currency_sar') }}</strong>
+                                {{ t('quickview_total') }}: <strong>{{ subtotal }} {{ t('currency_egp') }}</strong>
                             </span>
                         </div>
 
