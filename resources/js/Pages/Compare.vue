@@ -1,5 +1,6 @@
 <template>
     <div class="cmp-page">
+        <SeoHead :title="t('compare_title')" noindex />
 
         <!-- Hero -->
         <div class="cmp-hero">
@@ -232,6 +233,7 @@
 import { computed, inject } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import axios from 'axios';
+import SeoHead from '../components/Shared/SeoHead.vue';
 import { useLocale } from '../composables/useLocale';
 
 const { t } = useLocale();

@@ -126,6 +126,8 @@ class RulesController extends Controller
   {
     Gate::authorize('admin.group.delete');
 
+    $this->ensureGroupIsNotOwn(Rule::findOrFail($id));
+
     $this->ruleRepository->delete($id);
     return to_route('rules.index')->with('dark', __('messages.RULE_DELETED'));
   }

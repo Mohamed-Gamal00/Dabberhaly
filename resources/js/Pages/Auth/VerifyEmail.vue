@@ -1,5 +1,6 @@
 <template>
-    <div class="auth-page">
+    <div class="auth-page" :dir="dir">
+        <SeoHead :title="t('verify_title')" noindex />
         <div class="auth-left d-none d-md-flex">
             <div class="auth-left-content">
                 <v-icon size="56" color="white" class="mb-4">mdi-email-check-outline</v-icon>
@@ -78,12 +79,13 @@
 <script setup>
 import { computed } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 
 defineOptions({ layout: null });
 
 const siteName = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
-const { t } = useLocale();
+const { t, dir } = useLocale();
 
 const page    = usePage();
 const success = computed(() => page.props.flash?.success);
@@ -97,7 +99,7 @@ const resend = () => resendForm.post('/verify-resend');
 </script>
 
 <style scoped>
-.auth-page { display:flex; min-height:100vh; direction:rtl; }
+.auth-page { display:flex; min-height:100vh; }
 .auth-left { width:42%; background:linear-gradient(135deg,#76543D 0%,#8d6b51 50%,#8d6b51 100%); display:flex; align-items:center; justify-content:center; padding:48px; position:relative; overflow:hidden; }
 .auth-left::before { content:''; position:absolute; width:300px; height:300px; border-radius:50%; background:rgba(255,255,255,0.05); top:-80px; right:-80px; }
 .auth-left-content { position:relative; z-index:1; }

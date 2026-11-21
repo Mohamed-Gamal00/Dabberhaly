@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\City;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\User_verfication;
@@ -36,7 +37,12 @@ class UserService
                     'phone_number' => $user->phone_number,
                     'user_id' => $user->id,
                     'address' => $request->address,
-                    'country_id' => 178, // Assuming default country is 178 (Saudi Arabia)
+                    // The mobile app never sends a country — derive it
+                    // from the city (a city belongs to one country),
+                    // same as the API address create/update. The old
+                    // hardcoded 178 (Saudi Arabia) was wrong for every
+                    // other country.
+                    'country_id' => City::find($request->city_id)?->country_id,
                     'city_id' => $request->city_id,
                     'main_address' => true
                 ]);

@@ -31,7 +31,7 @@ Route::get('/up', function () {
     Route::get('/reset-password', [UserAuthController::class, 'resetPasswordView'])->name('reset');
 
     Route::post('/login', [UserAuthController::class, 'login'])->name('auth.login');
-    Route::post('/register', [UserAuthController::class, 'register'])->name('auth.register');
+    Route::post('/register', [UserAuthController::class, 'register'])->middleware('throttle:5,1')->name('auth.register');
     Route::post('/verify', [UserAuthController::class, 'verifyCode'])->middleware('throttle:5,1')->name('auth.verify');
     Route::post('/verify-resend', [UserAuthController::class, 'resendVerificationCode'])->middleware('throttle:5,1')->name('auth.verify.resend');
     Route::post('/forgot-password', [UserAuthController::class, 'forgotPassword'])->name('auth.forgot');
@@ -166,13 +166,14 @@ Route::middleware('auth:web')->group(function () {
 
     Route::put('/user_update_info/update', [UserProfileController::class, 'updatePassword'])->name('update_password');
     Route::put('/user_normal_info/update', [UserProfileController::class, 'updateUserInfo'])->name('update_user_info');
-    Route::post('/user_normal_info/verify_to_update', [UserProfileController::class, 'verify_to_update'])->name('verify_to_update');
-    Route::post('/user_normal_info/resendVerifyCode_to_update', [UserProfileController::class, 'resendVerifyCodeToupdate'])->name('resendVerifyCode_to_update');
 
 
     // /* المرتجعات */
     Route::get('/user_return_orders', [\App\Http\Controllers\Inertia\ReturnProductsController::class, 'index'])->name('user.return_products');
     Route::post('/user_return_orders/store', [\App\Http\Controllers\Inertia\ReturnProductsController::class, 'store'])->name('user.return_products.store');
+
+    // إلغاء الطلب (العميل)
+    Route::post('/user_orders/cancel', [\App\Http\Controllers\Inertia\UserOrdersController::class, 'cancel'])->name('user.orders.cancel');
 
 
     #################################################--Comments Routes

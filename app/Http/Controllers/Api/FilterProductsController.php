@@ -57,7 +57,7 @@ class FilterProductsController extends Controller
             $productsQuery->where('category_id', $request->category_id);
         }
 
-        $products = $productsQuery->latest()->paginate(10);
+        $products = $productsQuery->with('parent', 'availability')->latest()->paginate(10);
 
         if (count($products) > 0) {
             if ($products->total() > $products->perPage()) {

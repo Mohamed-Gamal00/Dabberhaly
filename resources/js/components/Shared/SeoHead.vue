@@ -69,6 +69,16 @@ const robots      = computed(() => props.noindex ? 'noindex,nofollow' : (global.
 // The settings canonical_url is deliberately NOT used here: it is one
 // URL for the whole site, and using it forced the same canonical onto
 // every page. A page either passes its own canonical or falls back to
-// its own URL.
-const canonical   = computed(() => props.canonical || (typeof window !== 'undefined' ? window.location.href : ''));
+// its own URL — without the query string or hash, so filtered/paginated
+// URLs (/products?sort=price_asc, ?page=2, ...) don't canonicalize
+// themselves as separate pages.
+const stripQueryAndHash = (url) => {
+    try {
+        const u = new URL(url);
+        return u.origin + u.pathname;
+    } catch {
+        return String(url).split(/[?#]/)[0];
+    }
+};
+const canonical   = computed(() => props.canonical || (typeof window !== 'undefined' ? stripQueryAndHash(window.location.href) : ''));
 </script>

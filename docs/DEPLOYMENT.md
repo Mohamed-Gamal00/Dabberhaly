@@ -52,6 +52,10 @@ composer install --no-dev --optimize-autoloader
 npm install
 npm run build
 php artisan migrate --force
+# Seed BEFORE config:cache — the seeders read ADMIN_EMAIL /
+# ADMIN_PASSWORD and MOYASAR_*/SMS_* via env(), which returns null
+# once the config is cached (see §4).
+php artisan db:seed --force
 php artisan storage:link
 php artisan config:cache
 php artisan route:cache
@@ -64,7 +68,7 @@ php artisan view:cache
 > production; its gate (`App\Providers\TelescopeServiceProvider`) has an
 > empty allow-list, so nobody can open `/telescope` even if it were enabled.
 
-## 4. Seed — core data only
+## 4. Seed — core data only (runs in §3, before `config:cache`)
 
 ```bash
 php artisan db:seed --force
@@ -100,8 +104,9 @@ contact/social links (footer + contact page read them from settings).
 
 Order confirmation emails, newsletters, admin notifications and password
 reset codes are **queued jobs**. Without a running worker they pile up in
-the `jobs` table and are never sent — and the password-reset code is only
-created inside its queued job, so reset stops working entirely.
+the `jobs` table and are never sent — including the password-reset email,
+so a reset stops working entirely. (The reset code itself is created
+synchronously when the reset is requested; only sending it is queued.)
 
 Install the Supervisor program (edit the project path + user first):
 
@@ -151,7 +156,8 @@ One cron entry, every minute:
 
 Scheduled jobs (`app/Console/Kernel.php`, all daily):
 
-- `telescope:prune` — prune Telescope entries
+- `telescope:prune` — prune Telescope entries (only scheduled when
+  Telescope is installed — dev only; skipped on a `--no-dev` server)
 - `queue:prune-failed --hours=72` — drop failed jobs older than 3 days
 - `app:prune-expired-data` — delete expired verification codes
   (`users_verificationCodes`) and carts untouched for 30 days
@@ -202,7 +208,11 @@ restore at least once before launch — an untested backup is not a backup.
 2. `composer install --no-dev --optimize-autoloader`
 3. `npm install && npm run build`
 4. `php artisan migrate --force`
-5. `php artisan config:cache && php artisan route:cache && php artisan view:cache`
-6. `php artisan queue:restart`
-7. `curl -s -o /dev/null -w "%{http_code}\n" https://your-domain/up` → expect `200`
-8. Place a test order (COD) and confirm the confirmation email arrives.
+5. First deploy only — `php artisan db:seed --force` (creates the admin
+   account, the settings row and shipping row id 1; without it a fresh
+   server cannot take any order) **before** `config:cache`, and
+   `php artisan storage:link` (otherwise all product images 404)
+6. `php artisan config:cache && php artisan route:cache && php artisan view:cache`
+7. `php artisan queue:restart`
+8. `curl -s -o /dev/null -w "%{http_code}\n" https://your-domain/up` → expect `200`
+9. Place a test order (COD) and confirm the confirmation email arrives.

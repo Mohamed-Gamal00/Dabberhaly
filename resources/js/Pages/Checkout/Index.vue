@@ -244,13 +244,13 @@
                             <!-- Items -->
                             <div class="co-items">
                                 <div v-for="item in cartItems" :key="item.id" class="co-item">
-                                    <img :src="item.image" class="co-item-img" alt="product" />
+                                    <img :src="item.image" class="co-item-img" alt="product" @error="onImgError" />
                                     <div class="co-item-info">
                                         <div class="co-item-name">{{ pick(item, 'name') }}</div>
-                                        <div class="co-item-meta">{{ item.quantity }} × {{ Math.ceil(Number(item.discount_price) || Number(item.price)) }} {{ t('currency_sar') }}</div>
+                                        <div class="co-item-meta">{{ item.quantity }} × {{ money(unitPrice(item)) }} {{ t('currency_sar') }}</div>
                                     </div>
                                     <div class="co-item-total">
-                                        {{ Math.ceil((Number(item.discount_price) || Number(item.price)) * Number(item.quantity)) }} {{ t('currency_sar') }}
+                                        {{ money(unitPrice(item) * Number(item.quantity)) }} {{ t('currency_sar') }}
                                     </div>
                                 </div>
                             </div>
@@ -288,16 +288,16 @@
 
                             <!-- Totals -->
                             <div class="co-sum-row"><span>{{ t('cart_items_count') }}</span><span>{{ totalItemsCount }} {{ t('pieces') }}</span></div>
-                            <div class="co-sum-row"><span>{{ t('order_subtotal') }}</span><span>{{ Math.ceil(cartTotal + discountSaving) }} {{ t('currency_sar') }}</span></div>
+                            <div class="co-sum-row"><span>{{ t('order_subtotal') }}</span><span>{{ money(summary.subtotal_before_discount) }} {{ t('currency_sar') }}</span></div>
                             <div v-if="appliedDiscount" class="co-sum-row co-sum-discount">
                                 <span>
                                     <v-icon size="14" color="success" class="me-1">mdi-tag-outline</v-icon>
                                     {{ t('discount_applied') }} ({{ appliedDiscount.code }})
                                 </span>
-                                <span>- {{ discountSaving }} {{ t('currency_sar') }}</span>
+                                <span>- {{ money(discountSaving) }} {{ t('currency_sar') }}</span>
                             </div>
-                            <div class="co-sum-row"><span>{{ t('shipping_cost') }}</span><span>{{ shippingCost ? Math.ceil(shippingCost) + ' ' + t('currency_sar') : t('free_shipping') }}</span></div>
-                            <div v-if="vatRate > 0" class="co-sum-row"><span>{{ t('tax') }}</span><span>{{ Math.ceil(taxAmount) }} {{ t('currency_sar') }}</span></div>
+                            <div class="co-sum-row"><span>{{ t('shipping_cost') }}</span><span>{{ shippingCost ? money(shippingCost) + ' ' + t('currency_sar') : t('free_shipping') }}</span></div>
+                            <div v-if="vatRate > 0" class="co-sum-row"><span>{{ t('tax') }}</span><span>{{ money(taxAmount) }} {{ t('currency_sar') }}</span></div>
                             <div class="co-sum-row co-sum-total"><span>{{ t('total') }}</span><span>{{ grandTotal }} {{ t('currency_sar') }}</span></div>
 
                             <div v-if="errors.general" class="text-red text-caption mt-3 text-center">{{ errors.general }}</div>
@@ -337,6 +337,15 @@ import axios from 'axios';
 import { useLocale } from '../../composables/useLocale';
 const { t, pick, isEn, dir } = useLocale();
 
+// Local placeholder (Vanilla Latte) shown when an order-summary thumbnail fails to load.
+const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="#F7F0E5"/><g fill="none" stroke="#76543D" stroke-width="6"><path d="M55 75 L100 55 L145 75 L145 130 L100 150 L55 130 Z"/><path d="M55 75 L100 95 L145 75 M100 95 L100 150"/></g></svg>`
+);
+
+function onImgError(e) {
+    if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
+}
+
 const { props } = usePage();
 const user          = computed(() => props.auth?.user);
 const cartItems     = ref(props.cartItems || []);
@@ -365,13 +374,19 @@ const freeShippingThreshold = ref(props.freeShippingThreshold ? Number(props.fre
 const paymentMethods = ref(props.paymentMethods || ['cash_on_delivery', 'card_payment']);
 const discountPrice = ref(props.discountPrice || 0);
 const userAddresses = ref(props.userAddresses || []);
+// Server-computed summary (CheckoutServices::checkoutSummary): the
+// exact amounts the order is charged with. The page displays them
+// verbatim and only adds its (exact) shipping cost for the selected
+// shipping option — it must not recompute totals from the discount
+// code's face value.
+const summary = ref(props.summary || null);
 
 const submitting     = ref(false);
 const errors         = ref({});
 const discountInput  = ref('');
 const discountError  = ref('');
 const discountLoading = ref(false);
-const appliedDiscount = ref(null); // { code, value, type }
+const appliedDiscount = ref(props.appliedDiscount ? { ...props.appliedDiscount } : null); // { code, value, type }
 const joinNews       = ref(false);
 const guestMode      = ref('guest');
 
@@ -429,12 +444,29 @@ const shippingCost = computed(() => {
     if (shippingOption.value === 'noShipping') return 0;
     // Free shipping once the items subtotal (after product offers,
     // before any coupon) reaches the configured threshold.
-    if (freeShippingThreshold.value && cartTotal.value >= freeShippingThreshold.value) return 0;
+    if (freeShippingThreshold.value && subtotalBeforeDiscount.value >= freeShippingThreshold.value) return 0;
     if (shippingOption.value === 'fixed_shipping') return Number(shipping.value?.normal_shipping_price) || 0;
     if (shippingOption.value === 'shipping_based_on_city') return Number(cityShippingPrice.value) || 0;
     if (shippingOption.value === 'shipping_based_on_weight') return weightShippingCost.value;
     return 0;
 });
+
+// Items subtotal before any coupon (after product offers) — the
+// free-shipping base the server uses.
+const subtotalBeforeDiscount = computed(() =>
+    Number(summary.value?.subtotal_before_discount ?? cartTotal.value)
+);
+
+// Exact amounts, no rounding up: the server stores exact amounts.
+const money = (n) => {
+    const v = Math.round(Number(n || 0) * 100) / 100;
+    return Number.isInteger(v) ? v : v.toFixed(2);
+};
+
+// Unit price actually charged for a line: the coupon price (the
+// server only sends it when a discount is active), else the product
+// offer price, else the list price.
+const unitPrice = (item) => Number(item.discounted_price ?? item.discount_price ?? item.price);
 
 const totalWeight = computed(() =>
     cartItems.value.reduce((sum, item) => sum + Number(item.weight || 0) * Number(item.quantity), 0)
@@ -442,16 +474,14 @@ const totalWeight = computed(() =>
 
 // Weight shipping is charged on the TOTAL weight, not the per-kg price alone.
 const weightShippingCost = computed(() =>
-    Math.ceil(totalWeight.value * (Number(shipping.value?.weight_price) || 0))
+    totalWeight.value * (Number(shipping.value?.weight_price) || 0)
 );
 
-// VAT base = discounted items subtotal (after the coupon, if any).
-const taxAmount = computed(() =>
-    vatRate.value > 0 ? Math.max(0, cartTotal.value - discountSaving.value) * vatRate.value / 100 : 0
-);
+// VAT on the discounted items subtotal, as computed by the server.
+const taxAmount = computed(() => Number(summary.value?.tax_amount ?? 0));
 
 const grandTotal = computed(() =>
-    Math.ceil(Number(cartTotal.value) + Number(shippingCost.value) - Number(discountSaving.value) + Number(taxAmount.value))
+    money(Number(summary.value?.subtotal ?? cartTotal.value) + Number(shippingCost.value) - Number(discountSaving.value) + Number(taxAmount.value))
 );
 
 async function applyDiscount() {
@@ -467,8 +497,9 @@ async function applyDiscount() {
             value: data.discount_value,
             type:  data.discount_type,
         };
+        if (data.summary) summary.value = data.summary;
         discountPrice.value = data.discount_type === 'percentage'
-            ? Math.ceil(cartTotal.value * data.discount_value / 100)
+            ? cartTotal.value * data.discount_value / 100
             : data.discount_value;
         discountInput.value = '';
     } catch (e) {
@@ -488,7 +519,8 @@ async function removeDiscount() {
     // discounted_price on the cart rows, so a later checkout is
     // charged the full price and the code is not consumed.
     try {
-        await axios.post('/checkout/remove-discount');
+        const { data } = await axios.post('/checkout/remove-discount');
+        if (data?.summary) summary.value = data.summary;
     } catch (e) {
         console.error('Remove discount failed:', e.response?.data);
     }
@@ -500,10 +532,10 @@ async function removeDiscount() {
 
 const discountSaving = computed(() => {
     if (!appliedDiscount.value) return 0;
-    if (appliedDiscount.value.type === 'percentage') {
-        return Math.ceil(cartTotal.value * appliedDiscount.value.value / 100);
-    }
-    return appliedDiscount.value.value;
+    // The actual saving from the server: a fixed amount is capped at
+    // the eligible lines and a product code applies to matching lines
+    // only — never the code's face value off the whole cart.
+    return Number(summary.value?.discount || 0);
 });
 
 async function submit() {

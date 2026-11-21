@@ -34,7 +34,7 @@ class ProfileController extends Controller
     $data = $request->validate([
       'name' => 'required|string|max:100',
       'email' => 'required|email|unique:admins,email,' . $id,
-      'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+      'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
     ]);
 
     $admin = $this->profileRepository->updateProfile($data, $id);

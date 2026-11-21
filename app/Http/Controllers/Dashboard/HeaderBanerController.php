@@ -26,7 +26,7 @@ class HeaderBanerController extends Controller
     Gate::authorize('header_banner.edit');
     $data = $request->validate([
       'header' => ['nullable', 'array'],
-      'header.*.image' => ['nullable', 'image'],
+      'header.*.image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
       'header.*.image_link' => ['nullable', 'string', 'max:1000'],
       'change_image_link' => ['nullable', 'array']
     ]);

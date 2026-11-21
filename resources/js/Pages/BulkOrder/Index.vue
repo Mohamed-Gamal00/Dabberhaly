@@ -1,5 +1,6 @@
 <template>
     <div style="background:#f7f0e5; min-height:100vh; padding-bottom:48px">
+        <SeoHead :title="t('bulk_title')" noindex />
         <div style="background:linear-gradient(135deg,#76543D,#8d6b51); padding:40px 16px 50px">
             <h1 class="text-white font-weight-bold text-center" style="font-size:28px">{{ t('bulk_title') }}</h1>
             <p class="text-center mt-2" style="color:rgba(255,255,255,0.75); font-size:14px">{{ t('bulk_subtitle') }}</p>
@@ -29,6 +30,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 const { t } = useLocale();
 const form = useForm({ name: '', phone: '', company_name: '', description: '' });

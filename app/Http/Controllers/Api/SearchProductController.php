@@ -14,10 +14,8 @@ class SearchProductController extends Controller
     {
         $word = $request->has('product_name') ? $request->input('product_name') : null;
         $products = Product::with('parent', 'availability')
-            ->when($word != null, function ($query) use ($word) {
-                $query->where(fn ($q) => $q->where('name', 'LIKE', '%' . $word . '%')
-                    ->orWhere('name_en', 'LIKE', '%' . $word . '%'));
-            })->latest()->paginate(10);
+            ->when($word != null, fn ($query) => $query->searchText($word))
+            ->latest()->paginate(10);
 
 
         if (count($products) > 0) {

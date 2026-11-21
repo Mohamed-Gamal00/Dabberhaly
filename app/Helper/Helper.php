@@ -57,8 +57,10 @@ trait Helper
         }
 
         if ($guestId) {
+            // The header carries the guest's cookie_id — never the
+            // numeric guest id — so resolve the Guest row by cookie_id.
             $ids = $this->wishlistProductIds($request, 'guest:' . $guestId, fn () =>
-                Guest::find($guestId)?->wishlistProducts()->pluck('wishlist_products_guest.product_id')->all() ?? []);
+                Guest::where('cookie_id', $guestId)->first()?->wishlistProducts()->pluck('wishlist_products_guest.product_id')->all() ?? []);
             return in_array($productId, $ids);
         }
 

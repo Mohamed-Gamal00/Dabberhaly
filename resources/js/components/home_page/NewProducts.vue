@@ -59,6 +59,7 @@
                             :src="bannerImage"
                             class="banner-image"
                             alt="New Products Banner"
+                            @error="onImgError"
                         />
                     </div>
                 </v-col>
@@ -90,6 +91,15 @@ const { t } = useLocale();
 
 // Get banner image from page props
 const bannerImage = computed(() => usePage().props.newProductsBanner);
+
+// Local placeholder (Vanilla Latte) shown when the banner image fails to load.
+const IMG_FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="#F7F0E5"/><g fill="none" stroke="#76543D" stroke-width="6"><path d="M55 75 L100 55 L145 75 L145 130 L100 150 L55 130 Z"/><path d="M55 75 L100 95 L145 75 M100 95 L100 150"/></g></svg>`
+);
+
+function onImgError(e) {
+    if (e.target.src !== IMG_FALLBACK) e.target.src = IMG_FALLBACK;
+}
 
 function openQuickView(product) { Emitter.emit("openQuickView", product); }
 const modules = [Pagination];

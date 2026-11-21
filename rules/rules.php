@@ -77,6 +77,7 @@ return [
 
     'news' => [
         'news.view' => 'النشرة البريدية',
+        'news.send' => 'إرسال النشرة البريدية',
     ],
 
     'settings' => [

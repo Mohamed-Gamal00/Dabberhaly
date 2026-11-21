@@ -7,6 +7,7 @@ use App\Helper\Helper;
 use App\Models\Order;
 use App\Models\Product;
 use App\Repositories\Order\OrderInterface;
+use Illuminate\Http\Request;
 
 class OrderRepository implements OrderInterface
 {
@@ -72,9 +73,44 @@ class OrderRepository implements OrderInterface
         return $order;
     }
 
+    /**
+     * Cancel an order on behalf of its customer. Only transitions the
+     * status machine allows (anything except delivered / cancelled,
+     * via canTransitionTo) go through — the update() path below then
+     * returns the items to stock, with the same already-cancelled
+     * guard it uses for the admin cancel transition, so a second
+     * cancel can never restore stock twice.
+     *
+     * Returns the cancelled order, or null when the order cannot be
+     * cancelled (delivered, already cancelled, or already returned —
+     * a returned order's stock was already restored by the return).
+     */
+    public function cancel($id): ?Order
+    {
+        $order = $this->order->findOrFail($id);
+
+        if ($order->return_order || ! $order->status->canTransitionTo(OrderStatus::Cancelled)) {
+            return null;
+        }
+
+        return $this->update(new Request(['status' => OrderStatus::Cancelled->value]), $id);
+    }
+
     public function delete($id)
     {
         $order = $this->order->findOrFail($id);
+
+        // Deleting returns the items to stock, like cancelling does.
+        // An already-cancelled order already had its stock restored by
+        // the cancel transition, so skip it — restoring twice would
+        // inflate stock.
+        if ($order->status !== OrderStatus::Cancelled) {
+            foreach ($order->orderItems as $orderItem) {
+                Product::where('id', $orderItem->product_id)
+                    ->increment('quantity', $orderItem->quantity);
+            }
+        }
+
         $order->delete();
 
         return $order;

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helper\ArabicSearch;
 use App\Helper\SlugHelper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -195,6 +196,34 @@ class Product extends Model
         $builder->when($filters['category'] ?? false, function ($builder, $value) {
 
             $builder->where('products.category_id', 'LIKE', $value);
+        });
+    }
+
+    /**
+     * Free-text search over the given columns, tolerant of Arabic letter
+     * variants: a query typed with ا matches stored أ/إ/آ, ة matches ه,
+     * ى matches ي, and vice versa (see ArabicSearch). Uses REGEXP
+     * because normalizing only the query could never match the stored
+     * text with LIKE. English terms keep working as before — REGEXP is
+     * case-insensitive under the _ci collation, just like LIKE was.
+     */
+    public function scopeSearchText(Builder $query, ?string $term, array $columns = ['name', 'name_en']): Builder
+    {
+        if ($term === null || trim($term) === '') {
+            return $query;
+        }
+
+        $pattern = ArabicSearch::toRegExpPattern($term);
+
+        if ($pattern === null) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($pattern, $columns) {
+            foreach ($columns as $index => $column) {
+                $method = $index === 0 ? 'whereRaw' : 'orWhereRaw';
+                $q->{$method}("products.{$column} REGEXP ?", [$pattern]);
+            }
         });
     }
 

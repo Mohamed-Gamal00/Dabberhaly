@@ -28,7 +28,7 @@ class SendNewsToUsersController extends Controller
 
     public function sendNewsMail(SendNewsToUserRequest $request)
     {
-        Gate::authorize('news.view');
+        Gate::authorize('news.send');
 
         $userIds = (array) $request->input('users', []);
         $title   = $request->input('title');

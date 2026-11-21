@@ -12,8 +12,15 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Keep Telescope's tables from growing forever.
-        $schedule->command('telescope:prune')->daily();
+        // Keep Telescope's tables from growing forever. Telescope is a
+        // dev-only package (require-dev), so schedule the prune only
+        // when it is actually installed — same filesystem guard as the
+        // provider registration in config/app.php. On a --no-dev
+        // server the command does not exist and schedule:run would
+        // fail every day.
+        if (is_dir(base_path('vendor/laravel/telescope'))) {
+            $schedule->command('telescope:prune')->daily();
+        }
         // Drop failed jobs older than 3 days.
         $schedule->command('queue:prune-failed --hours=72')->daily();
         // Delete expired verification codes and abandoned carts.

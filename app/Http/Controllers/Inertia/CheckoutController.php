@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inertia;
 
 use App\Events\UserOrder;
+use App\Exceptions\CheckoutException;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\DiscountCode;
@@ -52,6 +53,14 @@ class CheckoutController extends Controller
         $discount      = DB::table('applied_discount_codes')->where('cookie_id', Cart::getCookieId())->first();
         $discountPrice = $discount ? DiscountCode::where('id', $discount->discount_id)->value('price') : null;
 
+        $user = Auth::guard('web')->user();
+
+        // The coupon price actually charged per cart row — only when a
+        // discount is really active, otherwise a stale leftover must
+        // not show as a lower line price.
+        $hasActiveDiscount = $this->checkoutService->hasActiveCouponDiscount($user);
+        $appliedCode       = $this->checkoutService->appliedDiscountCode($user);
+
         $cartItems = $items->map(fn($item) => [
             'id'             => $item->id,
             'product_id'     => $item->product_id,
@@ -60,11 +69,11 @@ class CheckoutController extends Controller
             'image'          => $item->product?->image_url,
             'price'          => (float) $item->product?->price,
             'discount_price' => $item->product?->discount_price ? (float) $item->product->discount_price : null,
+            'discounted_price' => $hasActiveDiscount && $item->discounted_price !== null ? (float) $item->discounted_price : null,
             'weight'         => (float) ($item->product?->weight ?? 0),
             'quantity'       => (int) $item->quantity,
         ]);
 
-        $user          = Auth::guard('web')->user();
         $userAddresses = $user
             ? $user->addresses()->get()->map(fn($a) => [
                 'id'            => $a->id,
@@ -88,6 +97,18 @@ class CheckoutController extends Controller
             'shipping'      => $shipping,
             'discountPrice' => $discountPrice,
             'userAddresses' => $userAddresses,
+            // The order summary, computed server-side with the exact
+            // formulas the order is charged with — the page displays
+            // these numbers verbatim and only adds its (exact)
+            // shipping cost for the selected shipping option.
+            'summary' => $this->checkoutService->checkoutSummary($user),
+            // The code already applied (session or usage row), so a
+            // page reload still shows the discounted summary.
+            'appliedDiscount' => $appliedCode ? [
+                'code'  => $appliedCode->code,
+                'value' => (float) $appliedCode->price,
+                'type'  => $appliedCode->discount_type,
+            ] : null,
             // The summary needs these to show the VAT line and to
             // waive shipping at the free-shipping threshold.
             'vatRate'             => CheckoutServices::vatRate(),
@@ -176,8 +197,14 @@ class CheckoutController extends Controller
                 return response()->json(['message' => __('flash.cart_empty_checkout')], 422);
             }
 
-        } catch (\Exception $e) {
+        } catch (CheckoutException $e) {
+            // A deliberate, user-facing error (bad shipping/address
+            // choice, missing shipping setup, unavailable product):
+            // its message is safe to show to the customer.
             return response()->json(['message' => $e->getMessage()], 400);
+        } catch (\Exception $e) {
+            Log::error('Web checkout pre-check failed', ['exception' => $e]);
+            return response()->json(['message' => __('flash.order_creation_failed')], 400);
         }
 
         // handle database processing
@@ -199,6 +226,13 @@ class CheckoutController extends Controller
             session()->forget('applied_discount_code_id');
 
             DB::commit();
+        } catch (CheckoutException $e) {
+            DB::rollBack();
+            // A deliberate, user-facing error (e.g. a soft-deleted
+            // product surfacing in createOrder's totals): its message
+            // is safe to show, like in the pre-check above — not the
+            // generic "order creation failed".
+            return response()->json(['message' => $e->getMessage()], 400);
         } catch (Throwable $e) {
             DB::rollBack();
             Log::error('Web checkout failed', ['exception' => $e]);
@@ -320,6 +354,7 @@ class CheckoutController extends Controller
             'discount_value' => (float) $code->price,
             'discount_type'  => $code->discount_type,
             'new_total'      => (float) $newTotal,
+            'summary'        => $this->checkoutService->checkoutSummary($user),
         ]);
     }
 
@@ -341,6 +376,7 @@ class CheckoutController extends Controller
         return response()->json([
             'message'   => __('flash.discount_removed'),
             'new_total' => (float) $this->checkoutService->calculateTotal($user),
+            'summary'   => $this->checkoutService->checkoutSummary($user),
         ]);
     }
 

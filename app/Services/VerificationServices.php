@@ -109,7 +109,10 @@ class VerificationServices
     public function getSMSVerifyMessageByAppName($code)
     {
         $setting = \App\Models\Setting::select('website_name', 'website_name_en')->first();
-        $message = $setting->CurrentNameLang . "  رمز التحقق الخاص بحسابك ";
+        // No settings row yet (e.g. a fresh install before seeding):
+        // fall back to the brand name instead of 500ing the
+        // verification flow on a null setting.
+        $message = ($setting?->CurrentNameLang ?? 'Dabberhaly') . "  رمز التحقق الخاص بحسابك ";
         return $message . $code;
     }
 

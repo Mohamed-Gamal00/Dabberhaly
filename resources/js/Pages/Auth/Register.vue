@@ -1,5 +1,6 @@
 <template>
-    <div class="auth-page">
+    <div class="auth-page" :dir="dir">
+        <SeoHead :title="t('register_title')" noindex />
         <!-- Left panel: branding -->
         <div class="auth-left d-none d-md-flex">
             <div class="auth-left-content">
@@ -266,12 +267,13 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import SeoHead from '../../components/Shared/SeoHead.vue';
 import { useLocale } from '../../composables/useLocale';
 
 defineOptions({ layout: null });
 
 const siteName = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
-const { t } = useLocale();
+const { t, dir } = useLocale();
 
 const props  = defineProps({ countries: Array, cities: Array });
 const formRef = ref(null);
@@ -354,7 +356,7 @@ const submit = async () => {
 </script>
 
 <style scoped>
-.auth-page { display: flex; min-height: 100vh; direction: rtl; }
+.auth-page { display: flex; min-height: 100vh; }
 
 .auth-left {
     width: 38%;

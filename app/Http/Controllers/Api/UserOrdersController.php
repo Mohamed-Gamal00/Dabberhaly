@@ -13,11 +13,18 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Repositories\Order\OrderRepository;
 use App\Services\CheckOut\CheckoutServices;
 use Illuminate\Http\Request;
 
 class UserOrdersController extends Controller
 {
+    protected $orderRepository;
+
+    public function __construct(OrderRepository $orderRepository)
+    {
+        $this->orderRepository = $orderRepository;
+    }
 
     public function mainOrders(Request $request)
     {
@@ -130,6 +137,29 @@ class UserOrdersController extends Controller
             $order->delete();
         }
         return ApiResponse::sendResponse(200, 'تم الحذف بنجاح');
+    }
+
+
+    /*  إلغاء الطلب  */
+    public function cancel(Request $request)
+    {
+        $request->validate([
+            'order_number' => 'required|string|exists:orders,number',
+        ]);
+
+        $order = Order::where('number', $request->order_number)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        // Delivered / already-cancelled / already-returned orders
+        // cannot be cancelled (see OrderRepository::cancel).
+        $cancelled = $this->orderRepository->cancel($order->id);
+
+        if (! $cancelled) {
+            return ApiResponse::sendResponse(422, 'لا يمكن إلغاء هذا الطلب');
+        }
+
+        return ApiResponse::sendResponse(200, 'تم إلغاء الطلب بنجاح');
     }
 
 
