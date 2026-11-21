@@ -356,11 +356,16 @@ class ReportsRepository implements ReportInterface
             // UTF-8 BOM so Excel opens Arabic correctly.
             fwrite($out, "\xEF\xBB\xBF");
 
+            // Delimiter is ';' (not ','): on Arabic Windows the list
+            // separator is ';' because ',' is the decimal separator,
+            // so Excel puts a comma-separated line into a single
+            // column. Values stay raw numbers (no thousands separators)
+            // so Excel still recognises them as numbers.
             [$headers, $rows] = $this->exportRows($type, $start, $end, $threshold);
-            fputcsv($out, $headers);
+            fputcsv($out, $headers, ';');
 
             foreach ($rows as $row) {
-                fputcsv($out, $row);
+                fputcsv($out, $row, ';');
             }
 
             fclose($out);

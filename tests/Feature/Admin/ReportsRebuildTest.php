@@ -755,12 +755,28 @@ class ReportsRebuildTest extends TestCase
             $content = $response->streamedContent();
         }
 
+        // The file starts with a UTF-8 BOM: strip it before parsing,
+        // otherwise the first header field carries the BOM bytes.
+        if (is_string($content) && str_starts_with($content, "\xEF\xBB\xBF")) {
+            $content = substr($content, 3);
+        }
+
         $lines = array_values(array_filter(
             array_map('trim', explode("\n", (string) $content)),
             fn ($line) => $line !== ''
         ));
         $this->assertGreaterThanOrEqual(2, count($lines), 'CSV must have a header row plus at least one data row.');
         $this->assertStringContainsString('Csv Seller', (string) $content, 'CSV must contain the sold product.');
+
+        // The file is semicolon-delimited (Excel on Arabic Windows
+        // uses ';' as the list separator): every row must split into
+        // its own columns, not land in a single cell.
+        $header = str_getcsv($lines[0], ';');
+        $this->assertCount(4, $header, 'CSV header must split into 4 columns on the semicolon delimiter.');
+        $this->assertSame('المنتج', $header[0]);
+        $data = str_getcsv($lines[1], ';');
+        $this->assertCount(4, $data, 'CSV data rows must split into 4 columns on the semicolon delimiter.');
+        $this->assertSame('Csv Seller', $data[0]);
     }
 
     // ------------------------------------------------------------------
