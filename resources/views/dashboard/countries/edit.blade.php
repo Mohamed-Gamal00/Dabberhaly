@@ -68,6 +68,7 @@
                                             </div>
                                             <!-- end row -->
                                         </div>
+                                        @error('city.*')<span class="error">{{ $message }}</span>@enderror
 
                                     </div>
                                 </div>

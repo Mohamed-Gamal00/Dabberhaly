@@ -89,7 +89,7 @@
                         <h5 class="footer-col-title">{{ t('footer_newsletter') }}</h5>
                         <p class="newsletter-desc">{{ t('footer_newsletter_desc') }}</p>
                         <div class="newsletter-form">
-                            <input v-model="email" type="email" :placeholder="t('footer_newsletter_placeholder')"
+                            <input v-model="email" type="email" maxlength="255" :placeholder="t('footer_newsletter_placeholder')"
                                 class="newsletter-input" dir="ltr" @keyup.enter="subscribe" />
                             <button class="newsletter-btn" :disabled="subscribing" @click="subscribe">
                                 <v-icon size="18">mdi-send</v-icon>
@@ -165,7 +165,10 @@ const socialLinks = computed(() => {
 });
 
 async function subscribe() {
-    if (!email.value.trim()) return;
+    if (!email.value.trim()) {
+        subscribeMsg.value = t('email_required');
+        return;
+    }
     subscribing.value = true;
     subscribeMsg.value = '';
     try {

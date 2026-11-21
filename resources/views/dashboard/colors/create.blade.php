@@ -31,6 +31,7 @@
                             </div>
                         </div>
                         <input type="hidden" name="color_code" id="selected-color" value="#ffffff">
+                        @error('color_code')<span class="error">{{ $message }}</span>@enderror
 
                         <div class="color" style="text-align: left;">
                             <div class="color-picker"></div>

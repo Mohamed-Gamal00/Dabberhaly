@@ -111,6 +111,7 @@
                                     v-model="form.address_title"
                                     :placeholder="t('address_name_placeholder')"
                                     :error-messages="errors.address_title"
+                                    maxlength="255"
                                     variant="outlined"
                                     density="comfortable"
                                     rounded="lg"
@@ -168,6 +169,7 @@
                                 <v-textarea
                                     v-model="form.address"
                                     :error-messages="errors.address"
+                                    maxlength="255"
                                     variant="outlined"
                                     density="comfortable"
                                     rounded="lg"

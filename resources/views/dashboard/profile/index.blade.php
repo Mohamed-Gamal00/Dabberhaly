@@ -34,7 +34,7 @@
                             <label for="example-text-input" class="col-sm-2 col-form-label">البريد
                                                                                             الالكتروني:</label>
                             <div class="col-sm-10">
-                                <input class="form-control" name="email" type="text" id="example-text-input"
+                                <input class="form-control" name="email" type="email" id="example-text-input"
                                        value="{{Auth::guard('admin')->user()->email}}">
                                 @error('email')
                                 <span class="error">{{ $message }}</span>

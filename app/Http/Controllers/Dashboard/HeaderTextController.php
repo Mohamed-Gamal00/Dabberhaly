@@ -37,7 +37,7 @@ class HeaderTextController extends Controller
         Gate::authorize('header_text.create');
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable'
+            'description' => 'nullable|string'
         ]);
 
         HeaderText::create($request->all());
@@ -74,7 +74,7 @@ class HeaderTextController extends Controller
         Gate::authorize('header_text.edit');
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable'
+            'description' => 'nullable|string'
         ]);
 
         $headerText = HeaderText::findOrFail($id);

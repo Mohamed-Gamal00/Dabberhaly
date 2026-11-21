@@ -62,6 +62,11 @@ class ShippingController extends Controller
       'add_price_based_on_city' => 'nullable|boolean',
       'weight_price' => 'required|numeric|min:0|max:100000',
       'normal_shipping_price' => 'required|numeric|min:0|max:100000',
+      // Per-city prices are written straight to cities.shipping_price;
+      // without these rules a non-numeric or negative value passed
+      // validation. Keys are city ids (see shipping_types/edit.blade.php).
+      'price' => 'nullable|array',
+      'price.*' => 'nullable|numeric|min:0',
     ]);
 
     // $record = ShippingTypesAndPrice::findOrFail($id);

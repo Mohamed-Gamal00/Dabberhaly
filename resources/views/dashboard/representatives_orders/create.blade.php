@@ -36,7 +36,7 @@
                             </div>
                             <div class="form-group my-3">
                                 <label for="phone">الهاتف</label>
-                                <input type="text" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}" required>
+                                <input type="tel" inputmode="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}" required>
                                 @error('phone')
                                     <span class="invalid-feedback d-block">{{ $message }}</span>
                                 @enderror

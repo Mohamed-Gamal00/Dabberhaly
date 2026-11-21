@@ -61,6 +61,10 @@ class StoreFatuerController extends Controller
       'title' => 'required|string|max:255',
       'title_en' => 'nullable|string|max:255',
       'description' => 'nullable|string|max:255',
+      // The store rule exists but update had none — and the repository
+      // uploads whatever file is present (uploadedImage does no mime
+      // check), so an SVG could be uploaded on edit.
+      'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
     ]);
     $data['request'] = $request; // Pass request object for image upload
 

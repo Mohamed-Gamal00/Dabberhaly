@@ -42,11 +42,11 @@
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <label class="field-label">{{ t('email') }}</label>
-                                    <v-text-field v-model="form.contact_email" variant="outlined" density="comfortable" rounded="lg" bg-color="#FAF6EF" hide-details="auto" class="mt-1 mb-3" dir="ltr" :error-messages="form.errors.contact_email" />
+                                    <v-text-field v-model="form.contact_email" type="email" variant="outlined" density="comfortable" rounded="lg" bg-color="#FAF6EF" hide-details="auto" class="mt-1 mb-3" dir="ltr" :error-messages="form.errors.contact_email" />
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <label class="field-label">{{ t('phone') }}</label>
-                                    <v-text-field v-model="form.phone_number" variant="outlined" density="comfortable" rounded="lg" bg-color="#FAF6EF" hide-details="auto" class="mt-1 mb-3" dir="ltr" :error-messages="form.errors.phone_number" />
+                                    <v-text-field v-model="form.phone_number" type="tel" inputmode="tel" variant="outlined" density="comfortable" rounded="lg" bg-color="#FAF6EF" hide-details="auto" class="mt-1 mb-3" dir="ltr" :error-messages="form.errors.phone_number" />
                                 </v-col>
                                 <v-col cols="12">
                                     <label class="field-label">{{ t('contact_message') }}</label>

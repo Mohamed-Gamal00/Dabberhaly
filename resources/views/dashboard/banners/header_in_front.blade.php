@@ -181,9 +181,12 @@
                                                     @endif
 
                                                     <input value="{{ $image->image_link }}" type="text"
-                                                           class="form-control"
+                                                           class="form-control @error('change_image_link.'.$image->id) is-invalid @enderror"
                                                            name="change_image_link[{{ $image->id }}]"
                                                            placeholder="ضع رابط الصورة هنا">
+                                                    @error('change_image_link.'.$image->id)
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
                                             </div>
                                         </div>

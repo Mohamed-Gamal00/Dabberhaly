@@ -130,6 +130,42 @@ class UserAddressStoreTest extends TestCase
         $this->assertDatabaseCount('user_addresses', 0);
     }
 
+    public function test_adding_an_address_rejects_too_short_address(): void
+    {
+        // Same minimum as the registration address: a 1-character
+        // address used to pass validation.
+        $user = $this->makeUser();
+
+        $response = $this->actingAs($user, 'web')->post(route('user.addresses.store'), [
+            'address_title' => 'Home',
+            'address' => 'x',
+        ]);
+
+        $response->assertSessionHasErrors(['address']);
+        $this->assertDatabaseCount('user_addresses', 0);
+    }
+
+    public function test_updating_an_address_rejects_too_short_address(): void
+    {
+        $user = $this->makeUser();
+        $address = UserAddress::create([
+            'user_id' => $user->id,
+            'address_title' => 'Home',
+            'first_name' => 'Mohamed',
+            'family_name' => 'Gamal',
+            'phone_number' => '01000000000',
+            'address' => '12 Tahrir St, Dokki, Giza',
+        ]);
+
+        $response = $this->actingAs($user, 'web')->put(route('user.addresses.update', $address->id), [
+            'address_title' => 'Home',
+            'address' => 'x',
+        ]);
+
+        $response->assertSessionHasErrors(['address']);
+        $this->assertSame('12 Tahrir St, Dokki, Giza', $address->fresh()->address);
+    }
+
     public function test_updating_an_address_keeps_the_accounts_name_and_phone(): void
     {
         $user = $this->makeUser();

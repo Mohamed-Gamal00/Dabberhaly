@@ -77,9 +77,8 @@
                                     <option value="" disabled>اختر المنتجات (أو اتركه فارغًا لجميع المنتجات)</option>
                                 </select>
 
-                                @error('product_id')
-                                <span class="error">{{ $message }}</span>
-                                @enderror
+                                @error('product_ids')<span class="error">{{ $message }}</span>@enderror
+                                @error('product_ids.*')<span class="error">{{ $message }}</span>@enderror
                             </div>
                         </div>
 

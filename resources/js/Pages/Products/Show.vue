@@ -209,7 +209,7 @@
                         <v-rating v-model="newRate" color="amber" density="compact" size="small" hover />
                         <span class="text-grey" style="font-size:12px">{{ rateLabels[newRate - 1] || t('choose_rating') }}</span>
                     </div>
-                    <v-textarea v-model="newComment" :placeholder="t('review_placeholder')" variant="outlined" density="compact" rounded="lg" rows="3" hide-details="auto" bg-color="grey-lighten-5" class="mb-3" :error-messages="reviewError" />
+                    <v-textarea v-model="newComment" maxlength="500" :placeholder="t('review_placeholder')" variant="outlined" density="compact" rounded="lg" rows="3" hide-details="auto" bg-color="grey-lighten-5" class="mb-3" :error-messages="reviewError" />
                     <v-btn color="primary" rounded="lg" style="text-transform:none" :loading="submittingReview" :disabled="!newRate || !newComment" @click="submitReview">{{ t('submit_review') }}</v-btn>
                 </div>
                 <div v-else class="review-login-prompt">

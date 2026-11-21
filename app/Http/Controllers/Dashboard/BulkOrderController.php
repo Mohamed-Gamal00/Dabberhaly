@@ -42,7 +42,9 @@ class BulkOrderController extends Controller
     Gate::authorize('bulk_order.create');
     $request->validate([
       'name' => 'required|string|max:255',
-      'phone' => 'required|string|max:255',
+      // Canonical phone rule (same as Auth/RegisterRequest): `string`
+      // accepted anything, `numeric` would reject + phones.
+      'phone' => ['required', 'regex:/^[0-9+\s\-]{7,20}$/'],
       'company_name' => 'required|string|max:255',
       'description' => 'required|string',
     ]);
@@ -80,7 +82,8 @@ class BulkOrderController extends Controller
     Gate::authorize('bulk_order.edit');
     $request->validate([
       'name' => 'required|string|max:255',
-      'phone' => 'required|string|max:255',
+      // Canonical phone rule (same as Auth/RegisterRequest).
+      'phone' => ['required', 'regex:/^[0-9+\s\-]{7,20}$/'],
       'company_name' => 'required|string|max:255',
       'description' => 'required|string',
     ]);

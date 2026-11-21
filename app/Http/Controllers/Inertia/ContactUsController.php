@@ -30,8 +30,8 @@ class ContactUsController extends Controller
     {
         $request->validate([
             'full_name'     => 'required|string|max:255',
-            'contact_email' => 'required|email',
-            'phone_number'  => 'required|numeric',
+            'contact_email' => 'required|email|max:255',
+            'phone_number'  => ['required', 'regex:/^[0-9+\s\-]{7,20}$/'],
             'text'          => 'required|string',
         ]);
 

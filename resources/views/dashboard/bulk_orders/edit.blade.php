@@ -21,22 +21,34 @@
                             @method('PUT')
                             <div class="form-group">
                                 <label for="name">الاسم</label>
-                                <input type="text" class="form-control" id="name" name="name"
+                                <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name"
                                     value="{{ $order->name }}" required>
+                                @error('name')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="form-group my-3">
                                 <label for="phone">الهاتف</label>
-                                <input type="number" class="form-control" id="phone" name="phone"
+                                <input type="tel" inputmode="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone"
                                     value="{{ $order->phone }}" required>
+                                @error('phone')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="form-group my-3">
                                 <label for="company_name">اسم الشركة او الجهة</label>
-                                <input type="text" class="form-control" id="company_name" name="company_name"
+                                <input type="text" class="form-control @error('company_name') is-invalid @enderror" id="company_name" name="company_name"
                                     value="{{ $order->company_name }}" required>
+                                @error('company_name')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="form-group my-3">
                                 <label for="description">انواع المنتجات المطلوبة	</label>
-                                <textarea class="form-control" id="description" name="description" rows="3" required>{{ $order->description }}</textarea>
+                                <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="3" required>{{ $order->description }}</textarea>
+                                @error('description')
+                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                @enderror
                             </div>
                             <button type="submit" class="btn btn-success">تعديل</button>
                         </form>

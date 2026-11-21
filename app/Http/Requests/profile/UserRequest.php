@@ -29,7 +29,7 @@ class UserRequest extends FormRequest
       'family_name' => 'nullable|string|max:255',
       'phone_number' => [
         'required',
-        'between:6,16',
+        'regex:/^[0-9+\s\-]{7,20}$/',
         Rule::unique(User::class)->ignore($user->id),
       ],
       'email' => [

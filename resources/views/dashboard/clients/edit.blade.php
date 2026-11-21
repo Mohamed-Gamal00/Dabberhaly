@@ -76,7 +76,7 @@
 
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">رقم الهاتف</label>
-                            <input type="text" class="form-control @error('phone_number') is-invalid @enderror"
+                            <input type="tel" inputmode="tel" class="form-control @error('phone_number') is-invalid @enderror"
                                    name="phone_number" value="{{ old('phone_number', $client->phone_number) }}" dir="ltr">
                             @error('phone_number')
                                 <div class="invalid-feedback">{{ $message }}</div>

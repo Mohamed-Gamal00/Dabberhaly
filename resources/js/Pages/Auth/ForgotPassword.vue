@@ -34,6 +34,8 @@
                         v-model="form.email"
                         placeholder="example@email.com"
                         type="email"
+                        inputmode="email"
+                        autocomplete="email"
                         variant="outlined"
                         density="comfortable"
                         hide-details="auto"

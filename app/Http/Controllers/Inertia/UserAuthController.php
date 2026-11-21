@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 
 class UserAuthController extends Controller
@@ -255,7 +256,9 @@ class UserAuthController extends Controller
     {
         $request->validate([
             'code'     => 'required|digits:4',
-            'password' => 'required|confirmed|min:8',
+            // Same strength as registration: a reset must not accept a
+            // password registration would reject.
+            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
         ]);
 
         $userId = session('user_id');

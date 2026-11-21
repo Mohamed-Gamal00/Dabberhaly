@@ -173,6 +173,7 @@
   "select_city": "Select City",
   "enter_address": "Enter address",
   "address_title": "Address",
+  "new_address_title": "New Address",
 
   "payment_page_title": "Complete Payment",
   "payment_secure": "Secure & encrypted payment",

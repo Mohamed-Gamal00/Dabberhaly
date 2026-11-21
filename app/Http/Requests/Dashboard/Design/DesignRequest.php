@@ -22,8 +22,8 @@ class DesignRequest extends FormRequest
   public function rules()
   {
     $rules = [
-      'title' => 'nullable|max:255',
-      'description' => 'nullable',
+      'title' => 'nullable|string|max:255',
+      'description' => 'nullable|string',
     ];
 
     if ($this->isMethod('post')) { // For store method

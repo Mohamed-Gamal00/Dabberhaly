@@ -53,7 +53,7 @@ class CityController extends Controller
       'name_en' => 'required|string|max:255|unique:cities,name_en',
       'code' => 'required|numeric|unique:cities,code',
       'status' => 'required|in:used,not_used',
-      'shipping_price' => 'required|numeric',
+      'shipping_price' => 'required|numeric|min:0',
     ]);
 
     $this->cityRepository->store($validated);
@@ -97,7 +97,7 @@ class CityController extends Controller
       'name_en' => 'required|string|max:255|unique:cities,name_en,' . $city->id,
       'code' => 'required|numeric|unique:cities,code,' . $city->id,
       'status' => 'required|in:used,not_used',
-      'shipping_price' => 'required|numeric',
+      'shipping_price' => 'required|numeric|min:0',
     ]);
 
     // Update the city with the validated data

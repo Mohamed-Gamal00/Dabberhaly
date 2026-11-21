@@ -450,7 +450,7 @@ class CheckoutServices
             if ($user) {
                 UserAddress::create([
                     'user_id'       => $user->id,
-                    'address_title' => 'عنوان جديد',
+                    'address_title' => __('new_address_title'),
                     'first_name'    => $addr['first_name'] ?? null,
                     'family_name'   => $addr['last_name'] ?? null,
                     'phone_number'  => $addr['phone_number'] ?? null,
@@ -499,7 +499,7 @@ class CheckoutServices
             // حفظ العنوان في قائمة عناوين اليوزر للاستخدام مستقبلاً
             UserAddress::create([
                 'user_id'       => $user->id,
-                'address_title' => 'عنوان جديد',
+                'address_title' => __('new_address_title'),
                 'first_name'    => $request->first_name,
                 'family_name'   => $request->last_name,
                 'phone_number'  => $request->phone_number,

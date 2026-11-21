@@ -51,16 +51,19 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">اسم المنتج بالإنجليزية</label>
-                        <input type="text" name="name_en" class="form-control"
+                        <input type="text" name="name_en" class="form-control @error('name_en') is-invalid @enderror"
                             value="{{ old('name_en', $product->name_en) }}" dir="ltr" />
+                        @error('name_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-12">
                         <label class="form-label fw-semibold">الوصف</label>
-                        <textarea name="description" rows="4" class="form-control">{{ old('description', $product->description) }}</textarea>
+                        <textarea name="description" rows="4" class="form-control @error('description') is-invalid @enderror">{{ old('description', $product->description) }}</textarea>
+                        @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-12">
                         <label class="form-label fw-semibold">الوصف بالإنجليزية</label>
-                        <textarea name="description_en" rows="4" class="form-control" dir="ltr">{{ old('description_en', $product->description_en) }}</textarea>
+                        <textarea name="description_en" rows="4" class="form-control @error('description_en') is-invalid @enderror" dir="ltr">{{ old('description_en', $product->description_en) }}</textarea>
+                        @error('description_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
             </div>
@@ -88,9 +91,10 @@
                         <label class="form-label fw-semibold">سعر الخصم</label>
                         <div class="input-group">
                             <input type="number" name="discount_price" step="0.01" min="0"
-                                class="form-control" value="{{ old('discount_price', $product->discount_price) }}" />
+                                class="form-control @error('discount_price') is-invalid @enderror" value="{{ old('discount_price', $product->discount_price) }}" />
                             <span class="input-group-text">ر.س</span>
                         </div>
+                        @error('discount_price')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-semibold">الكمية <span class="text-danger">*</span></label>
@@ -103,9 +107,10 @@
                         <label class="form-label fw-semibold">الوزن (كجم)</label>
                         <div class="input-group">
                             <input type="number" name="weight" step="0.01" min="0"
-                                class="form-control" value="{{ old('weight', $product->weight) }}" />
+                                class="form-control @error('weight') is-invalid @enderror" value="{{ old('weight', $product->weight) }}" />
                             <span class="input-group-text">كجم</span>
                         </div>
+                        @error('weight')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                     </div>
                 </div>
             </div>
@@ -124,8 +129,9 @@
                     <img id="mainImgPreview" src="{{ $product->image_url }}"
                         class="rounded border" style="width:120px; height:120px; object-fit:cover; flex-shrink:0" />
                     <div class="flex-grow-1">
-                        <input type="file" name="image" class="form-control" accept="image/*"
+                        <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/*"
                             onchange="previewMainImage(event)" />
+                        @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         <div class="form-text">اتركه فارغاً للإبقاء على الصورة الحالية</div>
                     </div>
                 </div>
@@ -214,6 +220,9 @@
                     @endforeach
 
                 </div>
+                @error('feature_name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                @error('feature_name_en')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                @error('feature_description')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 <input data-repeater-create type="button" class="btn btn-outline-primary btn-sm" value="+ إضافة ميزة" />
             </div>
         </div>
@@ -234,21 +243,23 @@
             <div class="card-body d-flex flex-column gap-3">
                 <div>
                     <label class="form-label fw-semibold">حالة النشاط</label>
-                    <select name="status" class="form-select">
+                    <select name="status" class="form-select @error('status') is-invalid @enderror">
                         <option value="active" @selected($product->status == 'active')>نشط</option>
                         <option value="archived" @selected($product->status == 'archived')>غير نشط</option>
                     </select>
+                    @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label fw-semibold">نوع المنتج</label>
-                    <select name="is_special" class="form-select">
+                    <select name="is_special" class="form-select @error('is_special') is-invalid @enderror">
                         <option value="0" @selected($product->is_special == 0)>عادي</option>
                         <option value="1" @selected($product->is_special == 1)>مميز</option>
                     </select>
+                    @error('is_special')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label fw-semibold">حالة التوفر</label>
-                    <select name="product_availability_id" class="form-select">
+                    <select name="product_availability_id" class="form-select @error('product_availability_id') is-invalid @enderror">
                         <option value="">اختر حالة التوفر</option>
                         @foreach($availability_status as $a)
                             <option value="{{ $a->id }}" @selected($product->product_availability_id == $a->id)>
@@ -256,6 +267,7 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('product_availability_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <button type="submit" class="btn btn-primary w-100 mt-2">
                     <i class="mdi mdi-content-save me-1"></i>
@@ -286,7 +298,7 @@
                 @if($companies)
                 <div>
                     <label class="form-label fw-semibold">البراند</label>
-                    <select name="company_id" class="form-select">
+                    <select name="company_id" class="form-select @error('company_id') is-invalid @enderror">
                         <option value="">بدون براند</option>
                         @foreach($companies as $company)
                             <option value="{{ $company->id }}" @selected($product->company_id == $company->id)>
@@ -294,6 +306,7 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('company_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 @endif
             </div>
@@ -316,12 +329,14 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('colors.*')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 </div>
                 <div>
                     <label class="form-label fw-semibold">الخيارات</label>
                     <select name="choice_id[]" id="choices" class="form-select multi-select" multiple>
                         <option></option>
                     </select>
+                    @error('choice_id.*')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 </div>
             </div>
         </div>

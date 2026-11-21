@@ -110,6 +110,7 @@
                                                     {{ $choice->name }}</option>
                                             @endforeach
                                         </select>
+                                        @error('choice_id.*')<span class="error">{{ $message }}</span>@enderror
                                     </div>
                                 </div>
 
@@ -225,6 +226,7 @@
                                                     <option selected>Open this select menu</option>
                                                     {!! buildCategoryOptions($mainCategories, null, '', $category->parent_id) !!}
                                                 </select>
+                                                @error('parent_id')<span class="error">{{ $message }}</span>@enderror
                                             </div>
                                         </div>
                                     </div>

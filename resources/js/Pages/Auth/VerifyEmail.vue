@@ -33,6 +33,9 @@
                     <v-text-field
                         v-model="form.code"
                         :placeholder="t('verify_code_placeholder')"
+                        type="text"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
                         variant="outlined"
                         density="comfortable"
                         hide-details="auto"

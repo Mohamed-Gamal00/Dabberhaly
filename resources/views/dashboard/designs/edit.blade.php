@@ -23,7 +23,7 @@
                             <div class="col-sm-10">
                                 <input readonly class="form-control" name="title" type="hidden" id="example-text-input"
                                     value="{{ $design->title }}">
-                                @error('name')
+                                @error('title')
                                     <span class="error">{{ $message }}</span>
                                 @enderror
                                 {{-- <x-form.input type="text" name="title" value="{{ $design->title }}" /> --}}

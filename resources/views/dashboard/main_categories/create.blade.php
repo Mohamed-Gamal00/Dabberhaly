@@ -96,6 +96,7 @@
                                                         class="form-select colors-select" aria-label="الخيارات" multiple>
                                                         {!! buildCategoryOptions($mainChoices) !!}
                                                     </select>
+                                                    @error('choice_id.*')<span class="error">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
 
@@ -202,6 +203,7 @@
                                                                     <option selected>Open this select menu</option>
                                                                     {!! buildCategoryOptions($mainCategories) !!}
                                                                 </select>
+                                                                @error('parent_id')<span class="error">{{ $message }}</span>@enderror
                                                             </div>
                                                         </div>
                                                     </div>

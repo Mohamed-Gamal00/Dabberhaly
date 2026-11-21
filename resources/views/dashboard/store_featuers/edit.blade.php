@@ -38,7 +38,8 @@
                         <div class="row mb-3">
                             <label for="example-number-input" class="col-sm-2 col-form-label fw-bold">الوصف</label>
                             <div class="col-sm-10">
-                                <textarea class="form-control" rows="7" name="description">{{ $featuer->description }}</textarea>
+                                <textarea class="form-control @error('description') is-invalid @enderror" rows="7" name="description">{{ $featuer->description }}</textarea>
+                                @error('description')<span class="error">{{ $message }}</span>@enderror
                             </div>
                         </div>
 

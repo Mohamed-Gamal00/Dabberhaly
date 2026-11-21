@@ -24,8 +24,10 @@ class ClientRequest extends FormRequest
     $rules = [
       'first_name' => 'required|string|max:255',
       'family_name' => 'required|string|max:255',
-      'email' => 'required|email',
-      'phone_number' => ['required', 'numeric'],
+      'email' => 'required|email|max:255|unique:users,email,' . $this->route('client'),
+      // Canonical phone rule (same as Auth/RegisterRequest): digits,
+      // spaces, dashes and a leading + — `numeric` rejected + phones.
+      'phone_number' => ['required', 'regex:/^[0-9+\s\-]{7,20}$/'],
     ];
 
     return $rules;

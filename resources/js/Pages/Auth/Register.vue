@@ -231,6 +231,7 @@
                                 rounded="lg"
                                 bg-color="grey-lighten-5"
                                 :rules="rules.password_confirmation"
+                                :error-messages="form.errors.password_confirmation"
                                 minlength="8"
                                 maxlength="64"
                             />

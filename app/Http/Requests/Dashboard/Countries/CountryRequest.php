@@ -23,7 +23,10 @@ class CountryRequest extends FormRequest
   {
     $rules = [
       'country_id' => 'required|exists:countries,id',
-      'city' => 'nullable|array'
+      'city' => 'nullable|array',
+      // The form sends city[] as city ids; without the per-item
+      // rule any value passed validation and was used in a query.
+      'city.*' => 'integer|exists:cities,id',
     ];
 
     return $rules;

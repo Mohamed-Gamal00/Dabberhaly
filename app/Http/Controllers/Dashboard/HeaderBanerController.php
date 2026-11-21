@@ -28,7 +28,10 @@ class HeaderBanerController extends Controller
       'header' => ['nullable', 'array'],
       'header.*.image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
       'header.*.image_link' => ['nullable', 'string', 'max:1000'],
-      'change_image_link' => ['nullable', 'array']
+      'change_image_link' => ['nullable', 'array'],
+      // These values are written straight to the DB per banner id;
+      // without the per-item rule any value passed validation.
+      'change_image_link.*' => ['nullable', 'string', 'max:1000'],
     ]);
     // dd($data);
 
