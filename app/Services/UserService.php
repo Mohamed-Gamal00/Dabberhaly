@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\City;
+use App\Models\Country;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\User_verfication;
@@ -41,8 +42,9 @@ class UserService
                     // from the city (a city belongs to one country),
                     // same as the API address create/update. The old
                     // hardcoded 178 (Saudi Arabia) was wrong for every
-                    // other country.
-                    'country_id' => City::find($request->city_id)?->country_id,
+                    // other country. Falls back to Egypt when no city
+                    // was given (the store is Egypt-only).
+                    'country_id' => City::find($request->city_id)?->country_id ?? Country::egyptId(),
                     'city_id' => $request->city_id,
                     'main_address' => true
                 ]);

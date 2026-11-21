@@ -47,7 +47,6 @@ class CheckoutController extends Controller
             $item->update(['weight' => $item->quantity * ($item->product->weight ?? 0)]);
         }
 
-        $countries  = DB::table('countries')->where('status', 'used')->get();
         $countryIds = DB::table('countries')->where('status', 'used')->pluck('id')->toArray();
         $cities     = DB::table('cities')->whereIn('country_id', $countryIds)->where('status', 'used')->get();
         $shipping   = ShippingTypesAndPrice::find(1);
@@ -94,7 +93,6 @@ class CheckoutController extends Controller
             'cartItems'     => $cartItems,
             'total'         => $cart->total(),
             'totalBefore'   => $cart->totalBeforeDiscount(),
-            'countries'     => $countries,
             'cities'        => $cities,
             'shipping'      => $shipping,
             'discountPrice' => $discountPrice,
@@ -153,15 +151,12 @@ class CheckoutController extends Controller
                 "addr.{$addrType}.last_name"    => ['required', 'string', 'max:255'],
                 "addr.{$addrType}.phone_number" => ['required', 'string', new EgyptianMobileNumber, 'max:20'],
                 "addr.{$addrType}.address"      => ['required', 'string', 'max:255'],
-                "addr.{$addrType}.country_id"   => ['required', 'exists:countries,id'],
                 "addr.{$addrType}.city_id"      => ['required', 'exists:cities,id'],
             ], [
                 "addr.{$addrType}.first_name.required"   => 'الاسم الأول مطلوب',
                 "addr.{$addrType}.last_name.required"    => 'اسم العائلة مطلوب',
                 "addr.{$addrType}.phone_number.required" => 'رقم الجوال مطلوب',
                 "addr.{$addrType}.address.required"      => 'العنوان التفصيلي مطلوب',
-                "addr.{$addrType}.country_id.required"   => 'الدولة مطلوبة',
-                "addr.{$addrType}.country_id.exists"     => 'الدولة المحددة غير صحيحة',
                 "addr.{$addrType}.city_id.required"      => 'المدينة مطلوبة',
                 "addr.{$addrType}.city_id.exists"        => 'المدينة المحددة غير صحيحة',
             ]);

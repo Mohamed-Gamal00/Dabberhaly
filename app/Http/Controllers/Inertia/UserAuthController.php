@@ -43,12 +43,10 @@ class UserAuthController extends Controller
 
     public function registerView()
     {
-        $countries   = Country::where('status', 'used')->get();
         $countryIds  = Country::where('status', 'used')->pluck('id')->toArray();
         $cities      = City::whereIn('country_id', $countryIds)->where('status', 'used')->get();
 
         return Inertia::render('Auth/Register', [
-            'countries' => $countries,
             'cities'    => $cities,
         ]);
     }
@@ -91,7 +89,6 @@ class UserAuthController extends Controller
                 'email'        => $data['email'],
                 'password'     => Hash::make($data['password']),
                 'address'      => $data['address'],
-                'country_id'   => $data['country_id'] ?? null,
                 'city_id'      => $data['city_id'] ?? null,
             ],
         ]);
@@ -186,7 +183,7 @@ class UserAuthController extends Controller
                 'phone_number'  => $user->phone_number,
                 'user_id'       => $user->id,
                 'address'       => $pending['address'],
-                'country_id'    => $pending['country_id'] ?? Country::first()?->id,
+                'country_id'    => Country::egyptId(),
                 'city_id'       => $pending['city_id'] ?? null,
                 'main_address'  => true,
             ]);

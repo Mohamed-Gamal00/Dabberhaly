@@ -39,7 +39,7 @@ class UserCheckoutRequest extends FormRequest
             'first_name' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
             'last_name' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
             'phone_number' => $isAddingNewAddress ? ['required', new EgyptianMobileNumber] : 'nullable',
-            'country_id' => $isAddingNewAddress ? ['required', 'exists:countries,id'] : 'nullable',
+            'country_id' => ['nullable', 'exists:countries,id'],
             'city_id' => $isAddingNewAddress ? ['required', 'exists:cities,id'] : 'nullable',
             'address' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
         ];
@@ -59,7 +59,6 @@ class UserCheckoutRequest extends FormRequest
             'first_name.required' => 'First name is required for the new address',
             'last_name.required' => 'Last name is required for the new address',
             'phone_number.required' => 'Phone number is required for the new address',
-            'country_id.required' => 'Country is required for the new address',
             'city_id.required' => 'City is required for the new address',
             'address.required' => 'Address is required for the new address',
         ];

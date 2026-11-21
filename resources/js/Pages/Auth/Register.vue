@@ -145,25 +145,13 @@
                             />
                         </v-col>
 
-                        <!-- Country -->
+                        <!-- Country (fixed: Egypt only) -->
                         <v-col cols="12" md="6">
-                            <label class="field-label">{{ t('country') }} <span class="req">*</span></label>
-                            <v-select
-                                v-model="form.country_id"
-                                :items="countries"
-                                item-title="name"
-                                item-value="id"
-                                :placeholder="t('select_country')"
-                                variant="outlined"
-                                density="comfortable"
-                                hide-details="auto"
-                                class="mt-1 mb-1"
-                                rounded="lg"
-                                bg-color="grey-lighten-5"
-                                :rules="rules.country_id"
-                                :error-messages="form.errors.country_id"
-                                @update:model-value="form.city_id = ''"
-                            />
+                            <label class="field-label">{{ t('country') }}</label>
+                            <div class="country-fixed mt-1 mb-1 d-flex align-center">
+                                <v-icon size="18" color="primary" class="me-2">mdi-map-marker-outline</v-icon>
+                                <span style="font-size:15px; font-weight:600">{{ t('egypt') }}</span>
+                            </div>
                         </v-col>
 
                         <!-- City -->
@@ -171,7 +159,7 @@
                             <label class="field-label">{{ t('city') }} <span class="req">*</span></label>
                             <v-select
                                 v-model="form.city_id"
-                                :items="filteredCities"
+                                :items="props.cities"
                                 item-title="name"
                                 item-value="id"
                                 :placeholder="t('select_city')"
@@ -183,7 +171,6 @@
                                 bg-color="grey-lighten-5"
                                 :rules="rules.city_id"
                                 :error-messages="form.errors.city_id"
-                                :disabled="!form.country_id"
                             />
                         </v-col>
 
@@ -276,12 +263,12 @@ defineOptions({ layout: null });
 const siteName = computed(() => usePage().props.seo?.site_name || t('common_store_name'));
 const { t, dir } = useLocale();
 
-const props  = defineProps({ countries: Array, cities: Array });
+const props  = defineProps({ cities: Array });
 const formRef = ref(null);
 
 const form = useForm({
     first_name: '', family_name: '', phone_number: '', email: '',
-    password: '', password_confirmation: '', address: '', country_id: '', city_id: '',
+    password: '', password_confirmation: '', address: '', city_id: '',
 });
 
 const loading  = ref(false);
@@ -291,12 +278,6 @@ const showPass2 = ref(false);
 const steps = computed(() => [
     t('register_step1'), t('register_step2'), t('register_step3'),
 ]);
-
-const filteredCities = computed(() =>
-    form.country_id
-        ? props.cities.filter(c => c.country_id === form.country_id)
-        : []
-);
 
 // ─── Client-side validation rules ────────────────────────────────────────────
 const namePattern = /^[\u0600-\u06FFa-zA-Z\s]+$/;
@@ -327,9 +308,6 @@ const rules = {
     address: [
         v => !!v                    || t('val_required'),
         v => v.length >= 5          || t('val_min_5'),
-    ],
-    country_id: [
-        v => !!v                    || t('val_required'),
     ],
     city_id: [
         v => !!v                    || t('val_required'),
@@ -392,5 +370,10 @@ const submit = async () => {
 .auth-form-wrapper { width: 100%; max-width: 520px; padding: 8px 0; }
 
 .field-label { font-size: 13px; font-weight: 600; color: #374151; }
+.country-fixed {
+    height: 48px; padding: 0 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 12px;
+    background: #f5f5f5; color: #374151;
+}
 .req { color: #ef4444; margin-right: 2px; }
 </style>
