@@ -34,12 +34,12 @@ class UserCheckoutRequest extends FormRequest
             // value must never silently become cash on delivery (the
             // checkout treats anything but card_payment as COD).
             'payment_method' => ['required', Rule::in(Setting::allowedPaymentMethodValues())],
-            'first_name' => $isAddingNewAddress ? 'required' : 'nullable',
-            'last_name' => $isAddingNewAddress ? 'required' : 'nullable',
-            'phone_number' => $isAddingNewAddress ? 'required' : 'nullable',
-            'country_id' => $isAddingNewAddress ? 'required' : 'nullable',
-            'city_id' => $isAddingNewAddress ? 'required' : 'nullable',
-            'address' => $isAddingNewAddress ? 'required' : 'nullable',
+            'first_name' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
+            'last_name' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
+            'phone_number' => $isAddingNewAddress ? ['required', 'regex:/^[0-9+\s\-]{7,20}$/'] : 'nullable',
+            'country_id' => $isAddingNewAddress ? ['required', 'exists:countries,id'] : 'nullable',
+            'city_id' => $isAddingNewAddress ? ['required', 'exists:cities,id'] : 'nullable',
+            'address' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
         ];
     }
 
@@ -57,6 +57,7 @@ class UserCheckoutRequest extends FormRequest
             'first_name.required' => 'First name is required for the new address',
             'last_name.required' => 'Last name is required for the new address',
             'phone_number.required' => 'Phone number is required for the new address',
+            'phone_number.regex' => 'رقم الجوال غير صحيح',
             'country_id.required' => 'Country is required for the new address',
             'city_id.required' => 'City is required for the new address',
             'address.required' => 'Address is required for the new address',

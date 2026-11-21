@@ -446,10 +446,13 @@ class SecurityBlockersTest extends TestCase
         $this->assertNotNull($verification);
 
         for ($i = 0; $i < 5; $i++) {
+            // Strong password on purpose: the reset now enforces the
+            // same strength as registration, so a weak password would
+            // 422 before the code-attempt counter ever runs.
             $this->post('/update-password', [
                 'code' => '0000',
-                'password' => 'newpassword',
-                'password_confirmation' => 'newpassword',
+                'password' => 'NewPass123',
+                'password_confirmation' => 'NewPass123',
             ]);
         }
 

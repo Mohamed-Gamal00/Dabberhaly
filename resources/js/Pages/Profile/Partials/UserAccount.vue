@@ -5,6 +5,10 @@
                 <label class="field-label">{{ t('first_name') }}</label>
                 <v-text-field
                     v-model="form.first_name"
+                    type="text"
+                    inputmode="text"
+                    autocomplete="given-name"
+                    maxlength="255"
                     variant="outlined"
                     density="comfortable"
                     rounded="lg"
@@ -18,18 +22,27 @@
                 <label class="field-label">{{ t('last_name') }}</label>
                 <v-text-field
                     v-model="form.family_name"
+                    type="text"
+                    inputmode="text"
+                    autocomplete="family-name"
+                    maxlength="255"
                     variant="outlined"
                     density="comfortable"
                     rounded="lg"
                     bg-color="grey-lighten-5"
                     hide-details="auto"
                     class="mt-1 mb-4"
+                    :error-messages="form.errors.family_name"
                 />
             </v-col>
             <v-col cols="12" md="6">
                 <label class="field-label">{{ t('phone') }}</label>
                 <v-text-field
                     v-model="form.phone_number"
+                    type="tel"
+                    inputmode="tel"
+                    autocomplete="tel"
+                    maxlength="20"
                     variant="outlined"
                     density="comfortable"
                     rounded="lg"

@@ -36,7 +36,7 @@
 
                 <v-form @submit.prevent="submit">
                     <label class="field-label">{{ t('login_email') }}</label>
-                    <v-text-field v-model="form.email" placeholder="example@email.com" autocomplete="username" :error-messages="form.errors.email" variant="outlined" density="comfortable" hide-details="auto" class="mb-4 mt-1" prepend-inner-icon="mdi-email-outline" dir="ltr" rounded="lg" bg-color="grey-lighten-5" />
+                    <v-text-field v-model="form.email" placeholder="example@email.com" type="email" inputmode="email" autocomplete="username" :error-messages="form.errors.email" variant="outlined" density="comfortable" hide-details="auto" class="mb-4 mt-1" prepend-inner-icon="mdi-email-outline" dir="ltr" rounded="lg" bg-color="grey-lighten-5" />
 
                     <label class="field-label">{{ t('login_password') }}</label>
                     <v-text-field v-model="form.password" placeholder="••••••••" autocomplete="current-password" :error-messages="form.errors.password" :type="showPassword ? 'text' : 'password'" variant="outlined" density="comfortable" hide-details="auto" class="mb-2 mt-1" prepend-inner-icon="mdi-lock-outline" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'" @click:append-inner="showPassword = !showPassword" rounded="lg" bg-color="grey-lighten-5" />

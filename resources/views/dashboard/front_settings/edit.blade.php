@@ -117,17 +117,19 @@
                             <label class="form-label fw-semibold">البريد الإلكتروني</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="mdi mdi-email-outline"></i></span>
-                                <input type="email" name="email" class="form-control"
+                                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                                     value="{{ old('email', $setting->email) }}" dir="ltr" />
                             </div>
+                            @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label class="form-label fw-semibold">رقم الجوال</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="mdi mdi-phone-outline"></i></span>
-                                <input type="text" name="phone_number" class="form-control"
+                                <input type="tel" inputmode="tel" name="phone_number" class="form-control @error('phone_number') is-invalid @enderror"
                                     value="{{ old('phone_number', $setting->phone_number) }}" dir="ltr" />
                             </div>
+                            @error('phone_number')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label class="form-label fw-semibold">عنوان المتجر</label>
@@ -147,16 +149,18 @@
                     <div class="card-body d-flex flex-column gap-3">
                         <div>
                             <label class="form-label fw-semibold">الرقم الضريبي</label>
-                            <input type="text" name="tax_number" class="form-control"
+                            <input type="text" name="tax_number" class="form-control @error('tax_number') is-invalid @enderror"
                                 value="{{ old('tax_number', $setting->tax_number) }}" />
+                            @error('tax_number')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label class="form-label fw-semibold">ضريبة القيمة المضافة (%)</label>
                             <div class="input-group">
                                 <input type="number" name="value_added_tax" step="0.01" min="0" max="100"
-                                    class="form-control" value="{{ old('value_added_tax', $setting->value_added_tax) }}" />
+                                    class="form-control @error('value_added_tax') is-invalid @enderror" value="{{ old('value_added_tax', $setting->value_added_tax) }}" />
                                 <span class="input-group-text">%</span>
                             </div>
+                            @error('value_added_tax')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
@@ -173,9 +177,10 @@
                             <label class="form-label fw-semibold">حد الشحن المجاني (ر.س)</label>
                             <div class="input-group">
                                 <input type="number" name="free_shipping_threshold" step="0.01" min="0"
-                                    class="form-control" value="{{ old('free_shipping_threshold', $setting->free_shipping_threshold) }}" />
+                                    class="form-control @error('free_shipping_threshold') is-invalid @enderror" value="{{ old('free_shipping_threshold', $setting->free_shipping_threshold) }}" />
                                 <span class="input-group-text">ر.س</span>
                             </div>
+                            @error('free_shipping_threshold')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                             <small class="text-muted">إجمالي السلة الذي عنده يصبح الشحن مجانياً ويكتمل شريط التقدم في السلة. اكتب 0 لإيقاف الشحن المجاني تماماً.</small>
                         </div>
                     </div>
@@ -193,17 +198,19 @@
                             <label class="form-label fw-semibold">رابط Google Play</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="mdi mdi-google-play"></i></span>
-                                <input type="text" name="google_play" class="form-control"
+                                <input type="url" name="google_play" class="form-control @error('google_play') is-invalid @enderror"
                                     value="{{ old('google_play', $setting->google_play) }}" dir="ltr" placeholder="https://play.google.com/..." />
                             </div>
+                            @error('google_play')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label class="form-label fw-semibold">رابط App Store</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="mdi mdi-apple"></i></span>
-                                <input type="text" name="apple_store" class="form-control"
+                                <input type="url" name="apple_store" class="form-control @error('apple_store') is-invalid @enderror"
                                     value="{{ old('apple_store', $setting->apple_store) }}" dir="ltr" placeholder="https://apps.apple.com/..." />
                             </div>
+                            @error('apple_store')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
@@ -237,10 +244,11 @@
                         <label class="form-label fw-semibold">{{ $info['label'] }}</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="mdi {{ $info['icon'] }}"></i></span>
-                            <input type="text" name="{{ $name }}" class="form-control"
+                            <input type="url" name="{{ $name }}" class="form-control @error($name) is-invalid @enderror"
                                 value="{{ old($name, $setting->$name) }}"
                                 placeholder="{{ $info['placeholder'] }}" dir="ltr" />
                         </div>
+                        @error($name)<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                     </div>
                     @endforeach
                 </div>
@@ -266,8 +274,9 @@
                             <div class="text-muted small mt-2">الشعار الحالي</div>
                         </div>
                         @endif
-                        <input type="file" name="logo" class="form-control" accept="image/*" />
-                        <div class="form-text">PNG أو SVG — يُفضل خلفية شفافة</div>
+                        <input type="file" name="logo" class="form-control @error('logo') is-invalid @enderror" accept="image/*" />
+                        @error('logo')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                        <div class="form-text">PNG — يُفضل خلفية شفافة</div>
                     </div>
                 </div>
             </div>
@@ -284,8 +293,9 @@
                             <div class="text-muted small mt-2">الأيقونة الحالية</div>
                         </div>
                         @endif
-                        <input type="file" name="image" class="form-control" accept="image/*" />
-                        <div class="form-text">ICO أو PNG — 32×32 بكسل</div>
+                        <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/*" />
+                        @error('image')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                        <div class="form-text">PNG — 32×32 بكسل</div>
                     </div>
                 </div>
             </div>
@@ -387,9 +397,10 @@
                                 عنوان الصفحة (Meta Title)
                                 <span class="text-muted fw-normal small">— الحد الأقصى 160 حرف</span>
                             </label>
-                            <input type="text" name="seo_meta_title" class="form-control"
+                            <input type="text" name="seo_meta_title" class="form-control @error('seo_meta_title') is-invalid @enderror"
                                 value="{{ old('seo_meta_title', $setting->seo_meta_title) }}"
                                 maxlength="160" placeholder="عنوان يظهر في نتائج جوجل..." />
+                            @error('seo_meta_title')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                             <div class="form-text">{{ strlen($setting->seo_meta_title ?? '') }}/160</div>
                         </div>
                         <div class="col-12">
@@ -397,28 +408,32 @@
                                 وصف الصفحة (Meta Description)
                                 <span class="text-muted fw-normal small">— الحد الأقصى 320 حرف</span>
                             </label>
-                            <textarea name="seo_meta_description" class="form-control" rows="3"
+                            <textarea name="seo_meta_description" class="form-control @error('seo_meta_description') is-invalid @enderror" rows="3"
                                 maxlength="320">{{ old('seo_meta_description', $setting->seo_meta_description) }}</textarea>
+                            @error('seo_meta_description')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold">الكلمات المفتاحية <span class="text-muted fw-normal small">— مفصولة بفاصلة</span></label>
-                            <input type="text" name="seo_meta_keywords" class="form-control"
+                            <input type="text" name="seo_meta_keywords" class="form-control @error('seo_meta_keywords') is-invalid @enderror"
                                 value="{{ old('seo_meta_keywords', $setting->seo_meta_keywords) }}"
                                 placeholder="متجر, تسوق, منتجات, ..." />
+                            @error('seo_meta_keywords')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Robots Index</label>
-                            <select name="robots_index" class="form-select">
+                            <select name="robots_index" class="form-select @error('robots_index') is-invalid @enderror">
                                 @foreach(['index,follow' => 'index, follow — مرئي لجوجل (الافتراضي)', 'noindex,nofollow' => 'noindex, nofollow — مخفي تماماً', 'index,nofollow' => 'index, nofollow', 'noindex,follow' => 'noindex, follow'] as $val => $label)
                                     <option value="{{ $val }}" @selected(($setting->robots_index ?? 'index,follow') === $val)>{{ $label }}</option>
                                 @endforeach
                             </select>
+                            @error('robots_index')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Canonical URL</label>
-                            <input type="url" name="canonical_url" class="form-control"
+                            <input type="url" name="canonical_url" class="form-control @error('canonical_url') is-invalid @enderror"
                                 value="{{ old('canonical_url', $setting->canonical_url) }}"
                                 placeholder="https://yourstore.com" dir="ltr" />
+                            @error('canonical_url')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
@@ -434,20 +449,23 @@
                     <div class="card-body d-flex flex-column gap-3">
                         <div>
                             <label class="form-label fw-semibold">عنوان OG</label>
-                            <input type="text" name="og_title" class="form-control"
+                            <input type="text" name="og_title" class="form-control @error('og_title') is-invalid @enderror"
                                 value="{{ old('og_title', $setting->og_title) }}" maxlength="160" />
+                            @error('og_title')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label class="form-label fw-semibold">وصف OG</label>
-                            <textarea name="og_description" class="form-control" rows="2"
+                            <textarea name="og_description" class="form-control @error('og_description') is-invalid @enderror" rows="2"
                                 maxlength="320">{{ old('og_description', $setting->og_description) }}</textarea>
+                            @error('og_description')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label class="form-label fw-semibold">صورة OG <span class="text-muted fw-normal small">1200×630</span></label>
                             @if($setting->og_image)
                                 <img src="{{ asset('storage/' . $setting->og_image) }}" class="img-thumbnail mb-2 d-block" style="max-height:100px" />
                             @endif
-                            <input type="file" name="og_image" class="form-control" accept="image/*" />
+                            <input type="file" name="og_image" class="form-control @error('og_image') is-invalid @enderror" accept="image/*" />
+                            @error('og_image')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
@@ -463,27 +481,31 @@
                     <div class="card-body d-flex flex-column gap-3">
                         <div>
                             <label class="form-label fw-semibold">نوع البطاقة</label>
-                            <select name="twitter_card" class="form-select">
+                            <select name="twitter_card" class="form-select @error('twitter_card') is-invalid @enderror">
                                 <option value="summary_large_image" @selected(($setting->twitter_card ?? 'summary_large_image') === 'summary_large_image')>صورة كبيرة (summary_large_image)</option>
                                 <option value="summary" @selected($setting->twitter_card === 'summary')>صورة صغيرة (summary)</option>
                             </select>
+                            @error('twitter_card')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label class="form-label fw-semibold">عنوان Twitter</label>
-                            <input type="text" name="twitter_title" class="form-control"
+                            <input type="text" name="twitter_title" class="form-control @error('twitter_title') is-invalid @enderror"
                                 value="{{ old('twitter_title', $setting->twitter_title) }}" maxlength="160" />
+                            @error('twitter_title')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label class="form-label fw-semibold">وصف Twitter</label>
-                            <textarea name="twitter_description" class="form-control" rows="2"
+                            <textarea name="twitter_description" class="form-control @error('twitter_description') is-invalid @enderror" rows="2"
                                 maxlength="320">{{ old('twitter_description', $setting->twitter_description) }}</textarea>
+                            @error('twitter_description')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div>
                             <label class="form-label fw-semibold">صورة Twitter</label>
                             @if($setting->twitter_image)
                                 <img src="{{ asset('storage/' . $setting->twitter_image) }}" class="img-thumbnail mb-2 d-block" style="max-height:100px" />
                             @endif
-                            <input type="file" name="twitter_image" class="form-control" accept="image/*" />
+                            <input type="file" name="twitter_image" class="form-control @error('twitter_image') is-invalid @enderror" accept="image/*" />
+                            @error('twitter_image')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
@@ -499,20 +521,23 @@
                     <div class="card-body row g-3">
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Google Analytics ID</label>
-                            <input type="text" name="google_analytics_id" class="form-control"
+                            <input type="text" name="google_analytics_id" class="form-control @error('google_analytics_id') is-invalid @enderror"
                                 value="{{ old('google_analytics_id', $setting->google_analytics_id) }}"
                                 placeholder="G-XXXXXXXXXX" dir="ltr" />
+                            @error('google_analytics_id')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Google Tag Manager ID</label>
-                            <input type="text" name="google_tag_manager_id" class="form-control"
+                            <input type="text" name="google_tag_manager_id" class="form-control @error('google_tag_manager_id') is-invalid @enderror"
                                 value="{{ old('google_tag_manager_id', $setting->google_tag_manager_id) }}"
                                 placeholder="GTM-XXXXXXX" dir="ltr" />
+                            @error('google_tag_manager_id')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Google Site Verification</label>
-                            <input type="text" name="google_site_verification" class="form-control"
+                            <input type="text" name="google_site_verification" class="form-control @error('google_site_verification') is-invalid @enderror"
                                 value="{{ old('google_site_verification', $setting->google_site_verification) }}" dir="ltr" />
+                            @error('google_site_verification')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>

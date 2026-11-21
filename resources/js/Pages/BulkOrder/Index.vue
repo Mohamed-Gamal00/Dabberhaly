@@ -15,7 +15,7 @@
                     <label class="field-label">{{ t('bulk_name') }}</label>
                     <v-text-field v-model="form.name" variant="outlined" density="comfortable" rounded="lg" bg-color="grey-lighten-5" hide-details="auto" class="mt-1 mb-3" :error-messages="form.errors.name" />
                     <label class="field-label">{{ t('bulk_phone') }}</label>
-                    <v-text-field v-model="form.phone" variant="outlined" density="comfortable" rounded="lg" bg-color="grey-lighten-5" hide-details="auto" class="mt-1 mb-3" dir="ltr" :error-messages="form.errors.phone" />
+                    <v-text-field v-model="form.phone" type="tel" inputmode="tel" variant="outlined" density="comfortable" rounded="lg" bg-color="grey-lighten-5" hide-details="auto" class="mt-1 mb-3" dir="ltr" :error-messages="form.errors.phone" />
                     <label class="field-label">{{ t('bulk_company') }}</label>
                     <v-text-field v-model="form.company_name" variant="outlined" density="comfortable" rounded="lg" bg-color="grey-lighten-5" hide-details class="mt-1 mb-3" />
                     <label class="field-label">{{ t('bulk_details') }}</label>

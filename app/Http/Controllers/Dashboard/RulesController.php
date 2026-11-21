@@ -47,7 +47,9 @@ class RulesController extends Controller
 
     $request->validate([
       'name' => 'required|string|max:255',
-      'abilities' => 'required|array'
+      'abilities' => 'required|array',
+      // Ability checkboxes only ever send 'allow'.
+      'abilities.*' => 'in:allow'
     ]);
 
     $this->ruleRepository->store($request);
@@ -111,7 +113,9 @@ class RulesController extends Controller
 
     $request->validate([
       'name' => 'required|string|max:255',
-      'abilities' => 'required|array'
+      'abilities' => 'required|array',
+      // Ability checkboxes only ever send 'allow'.
+      'abilities.*' => 'in:allow'
     ]);
 
     $this->ruleRepository->update($request, $rule->id);

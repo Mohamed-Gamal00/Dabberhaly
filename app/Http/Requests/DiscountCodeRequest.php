@@ -22,15 +22,25 @@ class DiscountCodeRequest extends FormRequest
   public function rules(): array
   {
     $discountCodeId = $this->route('discount_code');
-    return [
+    $rules = [
       'name' => 'required|string|max:255',
-      'code' => 'required|string|unique:discount_codes,code,' . $discountCodeId,
-      'price' => 'required|numeric|min:0',
+      'code' => 'required|string|max:255|unique:discount_codes,code,' . $discountCodeId,
+      'price' => ['required', 'numeric', 'min:0'],
       'status' => 'required|in:active,inactive',
-      'number_of_used' => 'required|numeric',
+      // A usage count is a whole number, never 1.5 or negative.
+      'number_of_used' => 'required|integer|min:0',
       'product_ids' => 'nullable|array',
       'product_ids.*' => 'nullable|numeric|exists:products,id',
       'discount_type' => 'required|in:percentage,price'
     ];
+
+    // A percentage over 100 would discount every eligible item to
+    // zero (CheckDiscountService clamps at 0), so it is not a valid
+    // percentage. A fixed-amount discount has no such ceiling.
+    if ($this->input('discount_type') === 'percentage') {
+      $rules['price'][] = 'max:100';
+    }
+
+    return $rules;
   }
 }

@@ -72,7 +72,7 @@
                             <div class="row mb-3 mt-3">
                                 <label for="example-text-input" class="col-sm-2 col-form-label fw-bold">سعر الشحن</label>
                                 <div class="col-sm-10">
-                                    <x-form.input type="number" name="shipping_price"
+                                    <x-form.input type="number" name="shipping_price" min="0" step="0.01"
                                         value="{{ old('shipping_price') }}" />
                                 </div>
                             </div>

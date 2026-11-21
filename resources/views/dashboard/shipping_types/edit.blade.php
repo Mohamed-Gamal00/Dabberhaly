@@ -126,6 +126,9 @@
                                         <input class="form-control price-input" type="text" placeholder="السعر"
                                             name="price[]">
                                     </div>
+                                    @error('price.*')
+                                        <span class="error">{{ $message }}</span>
+                                    @enderror
                                     @error('city_name')
                                         <span class="error">{{ $message }}</span>
                                     @enderror

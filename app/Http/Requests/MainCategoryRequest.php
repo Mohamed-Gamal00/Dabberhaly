@@ -26,7 +26,12 @@ class MainCategoryRequest extends FormRequest
       'name_en' => ['nullable', 'string', 'max:255'],
       'description' => ['nullable', 'string'],
       'description_en' => ['nullable', 'string'],
-      'choice_id' => ['nullable', 'exists:choices,id'],
+      // The form sends choice_id[] (an array); the old scalar
+      // `exists` rule did not validate the individual ids, so a
+      // bogus id reached the FK-constrained category_choices
+      // pivot and blew up with a 500 instead of a 422.
+      'choice_id' => ['nullable', 'array'],
+      'choice_id.*' => ['exists:choices,id'],
       'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:2048'],
 
     ];

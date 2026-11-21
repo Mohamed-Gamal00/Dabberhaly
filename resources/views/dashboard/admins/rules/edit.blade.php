@@ -30,6 +30,8 @@
                                 @enderror --}}
                             </div>
                         </div>
+                        @error('abilities')<div class="alert alert-danger">{{ $message }}</div>@enderror
+                        @error('abilities.*')<div class="alert alert-danger">{{ $message }}</div>@enderror
 
                 </div><!-- end cardbody -->
             </div><!-- end card -->

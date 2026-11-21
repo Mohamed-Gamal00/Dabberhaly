@@ -18,7 +18,7 @@ class BulkOrderController extends Controller
     {
         $request->validate([
             'name'         => 'required|string|max:255',
-            'phone'        => 'required|string|max:255',
+            'phone'        => ['required', 'string', 'regex:/^[0-9+\s\-]{7,20}$/', 'max:255'],
             'company_name' => 'nullable|string|max:255',
             'description'  => 'required|string',
         ]);

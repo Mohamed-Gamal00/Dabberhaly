@@ -23,7 +23,7 @@ class AdvertisementRequest extends FormRequest
   {
     $rules = [
       'title' => 'required|string|max:255',
-      'title_en' => ' nullable|string|max:255',
+      'title_en' => 'nullable|string|max:255',
       'is_active' => 'nullable|string|in:on'
     ];
 

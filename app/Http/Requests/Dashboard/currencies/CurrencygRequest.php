@@ -23,7 +23,10 @@ class CurrencygRequest extends FormRequest
   {
     $rules = [
       'price_in_default_currency' => 'required|numeric|min:0',
-      'currency_id' => 'exists:currencies,id',
+      // Was missing `required`: the rule is not implicit, so a
+      // request without currency_id passed validation and the
+      // repository then crashed on the missing key.
+      'currency_id' => 'required|exists:currencies,id',
     ];
 
     return $rules;

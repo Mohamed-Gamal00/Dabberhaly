@@ -149,14 +149,15 @@ class CheckoutController extends Controller
             $request->validate([
                 "addr.{$addrType}.first_name"   => ['required', 'string', 'max:255'],
                 "addr.{$addrType}.last_name"    => ['required', 'string', 'max:255'],
-                "addr.{$addrType}.phone_number" => ['required', 'string', 'max:20'],
-                "addr.{$addrType}.address"      => ['required', 'string', 'max:500'],
+                "addr.{$addrType}.phone_number" => ['required', 'string', 'regex:/^[0-9+\s\-]{7,20}$/', 'max:20'],
+                "addr.{$addrType}.address"      => ['required', 'string', 'max:255'],
                 "addr.{$addrType}.country_id"   => ['required', 'exists:countries,id'],
                 "addr.{$addrType}.city_id"      => ['required', 'exists:cities,id'],
             ], [
                 "addr.{$addrType}.first_name.required"   => 'الاسم الأول مطلوب',
                 "addr.{$addrType}.last_name.required"    => 'اسم العائلة مطلوب',
                 "addr.{$addrType}.phone_number.required" => 'رقم الجوال مطلوب',
+                "addr.{$addrType}.phone_number.regex"    => 'رقم الجوال غير صحيح',
                 "addr.{$addrType}.address.required"      => 'العنوان التفصيلي مطلوب',
                 "addr.{$addrType}.country_id.required"   => 'الدولة مطلوبة',
                 "addr.{$addrType}.country_id.exists"     => 'الدولة المحددة غير صحيحة',
@@ -166,7 +167,7 @@ class CheckoutController extends Controller
 
             if ($isGuest) {
                 $request->validate([
-                    'guest_email' => ['required', 'email'],
+                    'guest_email' => ['required', 'email', 'max:255'],
                 ], [
                     'guest_email.required' => 'البريد الإلكتروني مطلوب',
                     'guest_email.email'    => 'البريد الإلكتروني غير صحيح',
@@ -287,7 +288,7 @@ class CheckoutController extends Controller
      */
     public function applyDiscount(Request $request)
     {
-        $request->validate(['discount_code' => 'required|string']);
+        $request->validate(['discount_code' => 'required|string|max:255']);
 
         $user = Auth::guard('web')->user();
 

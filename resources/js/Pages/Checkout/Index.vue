@@ -125,11 +125,11 @@
                                     </div>
                                     <div v-if="!user" class="co-field co-field--full">
                                         <label class="co-label">{{ t('email') }}</label>
-                                        <v-text-field v-model="addrForm.email" :placeholder="t('email')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" dir="ltr" :error-messages="errors['guest_email']" />
+                                        <v-text-field v-model="addrForm.email" type="email" :placeholder="t('email')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" dir="ltr" :error-messages="errors['guest_email']" />
                                     </div>
                                     <div class="co-field co-field--full">
                                         <label class="co-label">{{ t('phone') }}</label>
-                                        <v-text-field v-model="addrForm.phone_number" :placeholder="t('phone')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" dir="ltr" :error-messages="errors['addr.shipping.phone_number'] || errors['addr.billing.phone_number']" />
+                                        <v-text-field v-model="addrForm.phone_number" type="tel" inputmode="tel" :placeholder="t('phone')" variant="outlined" density="compact" hide-details="auto" rounded="lg" bg-color="white" class="mt-1" dir="ltr" :error-messages="errors['addr.shipping.phone_number'] || errors['addr.billing.phone_number']" />
                                     </div>
                                     <div class="co-field co-field--full">
                                         <label class="co-label">{{ t('country') }}</label>
@@ -268,7 +268,7 @@
                                     </button>
                                 </div>
                                 <div v-else class="co-discount-input-row">
-                                    <v-text-field v-model="discountInput" :placeholder="t('discount_placeholder')" variant="outlined" density="compact" hide-details rounded="lg" bg-color="grey-lighten-5" style="flex:1" dir="ltr" :error="!!discountError" @keyup.enter="applyDiscount" />
+                                    <v-text-field v-model="discountInput" maxlength="255" :placeholder="t('discount_placeholder')" variant="outlined" density="compact" hide-details rounded="lg" bg-color="grey-lighten-5" style="flex:1" dir="ltr" :error="!!discountError" @keyup.enter="applyDiscount" />
                                     <v-btn color="primary" rounded="lg" height="40" style="text-transform:none; min-width:90px" :loading="discountLoading" @click="applyDiscount">{{ t('discount_apply') }}</v-btn>
                                 </div>
                                 <div v-if="discountError" class="mt-2">

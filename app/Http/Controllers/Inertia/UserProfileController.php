@@ -14,6 +14,7 @@ use App\Services\VerificationServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 
 class UserProfileController extends Controller
@@ -136,7 +137,9 @@ class UserProfileController extends Controller
 
     public function updatePassword(Request $request)
     {
-        $request->validate(['new_password' => 'required|confirmed|min:6']);
+        // Same strength as registration and reset: min:6 accepted
+        // passwords (e.g. "abcdef") registration would reject.
+        $request->validate(['new_password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()]]);
         $user = Auth::user();
         $user->update(['password' => Hash::make($request->new_password)]);
         return back()->with('info', __('flash.password_changed'));

@@ -39,10 +39,13 @@ class ChangePersonalInfoRequest extends FormRequest
         $user = request()->user();
 
         return [
-            'first_name' => ['string', 'max:255'],
-            'last_name' => ['string', 'max:255'],
-            'phone_number' => ['required', 'regex:/^[0-9+\s\-]{7,20}$/',],
-            'email' => ['string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            // Nullable: this is a partial-update endpoint (the controller
+            // falls back to the stored value with ??), so an explicit
+            // null must not 422.
+            'first_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['nullable', 'string', 'max:255'],
+            'phone_number' => ['required', 'regex:/^[0-9+\s\-]{7,20}$/', Rule::unique('users', 'phone_number')->ignore($user->id)],
+            'email' => ['nullable', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
         ];
     }
 }

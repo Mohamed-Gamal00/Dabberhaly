@@ -173,6 +173,7 @@
   "select_city": "اختر المدينة",
   "enter_address": "ادخل العنوان",
   "address_title": "عنوان",
+  "new_address_title": "عنوان جديد",
 
   "payment_page_title": "إتمام الدفع",
   "payment_secure": "بيئة دفع آمنة ومشفرة",

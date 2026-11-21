@@ -324,13 +324,14 @@
             <div class="row align-items-end g-3">
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">الحالة الجديدة</label>
-                    <select class="form-select" name="status" required>
+                    <select class="form-select @error('status') is-invalid @enderror" name="status" required>
                         @foreach($statuses as $s)
                             <option value="{{ $s->value }}" @selected($order->status === $s)>
                                 {{ $s->labelAr() }}
                             </option>
                         @endforeach
                     </select>
+                    @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-auto">
                     <button type="submit" class="btn btn-primary px-4">

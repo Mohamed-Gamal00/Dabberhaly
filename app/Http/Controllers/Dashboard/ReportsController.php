@@ -42,8 +42,9 @@ class ReportsController extends Controller
         Gate::authorize('report.create');
 
         $request->validate([
-            'start_at' => 'nullable|',
-            'end_at' => 'nullable|after:start_at'
+            'report_type' => 'required|in:products-report,return-products-report,coupons-report,customers-report,shipping-report',
+            'start_at' => 'nullable|date',
+            'end_at' => 'nullable|date|after:start_at'
         ]);
         $reportType = $request->report_type;
         $startAt = $request->start_at ?? '';

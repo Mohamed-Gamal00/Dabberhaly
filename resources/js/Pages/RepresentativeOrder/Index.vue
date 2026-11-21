@@ -15,7 +15,7 @@
                     <label class="field-label">{{ t('rep_name') }}</label>
                     <v-text-field v-model="form.name" variant="outlined" density="comfortable" rounded="lg" bg-color="grey-lighten-5" hide-details="auto" class="mt-1 mb-3" :error-messages="form.errors.name" />
                     <label class="field-label">{{ t('rep_phone') }}</label>
-                    <v-text-field v-model="form.phone" variant="outlined" density="comfortable" rounded="lg" bg-color="grey-lighten-5" hide-details="auto" class="mt-1 mb-3" dir="ltr" :error-messages="form.errors.phone" />
+                    <v-text-field v-model="form.phone" type="tel" inputmode="tel" variant="outlined" density="comfortable" rounded="lg" bg-color="grey-lighten-5" hide-details="auto" class="mt-1 mb-3" dir="ltr" :error-messages="form.errors.phone" />
                     <label class="field-label">{{ t('rep_details') }}</label>
                     <v-textarea v-model="form.description" variant="outlined" density="comfortable" rounded="lg" bg-color="grey-lighten-5" hide-details="auto" rows="4" class="mt-1 mb-5" :error-messages="form.errors.description" />
                     <v-btn type="submit" color="primary" block height="48" rounded="lg" style="text-transform:none; font-size:15px; font-weight:600" :loading="form.processing">{{ t('rep_send') }}</v-btn>

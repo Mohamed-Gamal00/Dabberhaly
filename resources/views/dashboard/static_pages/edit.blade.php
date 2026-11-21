@@ -22,22 +22,26 @@
                             @method('PUT')
                             <div class="form-group my-3">
                                 <label for="title">العنوان</label>
-                                <input type="text" name="title" class="form-control" id="title"
+                                <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" id="title"
                                     value="{{ old('title', $page->title) }}" required>
+                                @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="form-group my-3">
                                 <label for="title_en">العنوان بالإنجليزية</label>
-                                <input type="text" name="title_en" class="form-control" id="title_en"
+                                <input type="text" name="title_en" class="form-control @error('title_en') is-invalid @enderror" id="title_en"
                                     value="{{ old('title_en', $page->title_en) }}" dir="ltr" style="text-align:left">
+                                @error('title_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="form-group my-3">
                                 <label for="content">المحتوي</label>
                                 {{-- <textarea name="content" class="form-control text-editor" id="content" required>{{ $page->content }}</textarea> --}}
-                                <textarea id="elm1" name="content">{!! old('content', $page->content) !!}</textarea>
+                                <textarea id="elm1" name="content" class="@error('content') is-invalid @enderror">{!! old('content', $page->content) !!}</textarea>
+                                @error('content')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                             </div>
                             <div class="form-group my-3">
                                 <label for="content_en">المحتوي بالإنجليزية</label>
-                                <textarea id="elm2" name="content_en">{!! old('content_en', $page->content_en) !!}</textarea>
+                                <textarea id="elm2" name="content_en" class="@error('content_en') is-invalid @enderror">{!! old('content_en', $page->content_en) !!}</textarea>
+                                @error('content_en')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                             </div>
                             <button type="submit" class="btn btn-primary">تحديث</button>
                         </form>

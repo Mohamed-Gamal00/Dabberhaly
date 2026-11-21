@@ -29,7 +29,8 @@ class UpdateNewAddressRequest extends FormRequest
      */
     return [
       'address_title' => 'required|string|max:255',
-      'address' => 'required|string|max:255',
+      // Same minimum as the registration address (see CreateNewAddressRequest).
+      'address' => 'required|string|min:5|max:255',
     ];
     }
 }
