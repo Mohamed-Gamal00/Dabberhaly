@@ -23,7 +23,11 @@ class SendNewsToUsersController extends Controller
         Gate::authorize('news.view');
         $users = $this->SendNewsToUser->create();
 
-        return view('dashboard.send_news_to_users.create', compact('users'));
+        // The stats card shows the total explicitly; passing it as a
+        // named variable keeps the view from recomputing it.
+        $totalSubscribers = $users->count();
+
+        return view('dashboard.send_news_to_users.create', compact('users', 'totalSubscribers'));
     }
 
     public function sendNewsMail(SendNewsToUserRequest $request)
