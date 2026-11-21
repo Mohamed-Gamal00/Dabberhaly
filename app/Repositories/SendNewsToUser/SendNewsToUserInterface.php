@@ -2,14 +2,11 @@
 
 namespace App\Repositories\SendNewsToUser;
 
+use Illuminate\Pagination\LengthAwarePaginator;
+
 interface SendNewsToUserInterface
 {
-  public function create();
+  public function paginatedSubscribers(string $search = ''): LengthAwarePaginator;
+  public function totalSubscribers(): int;
   public function sendNewsMail($params);
-
-  /**
-   * Subscribers paginated (never load them all): 50 per page,
-   * optionally filtered by email search.
-   */
-  public function paginateSubscribers(?string $search = null, int $perPage = 50);
 }
