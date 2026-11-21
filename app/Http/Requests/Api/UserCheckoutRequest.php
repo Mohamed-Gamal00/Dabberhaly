@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Rules\EgyptianMobileNumber;
+
 use App\Models\Setting;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -36,7 +38,7 @@ class UserCheckoutRequest extends FormRequest
             'payment_method' => ['required', Rule::in(Setting::allowedPaymentMethodValues())],
             'first_name' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
             'last_name' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
-            'phone_number' => $isAddingNewAddress ? ['required', 'regex:/^[0-9+\s\-]{7,20}$/'] : 'nullable',
+            'phone_number' => $isAddingNewAddress ? ['required', new EgyptianMobileNumber] : 'nullable',
             'country_id' => $isAddingNewAddress ? ['required', 'exists:countries,id'] : 'nullable',
             'city_id' => $isAddingNewAddress ? ['required', 'exists:cities,id'] : 'nullable',
             'address' => $isAddingNewAddress ? ['required', 'string', 'max:255'] : 'nullable',
@@ -57,7 +59,6 @@ class UserCheckoutRequest extends FormRequest
             'first_name.required' => 'First name is required for the new address',
             'last_name.required' => 'Last name is required for the new address',
             'phone_number.required' => 'Phone number is required for the new address',
-            'phone_number.regex' => 'رقم الجوال غير صحيح',
             'country_id.required' => 'Country is required for the new address',
             'city_id.required' => 'City is required for the new address',
             'address.required' => 'Address is required for the new address',

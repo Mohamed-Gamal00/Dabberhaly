@@ -72,24 +72,25 @@ class AdminFormValidationTest extends TestCase
             'first_name' => 'محمد',
             'family_name' => 'أحمد',
             'email' => $client->email,
-            'phone_number' => '0555123456',
+            'phone_number' => '01012345678',
         ], $overrides);
     }
 
     // ===== Clients (ClientRequest) =====
 
-    public function test_client_phone_accepts_plus_prefixed_numbers(): void
+    public function test_client_phone_accepts_egyptian_plus20_number(): void
     {
         $client = User::factory()->create(['password' => 'password']);
 
-        // The old `numeric` rule rejected valid + phones.
+        // The old `numeric` rule rejected valid + phones; the
+        // Egyptian-mobile rule accepts the +20 form.
         $response = $this->asAdmin()->put(
             route('clients.update', $client),
-            $this->validClientPayload($client, ['phone_number' => '+966555123456'])
+            $this->validClientPayload($client, ['phone_number' => '+201011234567'])
         );
 
         $response->assertSessionHasNoErrors();
-        $this->assertSame('+966555123456', $client->fresh()->phone_number);
+        $this->assertSame('+201011234567', $client->fresh()->phone_number);
     }
 
     public function test_client_phone_rejects_garbage(): void
@@ -119,7 +120,7 @@ class AdminFormValidationTest extends TestCase
 
     // ===== Bulk orders / representative orders (phone rule) =====
 
-    public function test_bulk_order_phone_must_match_canonical_rule(): void
+    public function test_bulk_order_phone_must_be_egyptian_mobile(): void
     {
         $response = $this->asAdmin()->post(route('bulk_orders.store'), [
             'name' => 'شركة', 'phone' => 'abc', 'company_name' => 'شركة',
@@ -128,14 +129,14 @@ class AdminFormValidationTest extends TestCase
         $response->assertSessionHasErrors('phone');
 
         $response = $this->asAdmin()->post(route('bulk_orders.store'), [
-            'name' => 'شركة', 'phone' => '+966 55 512 3456', 'company_name' => 'شركة',
+            'name' => 'شركة', 'phone' => '+20 101 123 4567', 'company_name' => 'شركة',
             'description' => 'منتجات',
         ]);
         $response->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('bulk_orders', ['phone' => '+966 55 512 3456']);
+        $this->assertDatabaseHas('bulk_orders', ['phone' => '+20 101 123 4567']);
     }
 
-    public function test_representative_order_phone_must_match_canonical_rule(): void
+    public function test_representative_order_phone_must_be_egyptian_mobile(): void
     {
         $response = $this->asAdmin()->post(route('representatives_orders.store'), [
             'name' => 'مندوب', 'phone' => '12', 'description' => 'طلب',
@@ -143,16 +144,16 @@ class AdminFormValidationTest extends TestCase
         $response->assertSessionHasErrors('phone');
 
         $response = $this->asAdmin()->post(route('representatives_orders.store'), [
-            'name' => 'مندوب', 'phone' => '0555123456', 'description' => 'طلب',
+            'name' => 'مندوب', 'phone' => '01512345678', 'description' => 'طلب',
         ]);
         $response->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('representatives_orders', ['phone' => '0555123456']);
+        $this->assertDatabaseHas('representatives_orders', ['phone' => '01512345678']);
     }
 
     public function test_bulk_order_edit_form_shows_phone_error_by_the_field(): void
     {
         $order = DB::table('bulk_orders')->insertGetId([
-            'name' => 'شركة', 'phone' => '0555123456', 'company_name' => 'شركة',
+            'name' => 'شركة', 'phone' => '01012345678', 'company_name' => 'شركة',
             'description' => 'منتجات', 'created_at' => now(), 'updated_at' => now(),
         ]);
 

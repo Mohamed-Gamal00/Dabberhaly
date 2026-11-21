@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\RepresentativesOrder;
+use App\Rules\EgyptianMobileNumber;
 use Illuminate\Http\Request;
 
 class RepresentativeOrderController extends Controller
@@ -14,7 +15,7 @@ class RepresentativeOrderController extends Controller
         // Validate the incoming request
         $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:255',
+            'phone' => ['required', 'string', new EgyptianMobileNumber, 'max:255'],
             'description' => 'required|string',
         ]);
 

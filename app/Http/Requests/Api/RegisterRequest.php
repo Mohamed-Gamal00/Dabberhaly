@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api;
 
 use App\Helper\ApiResponse;
 use Illuminate\Contracts\Validation\Validator;
+use App\Rules\EgyptianMobileNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation;
@@ -32,7 +33,7 @@ class RegisterRequest extends FormRequest
             'email' => ['required', 'email', 'string', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'family_name' => ['required', 'string', 'max:255'],
-            'phone_number' => 'required|unique:users',
+            'phone_number' => ['required', 'string', new EgyptianMobileNumber, 'unique:users'],
             'address' => ['required', 'string', 'max:255'],
             'city_id' => ['required', 'exists:cities,id'],
         ];

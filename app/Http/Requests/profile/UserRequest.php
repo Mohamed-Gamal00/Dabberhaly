@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\profile;
 
+use App\Rules\EgyptianMobileNumber;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Models\User;
@@ -29,7 +31,7 @@ class UserRequest extends FormRequest
       'family_name' => 'nullable|string|max:255',
       'phone_number' => [
         'required',
-        'regex:/^[0-9+\s\-]{7,20}$/',
+        new EgyptianMobileNumber,
         Rule::unique(User::class)->ignore($user->id),
       ],
       'email' => [

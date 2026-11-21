@@ -4,6 +4,7 @@ namespace App\Http\Requests\Api;
 
 use App\Helper\ApiResponse;
 use Illuminate\Contracts\Validation\Validator;
+use App\Rules\EgyptianMobileNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
@@ -25,7 +26,10 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'phone_number' => 'required|exists:users,phone_number',
+            // Same Egyptian-mobile rule as registration: a registered
+            // user must be able to log in with the number they
+            // registered with, in local (010...) or +20 form.
+            'phone_number' => ['required', new EgyptianMobileNumber, 'exists:users,phone_number'],
             'password' => ['required']
         ];
     }

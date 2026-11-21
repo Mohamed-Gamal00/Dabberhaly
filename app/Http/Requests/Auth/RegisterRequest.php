@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Rules\EgyptianMobileNumber;
+
 use App\Helper\ApiResponse;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -21,7 +23,7 @@ class RegisterRequest extends FormRequest
             'first_name'   => ['required', 'string', 'min:2', 'max:50', 'regex:/^[\p{Arabic}a-zA-Z\s]+$/u'],
             'family_name'  => ['required', 'string', 'min:2', 'max:50', 'regex:/^[\p{Arabic}a-zA-Z\s]+$/u'],
             'email'        => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
-            'phone_number' => ['required', 'string', 'regex:/^[0-9+\s\-]{7,20}$/', 'unique:users,phone_number'],
+            'phone_number' => ['required', 'string', new EgyptianMobileNumber, 'unique:users,phone_number'],
             'address'      => ['required', 'string', 'min:5', 'max:255'],
             'country_id'   => ['required', 'integer', 'exists:countries,id'],
             'city_id'      => ['required', 'integer', 'exists:cities,id'],
@@ -47,7 +49,6 @@ class RegisterRequest extends FormRequest
             'email.unique'          => __('validation.register.email_taken'),
 
             'phone_number.required' => __('validation.register.phone_required'),
-            'phone_number.regex'    => __('validation.register.phone_invalid'),
             'phone_number.unique'   => __('validation.register.phone_taken'),
 
             'address.required'      => __('validation.register.address_required'),

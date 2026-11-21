@@ -48,7 +48,7 @@
                                 <tr data-id="5">
                                     <td data-field="id">{{ $code->name }}</td>
                                     <td data-field="id">{{ $code->code }}</td>
-                                    <td data-field="id">{{ $code->price }}</td>
+                                    <td data-field="id">{{ $code->price }}{{ $code->discount_type == 'price' ? ' جنيه' : ' %' }}</td>
                                     <td data-field="id">{{ $code->number_of_used }}</td>
                                     <td data-field="id">{{ $code->status == 'active' ? 'نشط' : 'غير نشط' }}</td>
                                     {{-- @can('discount_code.edit') --}}

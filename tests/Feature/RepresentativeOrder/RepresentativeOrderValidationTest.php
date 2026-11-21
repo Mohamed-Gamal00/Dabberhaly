@@ -7,8 +7,8 @@ use Tests\TestCase;
 
 /**
  * Validation gap fixed in the web representative-order form:
- * - phone had no format rule at all — now the canonical
- *   `regex:/^[0-9+\s\-]{7,20}$/` (same as RegisterRequest).
+ * - phone had no format rule at all — now the shared
+ *   Egyptian-mobile rule (App\Rules\EgyptianMobileNumber).
  * Errors are shown next to each field via form.errors (Inertia
  * useForm) — a failed submit keeps the form open with the errors.
  */

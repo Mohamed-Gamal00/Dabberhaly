@@ -300,7 +300,7 @@ const filteredCities = computed(() =>
 
 // ─── Client-side validation rules ────────────────────────────────────────────
 const namePattern = /^[\u0600-\u06FFa-zA-Z\s]+$/;
-const phonePattern = /^[0-9+\s\-]{7,20}$/;
+const phonePattern = /^(?:\+20|20|0)1[0125][0-9]{8}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const rules = {
@@ -318,7 +318,7 @@ const rules = {
     ],
     phone_number: [
         v => !!v                    || t('val_required'),
-        v => phonePattern.test(v)   || t('val_phone_invalid'),
+        v => phonePattern.test(v.replace(/[\s-]/g, '')) || t('val_phone_invalid'),
     ],
     email: [
         v => !!v                    || t('val_required'),

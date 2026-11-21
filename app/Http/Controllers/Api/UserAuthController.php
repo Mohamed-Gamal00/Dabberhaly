@@ -8,6 +8,7 @@ use App\Http\Requests\Api\LoginRequest;
 use App\Http\Requests\Api\RegisterRequest;
 use App\Models\User;
 use App\Models\User_verfication;
+use App\Rules\EgyptianMobileNumber;
 use App\Services\SMSGateways\moraSms;
 use App\Services\SMSGateways\TelephoneVerification;
 use App\Services\UserService;
@@ -150,6 +151,15 @@ class UserAuthController extends Controller
 
     public function forgetPassword(Request $request)
     {
+        // The phone must be a valid Egyptian mobile — same rule as
+        // registration/login. (Previously there was no validation at
+        // all here.) The uniform 200 response for unknown numbers
+        // below is unchanged: an invalid *format* 422s, an unknown
+        // but well-formed number still gets the generic reply.
+        $request->validate([
+            'phone_number' => ['required', 'string', new EgyptianMobileNumber],
+        ]);
+
         // SMS-flood guard: at most 5 code requests per phone + IP per
         // minute, like the other OTP endpoints.
         $throttleKey = 'api-forget-password:' . $request->phone_number . '|' . $request->ip();

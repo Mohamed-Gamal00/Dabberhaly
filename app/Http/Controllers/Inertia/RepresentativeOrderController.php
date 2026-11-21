@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Inertia;
 
+use App\Rules\EgyptianMobileNumber;
+
 use App\Http\Controllers\Controller;
 use App\Models\RepresentativesOrder;
 use Illuminate\Http\Request;
@@ -18,7 +20,7 @@ class RepresentativeOrderController extends Controller
     {
         $request->validate([
             'name'        => 'required|string|max:255',
-            'phone'       => ['required', 'string', 'regex:/^[0-9+\s\-]{7,20}$/', 'max:255'],
+            'phone'       => ['required', 'string', new EgyptianMobileNumber, 'max:255'],
             'description' => 'required|string',
         ]);
 

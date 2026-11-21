@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Dashboard\Client;
 
+use App\Rules\EgyptianMobileNumber;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ClientRequest extends FormRequest
@@ -25,9 +26,9 @@ class ClientRequest extends FormRequest
       'first_name' => 'required|string|max:255',
       'family_name' => 'required|string|max:255',
       'email' => 'required|email|max:255|unique:users,email,' . $this->route('client'),
-      // Canonical phone rule (same as Auth/RegisterRequest): digits,
-      // spaces, dashes and a leading + — `numeric` rejected + phones.
-      'phone_number' => ['required', 'regex:/^[0-9+\s\-]{7,20}$/'],
+      // A client's phone is a person's Egyptian mobile (same rule as
+      // Auth/RegisterRequest).
+      'phone_number' => ['required', new EgyptianMobileNumber],
     ];
 
     return $rules;
