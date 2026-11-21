@@ -29,6 +29,18 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    offerProducts: {
+        type: Array,
+        default: () => [],
+    },
+    giftProducts: {
+        type: Array,
+        default: () => [],
+    },
+    householdProducts: {
+        type: Array,
+        default: () => [],
+    },
     banners: {
         type: Array,
         default: () => [],
@@ -79,17 +91,24 @@ const sectionColors = {
         <TopOffers :bgColor="sectionColors.latte" />
         <ProductsComponents
             :products="products"
-            title="section_flash_deals"
+            title="section_latest_products"
             titleColor="red"
+            view-all-href="/products"
             :bgColor="sectionColors.softHover"
         />
 
-        <NewProducts :products="products" :bgColor="sectionColors.vanilla" />
+        <NewProducts
+            :products="offerProducts"
+            title="section_offers"
+            view-all-href="/offers"
+            :bgColor="sectionColors.vanilla"
+        />
         <QualityFeatuers :bgColor="sectionColors.vanilla" />
         <ProductsComponents
-            :products="products"
+            :products="giftProducts"
             title="section_top_gifts"
             titleColor="#404040"
+            view-all-href="/categories/gifts"
             :bgColor="sectionColors.softHover"
         />
         <v-container fluid>
@@ -113,9 +132,10 @@ const sectionColors = {
             </v-row>
         </v-container>
         <ProductsComponents
-            :products="products"
+            :products="householdProducts"
             title="Household_supplies"
             titleColor="#404040"
+            view-all-href="/categories/household-essentials"
             :bgColor="sectionColors.softHover"
         />
         <img

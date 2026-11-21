@@ -3,8 +3,8 @@
     <div class="new-products pt-15" :style="{ backgroundColor: bgColor }">
         <!-- Title -->
         <div class="title px-5 d-flex align-center justify-space-between">
-            <h2 class="section-title">{{ t('all_products') }}</h2>
-            <Link href="/products" class="shop-all-link">
+            <h2 class="section-title">{{ t(title) }}</h2>
+            <Link :href="viewAllHref" class="shop-all-link">
                 {{ t('shop_all') }}
             </Link>
         </div>
@@ -81,6 +81,14 @@ import { useLocale } from "../../composables/useLocale";
 
 const props = defineProps({
     products: Array,
+    title: {
+        type: String,
+        default: 'all_products',
+    },
+    viewAllHref: {
+        type: String,
+        default: '/products',
+    },
     bgColor: {
         type: String,
         default: '#F7F0E5' // Vanilla Cream fallback

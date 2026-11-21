@@ -5,7 +5,7 @@
             <h2 class="section-title">
                 {{ t(title) }}
             </h2>
-            <Link href="/products" class="shop-all-link">
+            <Link :href="viewAllHref" class="shop-all-link">
                 {{ t('shop_all') }}
             </Link>
         </div>
@@ -59,6 +59,10 @@ const props = defineProps({
     products: Array,
     title: String,
     titleColor: String,
+    viewAllHref: {
+        type: String,
+        default: '/products',
+    },
     bgColor: {
         type: String,
         default: '#FF4585F' // White fallback
